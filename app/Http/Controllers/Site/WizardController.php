@@ -105,7 +105,13 @@ class WizardController extends Controller
             Log::error('Stripe Checkout se nepodařilo vytvořit: '.$e->getMessage(), ['order' => $order->number]);
             $order->update(['status' => 'cancelled']);
 
-            return back()->withErrors(['payment' => 'Platbu se teď nepodařilo zahájit. Zkuste to prosím za chvíli, nebo nám napište.'])->withInput();
+            $message = 'Platbu se teď nepodařilo zahájit. Zkuste to prosím za chvíli, nebo nám napište.';
+            if ($request->attributes->get('site_full_access') && Setting::siteMode() !== 'live') {
+                // testerům a operátorovi před spuštěním ukážeme důvod (zprávy Stripe neobsahují klíče)
+                $message .= ' ['.$e->getMessage().']';
+            }
+
+            return back()->withErrors(['payment' => $message])->withInput();
         }
         $order->update(['stripe_session_id' => $session['id']]);
 

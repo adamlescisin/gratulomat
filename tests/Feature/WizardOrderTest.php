@@ -169,6 +169,15 @@ class WizardOrderTest extends TestCase
         File::deleteDirectory($storage);
     }
 
+    public function test_stripe_failure_shows_reason_to_tester(): void
+    {
+        $this->app->instance(StripeGateway::class, new StripeGateway); // bez klíčů
+        config(['services.stripe.test_secret' => null]);
+        $this->from('/zalozit')->submit($this->config(['voice' => true]))->assertRedirect('/zalozit')
+            ->assertSessionHasErrors(['payment' => 'Platbu se teď nepodařilo zahájit. Zkuste to prosím za chvíli, nebo nám napište. [Platby nejsou nastavené (chybí klíč Stripe TEST).]']);
+        $this->assertSame('cancelled', Order::first()->status);
+    }
+
     public function test_vip_inquiry_has_no_payment(): void
     {
         $this->submit($this->config(['vipSetup' => true]))->assertRedirect();

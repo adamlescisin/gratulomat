@@ -44,7 +44,8 @@ class StripeGateway
             'locale' => 'cs',
             'success_url' => route('wizard.done').'?objednavka='.$order->id,
             'cancel_url' => route('wizard').'?zruseno=1',
-            'expires_at' => now()->addMinutes(30)->timestamp,
+            // Stripe vyžaduje aspoň 30 minut; rezerva kvůli rozdílu hodin
+            'expires_at' => now()->addMinutes(35)->timestamp,
         ]);
 
         return ['id' => $session->id, 'url' => $session->url];
