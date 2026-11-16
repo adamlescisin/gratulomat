@@ -10,6 +10,9 @@
 
 return [
 
+    // Kam míří odkazy „Vytvořeno v Gratulomatu“ ze stránek událostí (growth loop).
+    'marketing_url' => env('MARKETING_URL', 'https://gratulomat.cz'),
+
     'site_mode' => env('SITE_MODE', 'coming_soon'), // coming_soon | maintenance | live
 
     // Provozovatelé (back-office /backoffice) – e-maily oddělené čárkou. Přihlašují se odkazem z e-mailu.

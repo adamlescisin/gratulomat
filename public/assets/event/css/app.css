@@ -464,3 +464,12 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .share-show__text .btn { margin-top: .6rem; }
 .share-show__qr { flex: 0 0 150px; width: 150px; padding: 8px; background: #fff; border-radius: 14px; }
 .share-show__qr svg { display: block; width: 100%; height: auto; }
+
+/* Growth loop: poděkování po první vzpomínce, podpis v patičce a odkaz ve finále Kina */
+.loop-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 1.5rem; margin: 2rem 0; }
+.loop-card > div { flex: 1 1 280px; }
+.foot__made { margin-top: .6rem; }
+.foot__made a { color: inherit; opacity: .7; text-decoration: none; border-bottom: 1px dotted currentColor; }
+.foot__made a:hover { opacity: 1; }
+.s-finale__loop { display: inline-block; margin-top: 2.2rem; color: var(--paper-mute); font-size: clamp(.9rem, 1.6vw, 1.2rem); opacity: .75; text-decoration: none; letter-spacing: .02em; }
+.s-finale__loop:hover { opacity: 1; }

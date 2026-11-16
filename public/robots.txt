@@ -1,2 +1,8 @@
+# Stránky událostí (/{slug}) nejdou vypsat v robots.txt – chrání je hlavička X-Robots-Tag: noindex
+# (RobotsHeaders middleware) a <meta name="robots"> v šabloně. Tady jen zbytek, co crawler nemá potřebovat.
 User-agent: *
-Disallow:
+Disallow: /backoffice
+Disallow: /moje
+Disallow: /prihlaseni
+Disallow: /pristup
+Disallow: /jazyk/

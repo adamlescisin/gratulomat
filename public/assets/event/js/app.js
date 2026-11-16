@@ -160,6 +160,7 @@
     S.me.mine.forEach(m => box.append(memCard(m, true)));
     $('[data-mine-empty]').hidden = S.me.mine.length > 0;
     $('[data-mine-count]').textContent = S.me.mine.length ? `(${S.me.mine.length})` : '';
+    const loop = $('[data-loop]'); if (loop) loop.hidden = S.me.mine.length === 0; // growth loop: poděkování až po první vzpomínce
   }
   function renderWall() {
     if (!S.me.wall) { $('[data-teaser]').hidden = false; return; }

@@ -187,4 +187,12 @@ return [
         'name_error' => 'Please enter your name (at least 2 characters).',
         'email_error' => 'Please check your e-mail.',
     ],
+
+    'loop' => [
+        'made_by' => 'Made with Gratulomat',
+        'thanks_title' => 'Thanks for joining in! 💛',
+        'thanks_text' => 'Planning your own celebration? You can create the same page – the Taster plan is free.',
+        'thanks_button' => 'Create your own',
+        'kino' => 'Want your own? gratulomat.cz',
+    ],
 ];

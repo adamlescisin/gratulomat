@@ -136,6 +136,16 @@
     <p>{{ __('guest.teaser', ['deadline' => $event->wallOpensAt()->timezone('Europe/Prague')->locale(app()->getLocale())->isoFormat($event->setting('wall_open_at') ? 'LLL' : 'LL')]) }}@unless ($funeral) {{ __('guest.teaser_surprise') }}@endunless</p>
   </section>
 
+  @if ($thanksUrl = $event->loopUrl('guest_thanks'))
+  <section class="loop-card card" data-loop hidden aria-labelledby="loop-title">
+    <div>
+      <h2 class="h2" id="loop-title">{{ __('guest.loop.thanks_title') }}</h2>
+      <p class="muted">{{ __('guest.loop.thanks_text') }}</p>
+    </div>
+    <a class="btn btn--ghost" href="{{ $thanksUrl }}" target="_blank" rel="noopener">{{ __('guest.loop.thanks_button') }}</a>
+  </section>
+  @endif
+
   <section class="share-show card" data-share hidden>
     <div class="share-show__text">
       <h2 class="h2">{{ $funeral ? __('guest.share_title_funeral') : __('guest.share_title') }}</h2>
@@ -147,6 +157,7 @@
 
   <footer class="foot">
     <p>{{ __('guest.foot') }}</p>
+    @if ($footUrl = $event->loopUrl('guest_footer'))<p class="foot__made"><a href="{{ $footUrl }}" target="_blank" rel="noopener">{{ __('guest.loop.made_by') }}</a></p>@endif
   </footer>
 </main>
 

@@ -191,4 +191,12 @@ return [
         'name_error' => 'Napište prosím své jméno (aspoň 2 znaky).',
         'email_error' => 'Zkontrolujte prosím e-mail.',
     ],
+
+    'loop' => [
+        'made_by' => 'Vytvořeno v Gratulomatu',
+        'thanks_title' => 'Díky, že jste se přidali! 💛',
+        'thanks_text' => 'Chystáte vlastní oslavu? Stejnou stránku si můžete vytvořit i vy – Ochutnávka je zdarma.',
+        'thanks_button' => 'Vytvořit vlastní',
+        'kino' => 'Chcete vlastní? gratulomat.cz',
+    ],
 ];

@@ -232,6 +232,7 @@
     },
 
     finale() {
+      const loop = window.GM && window.GM.loop; // growth loop; u smutečních událostí server nic nepošle
       const all = P.data.memories.flatMap(m => m.media.filter(x => x.kind === 'photo').map(x => x.thumbUrl));
       const cols = Math.ceil(Math.sqrt(Math.max(all.length, 1) * (innerWidth / innerHeight)));
       const rows = Math.ceil(Math.max(all.length, 1) / cols);
@@ -240,7 +241,8 @@
         h('div', { class: 's-finale__mosaic', style: `--cols:${cols};grid-template-rows:repeat(${rows},1fr)` }, tiles),
         h('div', { class: 's-finale__inner' },
           h('div', { class: 's-finale__title' }, (d().finale_title || `Všechno nejlepší, ${d().celebrant_vocative}!`)),
-          h('div', { class: 's-finale__sub' }, `${P.stats.people} lidí · ${P.stats.memories} vzpomínek · ${P.stats.wishes} přání · ${P.stats.photos} fotek · ${d().age} let`)));
+          h('div', { class: 's-finale__sub' }, `${P.stats.people} lidí · ${P.stats.memories} vzpomínek · ${P.stats.wishes} přání · ${P.stats.photos} fotek · ${d().age} let`),
+          loop && h('a', { class: 's-finale__loop', href: loop.url, target: '_blank', rel: 'noopener' }, loop.label)));
       return { el, dur: 30, enter() { fadeMusic(.8, 2000); confetti(); }, leave() { fadeMusic(.55, 1000); } };
     },
   };

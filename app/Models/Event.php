@@ -143,6 +143,21 @@ class Event extends Model
         return $this->type === config('gratulomat.funeral.type');
     }
 
+    /**
+     * Odkaz „vytvořit vlastní“ pro hosty (growth loop). U smutečních událostí žádná propagace – vrací null.
+     * V odkazu není slug ani jméno, jen umístění a typ události.
+     */
+    public function loopUrl(string $placement): ?string
+    {
+        if ($this->isFuneral()) {
+            return null;
+        }
+
+        return rtrim((string) config('gratulomat.marketing_url'), '/').'/?'.http_build_query([
+            'utm_source' => 'event', 'utm_medium' => 'guest_loop', 'utm_content' => $placement, 'utm_campaign' => $this->type ?: 'event',
+        ]);
+    }
+
     public function submissionsOpen(): bool
     {
         return in_array($this->status, ['collecting'], true)

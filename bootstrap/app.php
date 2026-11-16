@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\RobotsHeaders;
 use App\Http\Middleware\SetGuestLocale;
 use App\Http\Middleware\SiteMode;
 use App\Models\Setting;
@@ -19,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: []);
+        // Globálně (i pro 404 a odpovědi bez webového middlewaru): noindex všude mimo veřejný marketing.
+        $middleware->append(RobotsHeaders::class);
         $middleware->web(append: [
             SetGuestLocale::class,
             SiteMode::class,
@@ -36,7 +39,8 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             if ($mode === 'coming_soon') {
                 // U adres mimo routy neběží webový middleware – chybové hlášky formuláře doplníme prázdné.
-                return response()->view('site.coming-soon', ['errors' => new ViewErrorBag]);
+                return response()->view('site.coming-soon', ['errors' => new ViewErrorBag])
+                    ->header('X-Robots-Tag', RobotsHeaders::NOINDEX);
             }
 
             return null;

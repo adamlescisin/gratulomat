@@ -187,4 +187,12 @@ return [
         'name_error' => 'Bitte geben Sie Ihren Namen ein (mindestens 2 Zeichen).',
         'email_error' => 'Bitte prüfen Sie Ihre E-Mail.',
     ],
+
+    'loop' => [
+        'made_by' => 'Erstellt mit Gratulomat',
+        'thanks_title' => 'Danke, dass du dabei bist! 💛',
+        'thanks_text' => 'Planst du selbst eine Feier? Dieselbe Seite kannst du auch erstellen – die Probierversion ist kostenlos.',
+        'thanks_button' => 'Eigene erstellen',
+        'kino' => 'Auch eine eigene? gratulomat.cz',
+    ],
 ];

@@ -43,6 +43,7 @@
 @if ($event->show?->music)<audio data-music src="{{ $offline ? $event->show->music : asset($event->show->music) }}" loop preload="auto"></audio>@endif
 @php
     $gm = ['showUrl' => $showUrl];
+    if ($loopUrl = $event->loopUrl('kino_finale')) { $gm['loop'] = ['url' => $loopUrl, 'label' => __('guest.loop.kino')]; }
     if (!empty($embeddedShow)) { $gm['demoShow'] = $embeddedShow; }
 @endphp
 <script>window.GM = {!! json_encode($gm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
