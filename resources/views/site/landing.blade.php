@@ -164,12 +164,13 @@
     <h2 class="h2">Časté otázky</h2>
     <div class="faq">
       @foreach ([
-        ['Musí si gratulanti něco instalovat?', 'Ne. Stačí otevřít osobní odkaz v mobilu nebo počítači. Žádná aplikace, žádné heslo.'],
-        ['Co když na místě oslavy není internet?', 'Den předem si stáhnete offline balíček a videoprezentaci pustíte z notebooku – bez připojení.'],
-        ['Kdo uvidí fotky a vzpomínky?', 'Jen pozvaní hosté a oslavenec. Soukromá přání vidí pouze oslavenec. Stránka se nezobrazuje ve vyhledávačích.'],
+        ['Musí si organizátor nebo hosté/gratulanti něco instalovat?', 'Ne. Stačí otevřít osobní odkaz v mobilu nebo počítači. Žádná aplikace, žádné heslo.'],
+        ['Co když na místě události není internet?', 'Den předem si stáhnete offline balíček a videoprezentaci pustíte z notebooku – bez připojení.'],
+        ['Kdo uvidí fotky a vzpomínky?', 'Jen pozvaní hosté a oslavenec. Soukromá přání vidí pouze oslavenec. O sdílení výsledné prezentace rozhoduje organizátor. Stránka se nezobrazuje ve vyhledávačích.'],
+        ['Co když někteří hosté nehovoří česky?', 'Vůbec nevadí – každý organizátor nebo host si může přepnout svůj Gratulomat do jazyka dle libosti. Zatím máme češtinu, angličtinu a němčinu, další jazyky budeme přidávat průběžně.'],
         ['Jak dlouho data uchováváte?', 'Podle tarifu 1 až 12 měsíců po oslavě. Pak je smažeme, pokud si archiv neprodloužíte.'],
-        ['Můžu Gratulomat použít i pro firmu?', 'Ano – pro výročí zaměstnanců a rozlučky nabízíme roční balíčky. Napište nám.'],
-        ['Hodí se Gratulomat i pro smuteční rozloučení?', 'Ano. U smutečního rozloučení mohou hosté posílat vzpomínky, fotky a kondolence i po datu rozloučení. Hravé prvky vypneme a použijeme klidný vzhled „Tichá vzpomínka“.'],
+        ['Můžu Gratulomat použít i pro firmu?', 'Ano – Gratulomat můžete využít i pro výročí či oslavu firmy, zaměstnanců, projektu nebo rozlučky. Nabízíme i zvýhodněné balíčky na míru – napište nám.'],
+        ['Hodí se Gratulomat i pro smuteční rozloučení?', 'Ano. U smutečního rozloučení mohou hosté posílat vzpomínky, fotky a kondolence i po datu rozloučení. Hravé prvky vypneme a použijeme klidnou šablonu „Smuteční“.'],
       ] as [$q, $a])
         <details><summary>{{ $q }}<span aria-hidden="true">+</span></summary><p>{{ $a }}</p></details>
       @endforeach
