@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\InvoiceIssued;
 use App\Models\Invoice;
+use App\Models\Setting;
 use App\Models\WorkerJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,8 +20,30 @@ use Throwable;
  */
 class WorkerApiController extends Controller
 {
+    /** Kontrola spojení a heartbeat workeru (bez zamykání úloh). */
+    public function ping(Request $request): JsonResponse
+    {
+        $this->heartbeat($request);
+
+        return response()->json([
+            'ok' => true, 'server_time' => now()->toIso8601String(),
+            'queued' => WorkerJob::whereIn('status', ['queued', 'failed'])->count(),
+            'failed' => WorkerJob::where('status', 'failed')->count(),
+        ]);
+    }
+
+    private function heartbeat(Request $request): void
+    {
+        Setting::put('worker_heartbeat', [
+            'at' => now()->toIso8601String(),
+            'host' => mb_substr((string) $request->header('X-Worker-Host', ''), 0, 60),
+            'version' => mb_substr((string) $request->header('X-Worker-Version', ''), 0, 20),
+        ]);
+    }
+
     public function jobs(Request $request): JsonResponse
     {
+        $this->heartbeat($request);
         $types = array_filter(explode(',', (string) $request->query('types', 'invoice,credit_note')));
         $jobs = DB::transaction(function () use ($types) {
             $jobs = WorkerJob::whereIn('type', $types)

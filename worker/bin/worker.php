@@ -9,37 +9,15 @@ use Worker\MyUctoClient;
  * Endpointy /api/worker/* budou součástí aplikace (fáze Platby / Videoprezentace).
  */
 
-spl_autoload_register(function (string $class) {
-    if (str_starts_with($class, 'Worker\\')) {
-        require __DIR__.'/../src/'.str_replace('\\', '/', substr($class, 7)).'.php';
-    }
-});
-
-$config = require __DIR__.'/../config.php';
+require __DIR__.'/../src/bootstrap.php';
+$config = worker_config();
+$once = in_array('--once', $argv, true); // jeden průchod (ruční test, ladění)
 
 $myucto = new MyUctoClient($config['myucto_url'], $config['myucto_token'], $config['myucto_supplier_id']);
 $invoices = new InvoiceJobHandler($myucto, $config['consumer_client_address'], $config['branding_profile_id']);
 
-$api = function (string $method, string $path, array $fields = []) use ($config) {
-    $ch = curl_init(rtrim($config['gratulomat_url'], '/').$path);
-    curl_setopt_array($ch, [
-        CURLOPT_CUSTOMREQUEST => $method,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 120,
-        CURLOPT_HTTPHEADER => ['Authorization: Bearer '.$config['gratulomat_token'], 'Accept: application/json'],
-    ]);
-    if ($fields) {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields); // multipart kvůli PDF / souborům
-    }
-    $body = curl_exec($ch);
-    $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-    curl_close($ch);
-    if ($body === false || $status >= 400) {
-        throw new RuntimeException("Gratulomat {$method} {$path} → HTTP {$status}");
-    }
-
-    return json_decode($body ?: '[]', true) ?? [];
-};
+$api = worker_api($config);
+fwrite(STDOUT, date('c').' worker '.WORKER_VERSION.' spuštěn, server '.$config['gratulomat_url'].PHP_EOL);
 
 while (true) {
     try {
@@ -61,6 +39,7 @@ while (true) {
                     'pdf' => new CURLFile($pdf, 'application/pdf', ($result['number'] ?: 'doklad').'.pdf'),
                 ]);
                 unlink($pdf);
+                fwrite(STDOUT, date('c')." úloha {$job['id']} ({$job['type']}) hotová: doklad {$result['number']}\n");
             } catch (Throwable $e) {
                 fwrite(STDERR, date('c')." úloha {$job['id']}: {$e->getMessage()}\n");
                 $api('POST', "/api/worker/jobs/{$job['id']}/failed", ['error' => mb_substr($e->getMessage(), 0, 1000)]);
@@ -68,6 +47,9 @@ while (true) {
         }
     } catch (Throwable $e) {
         fwrite(STDERR, date('c')." {$e->getMessage()}\n");
+    }
+    if ($once) {
+        break;
     }
     sleep($config['poll_seconds']);
 }

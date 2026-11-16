@@ -12,6 +12,7 @@ Route::post('/quote', [WizardController::class, 'quote'])->middleware('throttle:
 Route::post('/stripe/webhook', StripeWebhookController::class);
 
 Route::middleware(WorkerToken::class)->prefix('worker')->group(function () {
+    Route::get('/ping', [WorkerApiController::class, 'ping']);
     Route::get('/jobs', [WorkerApiController::class, 'jobs']);
     Route::post('/jobs/{job}/done', [WorkerApiController::class, 'done']);
     Route::post('/jobs/{job}/failed', [WorkerApiController::class, 'failed']);

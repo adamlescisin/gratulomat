@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Gratulomat worker jako služba macOS. Nahraďte CESTA_K_REPO a případně cestu k php (which php). -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>cz.gratulomat.worker</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/php</string>
+    <string>CESTA_K_REPO/worker/bin/worker.php</string>
+  </array>
+  <key>WorkingDirectory</key><string>CESTA_K_REPO</string>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>ThrottleInterval</key><integer>30</integer>
+  <key>StandardOutPath</key><string>/tmp/gratulomat-worker.log</string>
+  <key>StandardErrorPath</key><string>/tmp/gratulomat-worker.err</string>
+</dict>
+</plist>
