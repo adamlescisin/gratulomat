@@ -1,17 +1,21 @@
 <?php
 
 use App\Domain\Guest\GuestSession;
+use App\Http\Controllers\Backoffice\BackofficeController;
 use App\Http\Controllers\Event\EventPageController;
 use App\Http\Controllers\Event\GuestApiController;
 use App\Http\Controllers\Organizer\AuthController;
 use App\Http\Controllers\Organizer\EventAdminController;
+use App\Http\Controllers\Site\WaitlistController;
+use App\Http\Middleware\EnsureOperator;
 use App\Http\Middleware\EnsureOrganizer;
-use App\Http\Middleware\SiteMode;
 use App\Models\Household;
+use App\Models\TesterCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => view('welcome'))->name('home');
+// Dokud není hotová landing page, je úvodní stránkou coming soon (i v ostrém provozu).
+Route::get('/', fn () => view('site.coming-soon'))->name('home');
 
 // Přepínač jazyka rozhraní (stránka hosta). Obsah události se nepřekládá.
 Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
@@ -25,12 +29,15 @@ Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
 })->name('locale.switch');
 
 // Přístup testerů v režimu Připravujeme.
-Route::get('/pristup', fn () => view('site.access'))->name('access');
+Route::get('/pristup', fn () => view('site.coming-soon', ['openCode' => true]))->name('access');
+Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware('throttle:6,1')->name('waitlist');
+Route::get('/ochrana-soukromi', fn () => view('site.privacy'))->name('privacy');
 Route::post('/pristup', function (Request $request) {
     $code = strtoupper(trim((string) $request->input('code')));
-    if (! in_array($code, SiteMode::testerCodes(), true)) {
+    if (! TesterCode::isValidCode($code)) {
         return back()->withErrors(['code' => __('Kód neplatí.')]);
     }
+    TesterCode::where('code', $code)->increment('uses');
 
     return redirect('/')->withCookie(cookie(
         config('gratulomat.tester_cookie'), $code, 60 * 24 * config('gratulomat.tester_cookie_days')
@@ -43,6 +50,20 @@ Route::post('/prihlaseni', [AuthController::class, 'send'])->middleware('throttl
 Route::get('/prihlaseni/odkaz/{user}', [AuthController::class, 'link'])->name('login.link');
 Route::post('/odhlaseni', [AuthController::class, 'logout'])->name('logout');
 Route::get('/moje', [AuthController::class, 'events'])->middleware('auth')->name('organizer.events');
+
+// Back-office provozovatele (OPERATOR_EMAILS).
+Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(BackofficeController::class)->group(function () {
+    Route::get('/', 'dashboard')->name('backoffice');
+    Route::get('/udalosti', 'events')->name('backoffice.events');
+    Route::get('/cekaci-listina', 'waitlist')->name('backoffice.waitlist');
+    Route::get('/cekaci-listina.csv', 'waitlistCsv')->name('backoffice.waitlist.csv');
+    Route::delete('/cekaci-listina/{entry}', 'waitlistDelete')->name('backoffice.waitlist.delete');
+    Route::get('/rezim', 'mode')->name('backoffice.mode');
+    Route::post('/rezim', 'setMode');
+    Route::post('/rezim/kontrola', 'setChecklist')->name('backoffice.checklist');
+    Route::post('/rezim/kody', 'addCode')->name('backoffice.codes');
+    Route::delete('/rezim/kody/{code}', 'deleteCode')->name('backoffice.codes.delete');
+});
 
 /*
  * Stránky událostí – vždy až na konci (zachytávají /{slug}).

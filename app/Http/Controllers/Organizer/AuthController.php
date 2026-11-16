@@ -22,8 +22,11 @@ class AuthController extends Controller
     {
         $email = mb_strtolower(trim((string) $request->validate(['email' => 'required|email'])['email']));
         $user = User::where('email', $email)->first();
+        if (! $user && in_array($email, config('gratulomat.operators'), true)) {
+            $user = User::create(['email' => $email, 'name' => strstr($email, '@', true)]);
+        }
         // Stejná odpověď, ať účet existuje, nebo ne (žádné zjišťování e-mailů).
-        if ($user && $user->events()->exists()) {
+        if ($user && ($user->isOperator() || $user->events()->exists())) {
             Mail::to($user)->send(new LoginLink($user, $user->loginLink()));
         }
 
@@ -45,6 +48,9 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->save();
 
+        if ($user->isOperator()) {
+            return redirect()->route('backoffice');
+        }
         $events = $user->events()->get();
 
         return $events->count() === 1

@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Event;
+use App\Models\Setting;
+use App\Models\TesterCode;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -10,21 +12,22 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Režim webu (specifikace „Veřejný web, domény a režimy“):
  * přihlášený admin → platné cookie testera → pozvánka k TEST / zaplacené události → jinak coming soon.
- * Zatím: režim z konfigurace, testeři přes cookie. Admin a pozvánky přibudou s back-office a modelem Event.
+ * Režim z back-office (tabulka settings), jinak z .env. Provozovatel (back-office) vidí web vždy.
  */
 class SiteMode
 {
     /** Cesty, které fungují v každém režimu. */
-    private const ALWAYS = ['pristup', 'pristup/*', 'prihlaseni', 'prihlaseni/*', 'odhlaseni', 'moje', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
+    private const ALWAYS = ['pristup', 'pristup/*', 'prihlaseni', 'prihlaseni/*', 'odhlaseni', 'moje', 'backoffice', 'backoffice/*',
+        'cekaci-listina', 'ochrana-soukromi', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
 
     public function handle(Request $request, Closure $next): Response
     {
-        $mode = config('gratulomat.site_mode');
+        $mode = Setting::siteMode();
 
         $event = $request->route('event');
         $eventOk = $event instanceof Event && $event->reachableBeforeLaunch();
 
-        if ($mode === 'live' || $request->is(...self::ALWAYS) || $this->isTester($request) || $eventOk) {
+        if ($mode === 'live' || $request->is(...self::ALWAYS) || $eventOk || $this->isTester($request) || $request->user()?->isOperator()) {
             return $next($request);
         }
 
@@ -39,12 +42,6 @@ class SiteMode
     {
         $cookie = $request->cookie(config('gratulomat.tester_cookie'));
 
-        return is_string($cookie) && in_array($cookie, self::testerCodes(), true);
-    }
-
-    /** @return list<string> */
-    public static function testerCodes(): array
-    {
-        return array_values(array_filter(array_map(fn ($c) => strtoupper(trim($c)), (array) config('gratulomat.tester_codes'))));
+        return is_string($cookie) && TesterCode::isValidCode($cookie);
     }
 }

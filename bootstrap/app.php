@@ -2,9 +2,12 @@
 
 use App\Http\Middleware\SetGuestLocale;
 use App\Http\Middleware\SiteMode;
+use App\Models\Setting;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -20,5 +23,19 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Neexistující stránka v režimu Připravujeme / Údržba = coming soon / údržba (i neznámé adresy událostí).
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->expectsJson() || $request->is('api/*', 'backoffice', 'backoffice/*', '*/admin', '*/admin/*', '*/api/*', '*/m/*')) {
+                return null;
+            }
+            $mode = Setting::siteMode();
+            if ($mode === 'maintenance') {
+                return response()->view('site.maintenance', status: 503)->header('Retry-After', '600');
+            }
+            if ($mode === 'coming_soon') {
+                return response()->view('site.coming-soon');
+            }
+
+            return null;
+        });
     })->create();

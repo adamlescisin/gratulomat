@@ -12,6 +12,12 @@ return [
 
     'site_mode' => env('SITE_MODE', 'coming_soon'), // coming_soon | maintenance | live
 
+    // Provozovatelé (back-office /backoffice) – e-maily oddělené čárkou. Přihlašují se odkazem z e-mailu.
+    'operators' => array_values(array_filter(array_map(fn ($e) => strtolower(trim($e)), explode(',', (string) env('OPERATOR_EMAILS', ''))))),
+
+    // Kam chodí upozornění (čekací listina, nové objednávky).
+    'notify_email' => env('NOTIFY_EMAIL', 'ahoj@gratulomat.cz'),
+
     // Dočasně z .env (čárkou oddělené); později tabulka tester_codes v back-office.
     'tester_codes' => array_filter(explode(',', (string) env('TESTER_CODES', ''))),
     'tester_cookie' => 'gm_tester',

@@ -36,7 +36,13 @@ class User extends Authenticatable
 
     public function organizes(Event $event): bool
     {
-        return $this->events()->whereKey($event->id)->exists();
+        return $this->isOperator() || $this->events()->whereKey($event->id)->exists();
+    }
+
+    /** Provozovatel (back-office) – podle OPERATOR_EMAILS. */
+    public function isOperator(): bool
+    {
+        return in_array(strtolower($this->email), config('gratulomat.operators'), true);
     }
 
     /** Přihlašovací odkaz (bez hesla), platný $minutes minut a jen jednou. */

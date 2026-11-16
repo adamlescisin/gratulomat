@@ -1,0 +1,65 @@
+/* Gratulomat – veřejné stránky (coming soon, právní). Fonty jsou hostované lokálně (bez Google Fonts). */
+@font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-display: swap; font-weight: 200 800;
+  src: url(fonts/bricolage-grotesque-latin-ext-opsz-normal.woff2) format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-display: swap; font-weight: 200 800;
+  src: url(fonts/bricolage-grotesque-latin-opsz-normal.woff2) format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Inter"; font-style: normal; font-display: swap; font-weight: 100 900;
+  src: url(fonts/inter-latin-ext-wght-normal.woff2) format("woff2-variations");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-style: normal; font-display: swap; font-weight: 100 900;
+  src: url(fonts/inter-latin-wght-normal.woff2) format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+:root { --ink: #1C1633; --ink-2: #251E40; --cream: #FFF6E9; --coral: #FF5A3C; --coral-dark: #B93A22; --sun: #FFC433; --mint: #2EC4A0; --muted: #C9C3D9; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: var(--cream); font-family: Inter, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: var(--sun); }
+input, button { font: inherit; }
+input[type=checkbox] { accent-color: var(--coral); }
+.display { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; letter-spacing: -0.035em; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.cs { min-height: 100vh; display: flex; flex-direction: column; }
+.cs-wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+.cs-head { padding-top: 28px; padding-bottom: 28px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.btn-outline { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 0; background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255,246,233,.35); color: var(--cream); font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.btn-outline:hover { box-shadow: inset 0 0 0 1.5px var(--cream); }
+.cs-main { flex: 1; padding-top: 24px; padding-bottom: 72px; display: flex; flex-wrap: wrap; align-items: center; gap: 56px; }
+.cs-copy { flex: 1 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 24px; }
+.eyebrow { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sun); }
+.cs h1 { margin: 0; font-size: clamp(44px, 6.4vw, 84px); line-height: .96; }
+.lead { margin: 0; font-size: 20px; line-height: 1.55; color: var(--muted); max-width: 36rem; }
+.wl { display: flex; flex-direction: column; gap: 12px; max-width: 520px; }
+.wl-label { font-weight: 700; }
+.wl-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.wl-row input { flex: 1 1 240px; min-height: 56px; border: 0; border-radius: 16px; padding: 0 18px; font-size: 17px; background: var(--cream); color: var(--ink); }
+.btn-coral { min-height: 56px; padding: 0 26px; border: 0; border-radius: 999px; background: var(--coral); color: var(--ink); font-size: 17px; font-weight: 700; cursor: pointer; }
+.btn-coral:hover { filter: brightness(1.06); }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: var(--muted); cursor: pointer; }
+.consent input { width: 20px; height: 20px; margin: 0; flex: none; }
+.msg { font-size: 14px; color: var(--sun); }
+.done { margin: 0; padding: 18px 20px; border-radius: 18px; background: rgba(46,196,160,.14); box-shadow: inset 0 0 0 1px rgba(46,196,160,.5); font-size: 17px; max-width: 520px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; max-width: 560px; }
+.chips span { padding: 8px 14px; border-radius: 999px; background: rgba(255,246,233,.08); box-shadow: inset 0 0 0 1px rgba(255,246,233,.18); font-size: 14px; }
+.cs-art { flex: 1 1 360px; min-width: 0; display: flex; justify-content: center; }
+.cs-card { width: 100%; max-width: 420px; aspect-ratio: 1 / 1; border-radius: 40px; background: var(--ink-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+.cs-card span { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 24px; }
+.press { border: 0; background: none; padding: 0; cursor: pointer; border-radius: 50%; transition: transform .12s ease; }
+.press:active { transform: translateY(4px) scale(.97); }
+.code-box { padding-bottom: 48px; }
+.code-box form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 24px; border-radius: 24px; background: var(--cream); color: var(--ink); max-width: 640px; }
+.code-box .field { flex: 1 1 260px; display: flex; flex-direction: column; gap: 6px; }
+.code-box label { font-weight: 700; }
+.code-box input { min-height: 52px; border: 1.5px solid rgba(28,22,51,.2); border-radius: 14px; padding: 0 16px; font-size: 17px; letter-spacing: .06em; text-transform: uppercase; }
+.btn-ink { min-height: 52px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--ink); color: var(--cream); font-size: 16px; font-weight: 700; cursor: pointer; }
+.code-box .err { flex-basis: 100%; font-size: 14px; color: #B5321A; }
+.cs-foot { padding-top: 24px; padding-bottom: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; border-top: 1px solid rgba(255,246,233,.12); font-size: 14px; color: var(--muted); }
+.cs-foot nav { display: flex; gap: 20px; flex-wrap: wrap; }
+.cs-foot a { color: var(--cream); }
+
+.legal { max-width: 760px; margin: 0 auto; padding: 0 24px 72px; line-height: 1.6; color: var(--muted); }
+.legal h1 { color: var(--cream); font-size: clamp(36px, 5vw, 56px); line-height: 1; margin: 16px 0 24px; }
+.legal h2 { color: var(--cream); font-family: "Bricolage Grotesque", sans-serif; font-size: 22px; margin: 32px 0 8px; }
+@media (prefers-reduced-motion: reduce) { .press { transition: none; } }

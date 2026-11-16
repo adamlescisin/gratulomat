@@ -38,6 +38,13 @@ Fáze 2 – administrace organizátora a nasazení:
 - příkaz `gratulomat:organizer` (přidá organizátora a vypíše přihlašovací odkaz)
 - nasazení GitHub Actions → Hostinger přes SSH, viz [docs/DEPLOY.md](docs/DEPLOY.md)
 
+Fáze 3 – veřejná část a back-office:
+
+- coming soon stránka podle návrhu (čekací listina → tabulka `waitlist` + upozornění na `NOTIFY_EMAIL`), `/ochrana-soukromi`
+- favicon a ikony z tlačítka značky (`public/favicon.*`, `apple-touch-icon.png`, `site.webmanifest`), fonty hostované lokálně
+- back-office `/backoffice` pro `OPERATOR_EMAILS`: přehled, události (vstup do administrace kterékoli události),
+  čekací listina (CSV), režim webu (přebíjí `SITE_MODE`), kódy testerů, kontrolní seznam a spuštění ostrého provozu
+
 Další: průvodce a Stripe → back-office (Filament) → e-maily (Resend) → spuštění.
 
 ## Beta: Adamových 50
