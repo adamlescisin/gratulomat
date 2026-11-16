@@ -8,6 +8,9 @@
     $nowYear = (int) date('Y');
     $minYear = $event->start_year ?? max(1930, $nowYear - 80);
     $heroKey = 'guest.hero.'.(trans()->has('guest.hero.'.$event->type) ? $event->type : 'default');
+    $many = count($household->names ?? []) > 1;
+    $v['go'] = __($many ? 'guest.go_many' : 'guest.go_one');
+    $v['create'] = __($many ? 'guest.create_many' : 'guest.create_one');
 @endphp
 <header class="topbar">
   <a class="brand" href="{{ route('event.show', $event) }}"><span class="brand__mark">{{ $event->age() ?: '✦' }}</span><span class="brand__name">{{ $event->title }}</span></a>

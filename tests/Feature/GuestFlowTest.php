@@ -62,7 +62,7 @@ class GuestFlowTest extends TestCase
 
         $this->get('/adamovych-50')->assertOk()->assertSee(__('guest.landing_lead'));
         $this->loginAs($h)->get('/adamovych-50')->assertOk()
-            ->assertSee('Adamových 50 let', false)
+            ->assertSee('s námi vytvořit příběh vzpomínek a přání pro událost <em>Adamových 50</em>', false)
             ->assertSee('Přání pro Adama');
 
         $me = $this->getJson('/adamovych-50/api/me')->assertOk()->json();
