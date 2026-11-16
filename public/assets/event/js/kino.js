@@ -121,7 +121,12 @@
       const count = h('div', { class: 's-title__count' }, by);
       const el = h('section', { class: 'slide s-title' }, h('div', {}, count,
         h('div', { class: 's-title__name' }, P.data.title),
-        h('div', { class: 's-title__sub' }, `${P.stats.memories} vzpomínek · ${P.stats.photos} fotek · od ${P.stats.people} lidí, kteří tě mají rádi`)));
+        h('div', { class: 's-title__sub' }, [
+          `${P.stats.memories} ${plural(P.stats.memories, 'vzpomínka', 'vzpomínky', 'vzpomínek')}`,
+          `${P.stats.photos} ${plural(P.stats.photos, 'fotka', 'fotky', 'fotek')}`,
+          P.stats.people === 1 ? 'od 1 jedinečného člověka, bez kterého by tento příběh nebyl úplný…'
+            : `od ${P.stats.people} jedinečných lidí, bez kterých by tento příběh nebyl úplný…`,
+        ].join(' · '))));
       return { el, dur: 9, tick(t) {
         const p = Math.min(1, Math.max(0, (t - .6) / 3.6)), e = 1 - Math.pow(1 - p, 3);
         count.textContent = Math.round(by + P.data.age * e);
