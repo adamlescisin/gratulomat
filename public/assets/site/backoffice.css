@@ -46,3 +46,4 @@
 .inp { min-height: 44px; border: 1.5px solid rgba(28,22,51,.2); border-radius: 12px; padding: 0 12px; font-size: 15px; background: #fff; color: var(--ink); }
 .flash { margin: 0; padding: 14px 18px; border-radius: 14px; background: #E3F6EF; box-shadow: inset 0 0 0 1px var(--mint); font-weight: 600; }
 .flash--err { background: #FFE2DB; box-shadow: inset 0 0 0 1px var(--coral); }
+a.b { color: var(--cream); } a.b--ghost { color: var(--ink); }

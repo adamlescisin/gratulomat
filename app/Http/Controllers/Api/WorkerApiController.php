@@ -27,7 +27,9 @@ class WorkerApiController extends Controller
                 ->where(fn ($q) => $q->where('status', 'queued')
                     ->orWhere(fn ($q) => $q->where('status', 'running')->where('locked_until', '<', now()))
                     ->orWhere(fn ($q) => $q->where('status', 'failed')->where('attempts', '<', 5)->where('updated_at', '<', now()->subMinutes(10))))
-                ->orderBy('id')->limit(10)->lockForUpdate()->get();
+                ->orderBy('id')->limit(10)->lockForUpdate()->get()
+                // dobropis až po vystavení původního dokladu
+                ->filter(fn ($j) => $j->type !== 'credit_note' || Invoice::find($j->payload['invoice_id'] ?? 0)?->myucto_id);
             foreach ($jobs as $job) {
                 $job->update(['status' => 'running', 'locked_until' => now()->addMinutes(10), 'attempts' => $job->attempts + 1]);
             }
@@ -37,8 +39,11 @@ class WorkerApiController extends Controller
 
         return response()->json(['data' => $jobs->map(fn ($j) => [
             'id' => $j->id, 'type' => $j->type,
-            'payload' => [...$j->payload, ...($j->result['myucto_id'] ?? null ? ['myucto_id' => $j->result['myucto_id']] : [])],
-        ])]);
+            'payload' => $j->type === 'credit_note'
+                ? [...$j->payload, 'invoice_myucto_id' => Invoice::find($j->payload['invoice_id'])->myucto_id,
+                    ...($j->result['myucto_id'] ?? null ? ['credit_note_myucto_id' => $j->result['myucto_id']] : [])]
+                : [...$j->payload, ...($j->result['myucto_id'] ?? null ? ['myucto_id' => $j->result['myucto_id']] : [])],
+        ])->values()]);
     }
 
     public function done(Request $request, WorkerJob $job): JsonResponse

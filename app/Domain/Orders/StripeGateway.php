@@ -28,7 +28,7 @@ class StripeGateway
     }
 
     /** @return array{id: string, url: string} */
-    public function createCheckout(Order $order): array
+    public function createCheckout(Order $order, int $expiresMinutes = 35): array
     {
         $client = $this->client($order->is_test);
         $items = array_values(array_filter($order->lines, fn ($l) => $l['total'] > 0));
@@ -56,7 +56,7 @@ class StripeGateway
             'success_url' => route('wizard.done').'?objednavka='.$order->id,
             'cancel_url' => route('wizard').'?zruseno=1',
             // Stripe vyžaduje aspoň 30 minut; rezerva kvůli rozdílu hodin
-            'expires_at' => now()->addMinutes(35)->timestamp,
+            'expires_at' => now()->addMinutes(max(35, min($expiresMinutes, 60 * 23)))->timestamp,
         ];
         if ($discounts) {
             $params['discounts'] = $discounts;
@@ -83,12 +83,17 @@ class StripeGateway
         throw new UnexpectedValueException('Neplatný podpis webhooku.');
     }
 
-    public function refund(Order $order, ?int $amountHalere = null): void
+    /** Vrácení přes Stripe; vrací celkovou vrácenou částku platby (haléře). */
+    public function refund(Order $order, ?int $amountHalere = null): int
     {
-        $this->client($order->is_test)->refunds->create(array_filter([
+        $client = $this->client($order->is_test);
+        $client->refunds->create(array_filter([
             'payment_intent' => $order->stripe_payment_intent,
             'amount' => $amountHalere,
         ]));
+        $pi = $client->paymentIntents->retrieve($order->stripe_payment_intent, ['expand' => ['latest_charge']]);
+
+        return (int) ($pi->latest_charge->amount_refunded ?? 0);
     }
 
     public static function isPaid(object $session): bool

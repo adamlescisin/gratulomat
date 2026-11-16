@@ -6,6 +6,7 @@ use App\Domain\Pricing\PricingService;
 use App\Mail\EventReady;
 use App\Mail\FreeEventConfirm;
 use App\Mail\NewOrderNotice;
+use App\Mail\PaymentLink;
 use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Invoice;
@@ -87,7 +88,7 @@ class OrderService
             if ($order->event_id) {
                 return $order->event;
             }
-            $cfg = new WizardConfig($order->config);
+            $cfg = WizardConfig::fromRequest($order->config);
             $guestLimit = (int) collect($order->lines)->where('code', 'guest_pack')->sum('qty') * config('gratulomat.addons.guest_pack.size')
                 + config("gratulomat.plans.{$order->plan}.guests");
 
@@ -128,6 +129,55 @@ class OrderService
         }
 
         return $event;
+    }
+
+    /**
+     * Vrácení peněz (z back-office nebo webhooku charge.refunded). $totalRefunded je celková vrácená částka
+     * podle Stripe, takže opakované volání nic nezdvojí. Za rozdíl se vystaví dobropis.
+     */
+    public function recordRefund(Order $order, int $totalRefunded, string $reason, ?string $by = null): int
+    {
+        return DB::transaction(function () use ($order, $totalRefunded, $reason, $by) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->first();
+            $delta = min($totalRefunded, $order->total_halere) - $order->refunded_halere;
+            if ($delta <= 0) {
+                return 0;
+            }
+            $order->refunded_halere += $delta;
+            $order->refunded_at = now();
+            $order->log('Vráceno '.Order::czk($delta).' – '.$reason, $by);
+
+            $invoice = $order->invoices()->where('kind', 'invoice')->first();
+            if ($invoice && ! $order->is_test) {
+                $note = Invoice::create(['order_id' => $order->id, 'kind' => 'credit_note', 'status' => 'queued', 'amount_halere' => -$delta, 'source_invoice_id' => $invoice->id]);
+                WorkerJob::create([
+                    'type' => 'credit_note', 'subject_type' => Invoice::class, 'subject_id' => $note->id,
+                    'payload' => [
+                        'order_number' => $order->number, 'invoice_id' => $invoice->id, 'refund_halere' => $delta,
+                        'full' => $order->refunded_halere >= $order->total_halere && $delta === $order->total_halere,
+                        'reason' => mb_substr($reason, 0, 200), 'vat_rate' => config('gratulomat.vat_rate'),
+                    ],
+                ]);
+            }
+
+            return $delta;
+        });
+    }
+
+    /** VIP poptávka → individuální cena a platební odkaz Stripe (platí 23 hodin). */
+    public function vipPaymentLink(Order $order, int $amountHalere, StripeGateway $stripe, ?string $by = null): string
+    {
+        $vat = $amountHalere - (int) round($amountHalere * 100 / (100 + config('gratulomat.vat_rate')));
+        $order->update([
+            'plan' => 'vip', 'lines' => [['code' => 'vip', 'name' => 'Tarif VIP', 'qty' => 1, 'unit_price' => $amountHalere, 'total' => $amountHalere]],
+            'total_halere' => $amountHalere, 'vat_halere' => $vat, 'status' => 'pending', 'expires_at' => now()->addHours(23),
+        ]);
+        $session = $stripe->createCheckout($order->fresh(), 60 * 23);
+        $order->update(['stripe_session_id' => $session['id'], 'payment_url' => $session['url']]);
+        $order->log('Platební odkaz VIP na '.Order::czk($amountHalere), $by);
+        Mail::to($order->email)->send(new PaymentLink($order->fresh()));
+
+        return $session['url'];
     }
 
     /** Úloha pro worker na Mac Mini: daňový doklad v MyÚčtu (spec. „Fakturace a DPH“). */

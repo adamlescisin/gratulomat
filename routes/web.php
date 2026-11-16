@@ -2,6 +2,7 @@
 
 use App\Domain\Guest\GuestSession;
 use App\Http\Controllers\Backoffice\BackofficeController;
+use App\Http\Controllers\Backoffice\OrdersController;
 use App\Http\Controllers\Event\EventPageController;
 use App\Http\Controllers\Event\GuestApiController;
 use App\Http\Controllers\Organizer\AuthController;
@@ -61,6 +62,17 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::get('/cekaci-listina', 'waitlist')->name('backoffice.waitlist');
     Route::get('/cekaci-listina.csv', 'waitlistCsv')->name('backoffice.waitlist.csv');
     Route::delete('/cekaci-listina/{entry}', 'waitlistDelete')->name('backoffice.waitlist.delete');
+    Route::get('/objednavky', [OrdersController::class, 'index'])->name('backoffice.orders');
+    Route::get('/objednavky.csv', [OrdersController::class, 'csv'])->name('backoffice.orders.csv');
+    Route::get('/objednavky/{order}', [OrdersController::class, 'show'])->name('backoffice.order');
+    Route::post('/objednavky/{order}/vratit', [OrdersController::class, 'refund'])->name('backoffice.order.refund');
+    Route::post('/objednavky/{order}/znovu-odeslat', [OrdersController::class, 'resend'])->name('backoffice.order.resend');
+    Route::post('/objednavky/{order}/zrusit', [OrdersController::class, 'cancel'])->name('backoffice.order.cancel');
+    Route::post('/objednavky/{order}/vip-odkaz', [OrdersController::class, 'vipLink'])->name('backoffice.order.vip');
+    Route::post('/objednavky/{order}/vip-rucne', [OrdersController::class, 'vipManual'])->name('backoffice.order.vipManual');
+    Route::post('/objednavky/{order}/uloha/{job}', [OrdersController::class, 'retryJob'])->name('backoffice.order.retry');
+    Route::get('/objednavky/{order}/doklad/{invoice}', [OrdersController::class, 'invoicePdf'])->name('backoffice.order.pdf');
+    Route::post('/objednavky/{order}/poznamka', [OrdersController::class, 'note'])->name('backoffice.order.note');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
     Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');
     Route::post('/slevy/{discount}/prepnout', 'discountToggle')->name('backoffice.discounts.toggle');

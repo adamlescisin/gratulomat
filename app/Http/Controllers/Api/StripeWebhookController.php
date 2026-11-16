@@ -9,6 +9,7 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Stripe\Event;
 use UnexpectedValueException;
 
@@ -57,8 +58,21 @@ class StripeWebhookController extends Controller
                 }
                 break;
             case 'charge.refunded':
+                $order = Order::where('stripe_payment_intent', $obj->payment_intent ?? '-')->first();
+                if ($order) {
+                    $orders->recordRefund($order, (int) $obj->amount_refunded, 'vráceno ve Stripe', 'Stripe');
+                } else {
+                    Log::warning('Stripe: vrácení k neznámé platbě', ['payment_intent' => $obj->payment_intent ?? null]);
+                }
+                break;
             case 'charge.dispute.created':
-                Log::warning("Stripe: {$event->type}", ['payment_intent' => $obj->payment_intent ?? null]);
+                $order = Order::where('stripe_payment_intent', $obj->payment_intent ?? '-')->first();
+                $order?->log('Zákazník rozporoval platbu (chargeback) – vyřešte ve Stripe', 'Stripe');
+                Log::warning('Stripe: chargeback', ['payment_intent' => $obj->payment_intent ?? null, 'order' => $order?->number]);
+                try {
+                    Mail::raw('Zákazník rozporoval platbu '.($order?->number ?? $obj->payment_intent).'. Odpovězte ve Stripe Dashboardu (Disputes) do termínu.', fn ($m) => $m->to(config('gratulomat.notify_email'))->subject('Gratulomat: chargeback '.($order?->number ?? '')));
+                } catch (\Throwable) {
+                }
                 break;
         }
     }

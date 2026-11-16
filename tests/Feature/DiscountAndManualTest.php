@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\WorkerJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use Tests\Support\FakeStripe;
 use Tests\TestCase;
 
 class DiscountAndManualTest extends TestCase
