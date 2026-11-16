@@ -24,7 +24,7 @@ class AutoShareTest extends TestCase
 
     public function test_teaser_shows_deadline_and_surprise_only_for_celebrations(): void
     {
-        $e = $this->event(['collect_until' => '2027-01-20 10:00:00']);
+        $e = $this->event(['collect_until' => '2027-01-20 10:00:00', 'event_date' => '2027-01-23 17:00:00']);
         $this->get('/janinych-60/g/tok12345678')->assertRedirect();
         $this->get('/janinych-60')->assertSee('zapečetěné až do 20. ledna 2027.')->assertSee('Překvapení musí být!')
             ->assertSee('audiovizuální prezentace s časovou osou');
@@ -52,5 +52,23 @@ class AutoShareTest extends TestCase
         $this->actingAs(User::first());
         $this->postJson('/janinych-60/admin/api/show', ['public_from' => null])->assertOk();
         $this->assertFalse($e->fresh()->showPublic());
+    }
+
+    public function test_wall_opens_at_deadline_or_organizer_time(): void
+    {
+        $e = $this->event(['collect_until' => now()->addWeek(), 'event_date' => now()->addMonth()]);
+        $this->assertFalse($e->wallOpen());
+        $this->travel(8)->days();
+        $this->assertTrue($e->fresh()->wallOpen(), 'po uzávěrce sběru, i když oslava teprve bude');
+        $this->travelBack();
+
+        $this->actingAs(User::first());
+        $this->postJson('/janinych-60/admin/api/settings', ['wall_open_at' => now()->addDays(3)->timezone('Europe/Prague')->format('Y-m-d\TH:i')])->assertOk();
+        $this->assertFalse($e->fresh()->wallOpen());
+        $this->travel(4)->days();
+        $this->assertTrue($e->fresh()->wallOpen());
+        auth()->logout();
+        $this->get('/janinych-60/g/tok12345678');
+        $this->get('/janinych-60')->assertSee('zapečetěné až do');
     }
 }

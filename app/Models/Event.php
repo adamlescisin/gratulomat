@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 class Event extends Model
 {
@@ -157,7 +158,20 @@ class Event extends Model
     /** Příspěvky ostatních: zapečetěné do data události; u smutečního rozloučení vidět hned. */
     public function wallOpen(): bool
     {
-        return $this->isFuneral() || $this->setting('wall_before_event', false) || $this->started() || $this->showPublic();
+        return $this->isFuneral() || $this->setting('wall_before_event', false) || now()->gte($this->wallOpensAt()) || $this->showPublic();
+    }
+
+    /** Kdy se hostům odpečetí příspěvky ostatních: čas z administrace, jinak uzávěrka sběru, jinak datum události. */
+    public function wallOpensAt(): Carbon
+    {
+        $set = $this->setting('wall_open_at');
+
+        if ($set) {
+            return Carbon::parse($set);
+        }
+
+        // uzávěrka sběru; pokud by sběr běžel i po oslavě, odpečetí se nejpozději v den události
+        return $this->collect_until && $this->collect_until->lt($this->event_date) ? $this->collect_until : $this->event_date;
     }
 
     /** V režimu Připravujeme jsou dostupné jen testovací a zaplacené (aktivní) události. */

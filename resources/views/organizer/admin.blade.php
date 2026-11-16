@@ -78,6 +78,8 @@
       </div>
       <p class="muted" style="margin:.2rem 0 1rem;font-size:.85rem">Datum události nebo délku archivu vám změníme na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
       <label class="muted">Uzávěrka sběru<br><input class="input" type="datetime-local" name="collect_until" style="width:auto"></label>
+      <label class="muted">Odpečetit příspěvky hostům<br><input class="input" type="datetime-local" name="wall_open_at" style="width:auto">
+        <span style="display:block;font-size:.8rem">Do té doby každý host vidí jen své příspěvky. Prázdné = při uzávěrce sběru.</span></label>
       <p class="muted" style="margin-top:1rem">Text pozvánky – <code>{jmena}</code>, <code>{odkaz}</code> a <code>{datum}</code> se doplní u každého hosta.</p>
       <textarea class="input" rows="6" name="invite_text"></textarea>
       <p><button class="btn btn--gold btn--sm" type="submit">Uložit nastavení</button></p>

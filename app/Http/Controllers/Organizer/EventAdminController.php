@@ -47,6 +47,8 @@ class EventAdminController extends Controller
                 'public_from' => $event->show?->public_from?->toIso8601String(),
                 'is_public' => $event->showPublic(),
                 'auto_share' => (bool) $event->setting('auto_share'),
+                'wall_open_at' => $event->setting('wall_open_at'),
+                'wall_opens_at' => $event->wallOpensAt()->toIso8601String(),
                 'auto_share_at' => ($event->collect_until ?? $event->event_date)?->toIso8601String(),
                 'game_enabled' => (bool) $event->show?->game_enabled,
             ],
@@ -190,6 +192,7 @@ class EventAdminController extends Controller
             'theme' => 'sometimes|string|in:'.implode(',', array_keys(Themes::ALL)),
             'mode' => 'sometimes|in:light,dark',
             'auto_share' => 'sometimes|boolean',
+            'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
         if (isset($v['title'])) {
@@ -210,6 +213,9 @@ class EventAdminController extends Controller
         $settings = $event->settings ?? [];
         if (isset($mode)) {
             $settings['mode'] = $mode;
+        }
+        if (array_key_exists('wall_open_at', $v)) {
+            $settings['wall_open_at'] = $v['wall_open_at'] ? Carbon::parse($v['wall_open_at'], 'Europe/Prague')->utc()->toIso8601String() : null;
         }
         if (array_key_exists('auto_share', $v)) {
             $settings['auto_share'] = (bool) $v['auto_share'];

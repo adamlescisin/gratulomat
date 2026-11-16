@@ -130,7 +130,7 @@
   </section>
   <section class="teaser" data-teaser hidden>
     <div class="teaser__envelope" aria-hidden="true">✉️</div>
-    <p>{{ __('guest.teaser', ['deadline' => ($event->collect_until ?? $event->event_date)?->timezone('Europe/Prague')->locale(app()->getLocale())->isoFormat('LL')]) }}@unless ($funeral) {{ __('guest.teaser_surprise') }}@endunless</p>
+    <p>{{ __('guest.teaser', ['deadline' => $event->wallOpensAt()->timezone('Europe/Prague')->locale(app()->getLocale())->isoFormat($event->setting('wall_open_at') ? 'LLL' : 'LL')]) }}@unless ($funeral) {{ __('guest.teaser_surprise') }}@endunless</p>
   </section>
 
   <section class="share-show card" data-share hidden>

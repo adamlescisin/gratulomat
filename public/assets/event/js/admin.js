@@ -95,7 +95,7 @@
     // vzhled: šablona + světlý / tmavý režim
     if (!f.dataset.loaded) { f.dataset.theme = E.theme; f.dataset.mode = E.mode; }
     renderThemes();
-    if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); f.dataset.loaded = '1'; }
+    if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); if (S.show.wall_open_at) field(f, 'wall_open_at').value = localInput(S.show.wall_open_at); if (E.funeral) field(f, 'wall_open_at').closest('label').hidden = true; f.dataset.loaded = '1'; }
   }
 
   function renderThemes() {
@@ -134,7 +134,7 @@
     }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
-      run(() => post('settings', { theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
+      run(() => post('settings', { wall_open_at: field(e.target, 'wall_open_at').value || null, theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
     }
   });
 
