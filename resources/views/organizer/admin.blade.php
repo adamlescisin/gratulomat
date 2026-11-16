@@ -35,6 +35,22 @@
       <textarea class="input" rows="4" name="lines" placeholder="Jana a Pavel&#10;Martin; kolega z práce"></textarea>
       <button class="btn btn--gold" type="submit">Přidat hosty</button>
     </form>
+    <div class="guest-tools">
+      <div class="guest-tool" data-file-import-wrap>
+        <h3 class="h3">Import ze souboru</h3>
+        <div data-file-import-on hidden>
+          <p class="muted">CSV nebo Excel (.xlsx). Sloupce <code>Jméno</code>, volitelně <code>E-mail</code> a <code>Vztah</code> – stačí export kontaktů nebo tabulka. Duplicitní jména přeskočíme.</p>
+          <form data-file-import class="row"><input type="file" name="file" accept=".csv,.txt,.xlsx" required> <button class="btn btn--ghost btn--sm" type="submit">Importovat</button></form>
+        </div>
+        <p class="muted" data-file-import-off hidden>Import seznamu (CSV, Excel) je součástí tarifu Premiéra.</p>
+      </div>
+      <div class="guest-tool" data-anon-wrap>
+        <h3 class="h3">Anonymní pozvánka</h3>
+        <p class="muted">Jeden společný odkaz pro kohokoli (sociální sítě, kancelář, nástěnka). Host se při otevření sám představí a dostane vlastní řádek v tabulce.</p>
+        <div data-anon-on hidden></div>
+        <p class="muted" data-anon-off hidden>Anonymní pozvánka je součástí tarifu Premiéra.</p>
+      </div>
+    </div>
     <div class="table-wrap"><table class="table" data-households>
       <thead><tr><th>Domácnost</th><th>Vztah</th><th>Příspěvky</th><th>Naposledy</th><th>Odkaz</th><th></th></tr></thead>
       <tbody></tbody>

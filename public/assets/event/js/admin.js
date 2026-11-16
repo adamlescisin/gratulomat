@@ -39,7 +39,7 @@
     $('[data-hh-count]').textContent = `(${hh.length}${E.guest_limit ? ' z ' + E.guest_limit : ''})`;
     $('[data-households] tbody').innerHTML = hh.map(x => `
       <tr class="${x.memories ? '' : 'is-silent'}">
-        <td><strong>${esc(x.label)}</strong><br><span class="muted">${esc(x.names.join(' · '))}</span></td>
+        <td><strong>${esc(x.label)}</strong>${x.source === 'anonymous' ? ' <span class="badge" title="Přihlásil se sám přes anonymní pozvánku">sám</span>' : x.source === 'import' ? ' <span class="badge">import</span>' : ''}<br><span class="muted">${esc(x.names.join(' · '))}${x.email ? ' · ' + esc(x.email) : ''}</span></td>
         <td>${esc(x.relation || '')}</td>
         <td>${x.memories}</td>
         <td class="muted">${x.last_seen ? fmt(x.last_seen) : '—'}</td>
@@ -51,6 +51,16 @@
           <button class="btn btn--ghost btn--sm btn--danger" data-del="${x.id}">×</button>
         </div></td>
       </tr>`).join('');
+
+    // import a anonymní pozvánka (od Premiéry)
+    $('[data-file-import-on]').hidden = !E.import_available; $('[data-file-import-off]').hidden = E.import_available;
+    $('[data-anon-on]').hidden = !E.anon_available; $('[data-anon-off]').hidden = E.anon_available;
+    $('[data-anon-on]').innerHTML = E.anon_link
+      ? `<p><code data-anon-url>${esc(E.anon_link)}</code></p><div class="row">
+          <button class="btn btn--gold btn--sm" data-anon="copy">Kopírovat odkaz</button>
+          <button class="btn btn--ghost btn--sm" data-anon="regenerate" title="Starý odkaz přestane platit">↻ Nový odkaz</button>
+          <button class="btn btn--ghost btn--sm btn--danger" data-anon="disable">Vypnout</button></div>`
+      : `<button class="btn btn--gold btn--sm" data-anon="enable">Vytvořit anonymní odkaz</button>`;
 
     // vzpomínky (organizátor vidí i soukromá přání)
     $('[data-mem-count]').textContent = `(${mem.length})`;
@@ -93,6 +103,17 @@
         toast(`Přidáno: ${r.added}${r.skipped ? ` · ${r.skipped} nepřidáno (limit tarifu ${r.limit})` : ''}`);
       });
     }
+    if (e.target.matches('[data-file-import]')) {
+      e.preventDefault();
+      run(async () => {
+        const fd = new FormData(e.target);
+        const r = await fetch(`${GM.base}/api/import`, { method: 'POST', headers: { 'X-CSRF-TOKEN': GM.csrf, Accept: 'application/json' }, body: fd });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || j.message || `Chyba ${r.status}`);
+        e.target.reset();
+        toast(`Importováno: ${j.added}${j.duplicates ? ` · ${j.duplicates} už v seznamu` : ''}${j.skipped ? ` · ${j.skipped} nad limit tarifu (${j.limit})` : ''}`);
+      });
+    }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
       run(() => post('settings', { invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
@@ -109,6 +130,10 @@
       const relation = prompt('Vztah (nepovinné):', x.relation || ''); if (relation == null) return;
       run(() => post(`households/${x.id}`, { label, relation }));
     }
+    if (t.dataset.anon === 'copy') { navigator.clipboard?.writeText(S.event.anon_link).then(() => toast('Odkaz zkopírován ✓')); }
+    if (t.dataset.anon === 'enable') run(() => post('anon-link', { action: 'enable' }), 'Anonymní odkaz je připravený');
+    if (t.dataset.anon === 'regenerate' && confirm('Vytvořit nový odkaz? Ten starý přestane fungovat.')) run(() => post('anon-link', { action: 'regenerate' }), 'Nový odkaz vytvořen');
+    if (t.dataset.anon === 'disable' && confirm('Vypnout anonymní pozvánku? Odkaz přestane fungovat, už přihlášení hosté zůstanou.')) run(() => post('anon-link', { action: 'disable' }), 'Anonymní pozvánka vypnutá');
     if (t.dataset.token && confirm('Vygenerovat nový odkaz? Ten starý přestane fungovat.')) run(() => post(`households/${t.dataset.token}`, { new_token: true }), 'Nový odkaz vytvořen');
     if (t.dataset.del && confirm('Smazat domácnost i všechny její příspěvky?')) run(() => post(`households/${t.dataset.del}`, { delete: true }));
     if (t.dataset.hide) run(() => post(`memories/${t.dataset.hide}`, { status: t.dataset.status === 'hidden' ? 'visible' : 'hidden' }));

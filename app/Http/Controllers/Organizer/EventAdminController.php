@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Organizer;
 
 use App\Domain\Guest\EventRules;
+use App\Domain\Guest\GuestImport;
 use App\Domain\Guest\MemoryPresenter;
 use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
@@ -36,6 +37,9 @@ class EventAdminController extends Controller
                 'invite_text' => $event->setting('invite_text') ?: $this->defaultInvite($event),
                 'game_available' => EventRules::has($event, 'game'),
                 'offline_available' => EventRules::has($event, 'offline'),
+                'import_available' => EventRules::has($event, 'import'),
+                'anon_available' => EventRules::has($event, 'anonymous_link'),
+                'anon_link' => EventRules::has($event, 'anonymous_link') && $event->setting('anon_token') ? route('event.anon', [$event, $event->setting('anon_token')]) : null,
             ],
             'show' => [
                 'public_from' => $event->show?->public_from?->toIso8601String(),
@@ -43,13 +47,48 @@ class EventAdminController extends Controller
                 'game_enabled' => (bool) $event->show?->game_enabled,
             ],
             'households' => $event->households()->orderBy('label')->get()->map(fn (Household $h) => [
-                'id' => $h->id, 'label' => $h->label, 'names' => $h->names, 'relation' => $h->relation,
+                'id' => $h->id, 'label' => $h->label, 'source' => $h->source, 'email' => $h->email, 'names' => $h->names, 'relation' => $h->relation,
                 'last_seen' => $h->last_seen_at?->toIso8601String(), 'memories' => (int) ($counts[$h->id] ?? 0),
                 'link' => $h->link(),
             ]),
             'memories' => MemoryPresenter::all($event, true),
             'media_base' => url($event->slug.'/m'),
         ]);
+    }
+
+    /** Import ze souboru (CSV, Excel) – od tarifu Premiéra. */
+    public function import(Request $request, Event $event): JsonResponse
+    {
+        if (! EventRules::has($event, 'import')) {
+            return response()->json(['error' => 'Import seznamu hostů je od tarifu Premiéra.'], 403);
+        }
+        $request->validate(['file' => 'required|file|max:2048|mimes:csv,txt,xlsx'], [
+            'file.mimes' => 'Nahrajte soubor CSV nebo Excel (.xlsx).', 'file.max' => 'Soubor může mít nejvýš 2 MB.',
+        ]);
+        try {
+            $rows = GuestImport::rows($request->file('file')->getRealPath(), $request->file('file')->getClientOriginalName());
+        } catch (\Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+        if (! $rows) {
+            return response()->json(['error' => 'V souboru jsme nenašli žádné hosty.'], 422);
+        }
+
+        return response()->json([...GuestImport::import($event, $rows), 'limit' => $event->limit('guests')]);
+    }
+
+    /** Anonymní pozvánka – zapnout / nový odkaz / vypnout (od Premiéry). */
+    public function anonLink(Request $request, Event $event): JsonResponse
+    {
+        if (! EventRules::has($event, 'anonymous_link')) {
+            return response()->json(['error' => 'Anonymní pozvánka je od tarifu Premiéra.'], 403);
+        }
+        $settings = $event->settings ?? [];
+        $settings['anon_token'] = $request->input('action') === 'disable' ? null : Household::newToken(16);
+        $event->settings = $settings;
+        $event->save();
+
+        return response()->json(['anon_link' => $settings['anon_token'] ? route('event.anon', [$event, $settings['anon_token']]) : null]);
     }
 
     public function addHouseholds(Request $request, Event $event): JsonResponse

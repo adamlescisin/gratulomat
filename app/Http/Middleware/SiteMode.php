@@ -18,7 +18,7 @@ class SiteMode
 {
     /** Cesty, které fungují v každém režimu. */
     private const ALWAYS = ['pristup', 'pristup/*', 'prihlaseni', 'prihlaseni/*', 'odhlaseni', 'moje', 'backoffice', 'backoffice/*',
-        'cekaci-listina', 'ochrana-soukromi', 'obchodni-podminky', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
+        'cekaci-listina', 'ochrana-soukromi', 'obchodni-podminky', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*', 'znacka/*'];
 
     public function handle(Request $request, Closure $next): Response
     {

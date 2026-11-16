@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Mail\LoginLink;
 use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Household;
@@ -11,8 +12,10 @@ use App\Models\Memory;
 use App\Models\Setting;
 use App\Models\TesterCode;
 use App\Models\WaitlistEntry;
+use App\Support\MailBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /** Back-office provozovatele (minimální verze před Filamentem): přehled, události, čekací listina, režim webu. */
 class BackofficeController extends Controller
@@ -94,6 +97,51 @@ class BackofficeController extends Controller
         $discount->delete();
 
         return back()->with('ok', "Kód {$discount->code} je smazaný.");
+    }
+
+    public function mailBrand()
+    {
+        return view('backoffice.mail', ['mode' => Setting::siteMode()]);
+    }
+
+    public function mailBrandSave(Request $request)
+    {
+        $v = $request->validate([
+            'from_name' => 'nullable|string|max:80',
+            'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'footer' => 'nullable|string|max:600',
+            'logo_width' => 'nullable|integer|min:60|max:320',
+            'logo' => 'nullable|file|mimes:png,jpg,jpeg,gif,webp|max:1024',
+            'remove_logo' => 'nullable|boolean',
+        ], [
+            'logo.mimes' => 'Logo nahrajte jako PNG, JPG, GIF nebo WebP (SVG e-mailové klienty neukazují).',
+            'logo.max' => 'Logo může mít nejvýš 1 MB.',
+            'color.regex' => 'Barva ve tvaru #FF5A3C.',
+        ]);
+        foreach (['from_name', 'color', 'footer', 'logo_width'] as $k) {
+            Setting::put("mail_$k", isset($v[$k]) && $v[$k] !== '' ? (string) $v[$k] : null);
+        }
+        if ($request->boolean('remove_logo')) {
+            MailBrand::removeLogo();
+        }
+        if ($request->hasFile('logo')) {
+            MailBrand::storeLogo($request->file('logo'));
+        }
+
+        return redirect()->route('backoffice.mail')->with('ok', 'Vzhled e-mailů je uložený.');
+    }
+
+    /** Náhled na vzorovém e-mailu (přihlašovací odkaz). */
+    public function mailPreview(Request $request)
+    {
+        return response((new LoginLink($request->user(), route('login')))->render());
+    }
+
+    public function mailTest(Request $request)
+    {
+        Mail::to($request->user())->send(new LoginLink($request->user(), route('login')));
+
+        return back()->with('ok', 'Zkušební e-mail odešel na '.$request->user()->email.'.');
     }
 
     public function waitlist()

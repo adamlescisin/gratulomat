@@ -12,6 +12,7 @@ use App\Http\Middleware\EnsureOperator;
 use App\Http\Middleware\EnsureOrganizer;
 use App\Models\Household;
 use App\Models\TesterCode;
+use App\Support\MailBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -64,12 +65,24 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');
     Route::post('/slevy/{discount}/prepnout', 'discountToggle')->name('backoffice.discounts.toggle');
     Route::delete('/slevy/{discount}', 'discountDelete')->name('backoffice.discounts.delete');
+    Route::get('/emaily', 'mailBrand')->name('backoffice.mail');
+    Route::post('/emaily', 'mailBrandSave')->name('backoffice.mail.save');
+    Route::get('/emaily/nahled', 'mailPreview')->name('backoffice.mail.preview');
+    Route::post('/emaily/test', 'mailTest')->middleware('throttle:5,1')->name('backoffice.mail.test');
     Route::get('/rezim', 'mode')->name('backoffice.mode');
     Route::post('/rezim', 'setMode');
     Route::post('/rezim/kontrola', 'setChecklist')->name('backoffice.checklist');
     Route::post('/rezim/kody', 'addCode')->name('backoffice.codes');
     Route::delete('/rezim/kody/{code}', 'deleteCode')->name('backoffice.codes.delete');
 });
+
+// Logo v e-mailech (veřejné – e-maily čte kdokoli).
+Route::get('/znacka/{file}', function (string $file) {
+    $path = MailBrand::logoPath();
+    abort_unless($path && basename($path) === $file, 404);
+
+    return response()->file($path, ['Cache-Control' => 'public, max-age=31536000, immutable']);
+})->where('file', 'logo-[a-f0-9]{10}\.(png|jpg|jpeg|gif|webp)')->name('mail.logo');
 
 // Průvodce založením události a platba.
 Route::get('/zalozit', [WizardController::class, 'page'])->name('wizard');
@@ -84,6 +97,8 @@ Route::get('/zalozit/potvrdit/{order}', [WizardController::class, 'confirm'])->n
 Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])->group(function () {
     Route::get('/', [EventPageController::class, 'show'])->name('event.show');
     Route::get('/g/{token}', [EventPageController::class, 'invite'])->where('token', '[A-Za-z0-9]{6,32}')->name('event.invite');
+    Route::get('/p/{token}', [EventPageController::class, 'anonForm'])->where('token', '[a-z0-9]{8,32}')->name('event.anon');
+    Route::post('/p/{token}', [EventPageController::class, 'anonJoin'])->where('token', '[a-z0-9]{8,32}')->middleware('throttle:10,1')->name('event.anon.join');
     Route::post('/prihlasit', [EventPageController::class, 'login'])->middleware('throttle:20,1')->name('event.login');
     Route::get('/odhlasit', [EventPageController::class, 'logout'])->name('event.logout');
     Route::get('/kino', [EventPageController::class, 'kino'])->name('event.kino');
@@ -98,6 +113,8 @@ Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])-
         Route::get('/', [EventAdminController::class, 'page'])->name('organizer.admin');
         Route::get('/api/state', [EventAdminController::class, 'state']);
         Route::post('/api/households', [EventAdminController::class, 'addHouseholds']);
+        Route::post('/api/import', [EventAdminController::class, 'import']);
+        Route::post('/api/anon-link', [EventAdminController::class, 'anonLink']);
         Route::post('/api/households/{household}', [EventAdminController::class, 'updateHousehold'])->whereNumber('household');
         Route::post('/api/memories/{memory}', [EventAdminController::class, 'updateMemory']);
         Route::post('/api/show', [EventAdminController::class, 'updateShow']);
