@@ -220,6 +220,9 @@ class EventAdminController extends Controller
         if (array_key_exists('auto_share', $v)) {
             $settings['auto_share'] = (bool) $v['auto_share'];
         }
+        if (array_key_exists('invite_text', $v) && trim((string) $v['invite_text']) === trim($this->defaultInvite($event))) {
+            $v['invite_text'] = null; // výchozí text neukládáme – při změně názvu se přizpůsobí
+        }
         if (array_key_exists('invite_text', $v)) {
             $settings['invite_text'] = $v['invite_text'];
         }
@@ -243,6 +246,13 @@ class EventAdminController extends Controller
         $file = $package->build($event, sys_get_temp_dir().'/gratulomat-'.$event->slug.'-'.date('Ymd-His').'.zip');
 
         return response()->download($file)->deleteFileAfterSend();
+    }
+
+    public static function defaultInviteFor(Event $event, string $set = 'invite'): string
+    {
+        $key = "organizer.$set.".(trans()->has("organizer.$set.".$event->type, $event->locale) ? $event->type : 'default');
+
+        return __($key, $event->textVars(), $event->locale);
     }
 
     private function defaultInvite(Event $event): string

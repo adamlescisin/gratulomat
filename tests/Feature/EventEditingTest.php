@@ -84,4 +84,20 @@ class EventEditingTest extends TestCase
         $q = $this->postJson('/api/quote', ['config' => ['guests' => 5, 'mp4' => true, 'collect' => 14, 'archive' => 1]])->json();
         $this->assertSame('ochutnavka', $q['plan']);
     }
+
+    public function test_default_invite_needs_no_declension(): void
+    {
+        [, $event] = $this->setupEvent();
+        $event->update(['title' => 'Svatba Adama a Evy', 'recipient_name' => 'Adam a Eva']);
+        $this->actingAs(User::where('email', 'adam.lescisin@seznam.c.z')->first());
+        $text = $this->getJson('/frantisek-40/admin/api/state')->json('event.invite_text');
+        $this->assertStringContainsString('K události „Svatba Adama a Evy“ ({datum})', $text);
+        $this->assertStringNotContainsString('pro Adam a Eva', $text);
+
+        // uložení beze změny výchozí text neukládá
+        $this->postJson('/frantisek-40/admin/api/settings', ['invite_text' => $text])->assertOk();
+        $this->assertNull($event->fresh()->setting('invite_text'));
+        $this->postJson('/frantisek-40/admin/api/settings', ['invite_text' => 'Vlastní text {odkaz}'])->assertOk();
+        $this->assertSame('Vlastní text {odkaz}', $event->fresh()->setting('invite_text'));
+    }
 }
