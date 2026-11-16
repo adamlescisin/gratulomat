@@ -38,6 +38,7 @@ class OfflinePackage
 
         $assets = public_path('assets/event');
         $zip->addFile("$assets/css/app.css", 'assets/css/app.css');
+        $zip->addFile("$assets/css/themes.css", 'assets/css/themes.css');
         $zip->addFile("$assets/js/kino.js", 'assets/js/kino.js');
         foreach (glob("$assets/fonts/*.woff2") as $f) {
             $zip->addFile($f, 'assets/fonts/'.basename($f));

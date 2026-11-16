@@ -74,7 +74,7 @@
         <p class="muted" style="margin:.4rem 0 .5rem">Vzhled stránky pro hosty <a href="{{ route('event.show', $event) }}" target="_blank" style="font-size:.85rem">náhled ↗</a></p>
         <div class="theme-modes" data-mode-pick></div>
         <div class="theme-grid" data-theme-pick></div>
-        <p class="muted" style="font-size:.8rem;margin:.4rem 0 0">Videoprezentace (Kino) má vždy filmový tmavý vzhled.</p>
+        <p class="muted" style="font-size:.8rem;margin:.4rem 0 0">Stejný vzhled má i videoprezentace (Kino) a offline balíček.</p>
       </div>
       <p class="muted" style="margin:.2rem 0 1rem;font-size:.85rem">Datum události nebo délku archivu vám změníme na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
       <label class="muted">Uzávěrka sběru<br><input class="input" type="datetime-local" name="collect_until" style="width:auto"></label>

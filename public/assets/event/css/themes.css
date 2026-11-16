@@ -23,6 +23,14 @@ body[data-theme] {
     radial-gradient(900px 500px at -10% 30%, rgba(var(--coral-rgb), .08), transparent 60%);
 }
 
+/* Kino (videoprezentace): plochy snímků podle šablony */
+body[data-theme] { --stage: var(--ink); --stage-2: var(--ink); --slide: var(--ink); --slide-2: var(--ink-3); }
+body[data-theme][data-mode="dark"] { --stage: #000; --stage-2: color-mix(in srgb, var(--ink) 60%, #000); --slide: var(--ink); --slide-2: color-mix(in srgb, var(--ink) 70%, #000); }
+body[data-theme].page-kino { background-image: none; }
+/* titulky přes fotky zůstávají světlé kvůli čitelnosti */
+body[data-theme] .s-photo .caption, body[data-theme] .s-photo .caption__by { color: #fff; }
+body[data-theme][data-mode="light"] .s-photo .caption__year { color: color-mix(in srgb, var(--gold) 55%, #fff); }
+
 /* společné pro světlé režimy */
 body[data-mode="light"] {
   color-scheme: light;
@@ -112,3 +120,10 @@ body[data-theme="brand"] .brand__mark { color: #fff; background: var(--coral); f
 body[data-theme="brand"] .card, body[data-theme="brand"] .kpi { box-shadow: 0 0 0 1px rgba(28, 22, 51, .08); }
 body[data-theme="brand"] a { color: var(--gold-2); }
 body[data-theme="brand"] a.brand, body[data-theme="brand"] a.btn--ghost { color: var(--paper); }
+
+/* Kino ve světlém režimu: ovládání a závěrečné titulky bez tmavých stínů */
+body[data-mode="light"] .kino__hud { background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 94%, transparent)); color: var(--paper); }
+body[data-mode="light"] .kino__controls button { background: rgba(var(--tint), .08); }
+body[data-mode="light"] .kino__controls button:hover { background: rgba(var(--tint), .16); }
+body[data-mode="light"] .kino__progress { background: rgba(var(--tint), .15); }
+body[data-mode="light"] :is(.s-finale__title, .s-finale__sub, .s-title__name) { text-shadow: none; }

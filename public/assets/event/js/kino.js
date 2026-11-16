@@ -365,7 +365,9 @@
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const c = h('canvas', { class: 'confetti' }); document.body.append(c);
     const ctx = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
-    const colors = ['#e3a94b', '#f6cf7d', '#e5674b', '#5fb3a4', '#f3ead8'];
+    // barvy konfet podle šablony (proměnné z themes.css)
+    const cs = getComputedStyle(document.body), v = n => cs.getPropertyValue(n).trim();
+    const colors = [v('--gold') || '#e3a94b', v('--gold-2') || '#f6cf7d', v('--coral') || '#e5674b', v('--teal') || '#5fb3a4', v('--paper') || '#f3ead8'];
     const ps = Array.from({ length: n }, () => ({ x: Math.random() * innerWidth, y: -20 - Math.random() * innerHeight * .5, vx: rnd(-1.5, 1.5), vy: rnd(2, 6),
       r: rnd(4, 9), c: colors[Math.floor(Math.random() * colors.length)], a: rnd(0, 6), va: rnd(-.15, .15) }));
     let f = 0;

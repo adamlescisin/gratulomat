@@ -27,7 +27,7 @@ class ThemesTest extends TestCase
         $this->get('/prihlaseni')->assertOk()->assertSee('data-theme="brand"', false);
         $this->actingAs(User::where('email', 'org@example.cz')->first());
         $this->get('/janinych-60/admin')->assertOk()->assertSee('data-theme="brand"', false);
-        $this->get('/janinych-60/kino')->assertOk()->assertDontSee('data-theme=', false);
+        $this->get('/janinych-60/kino')->assertOk()->assertSee('data-theme="vesela" data-mode="dark"', false);
     }
 
     public function test_legacy_kino_theme_is_exclusive_dark(): void
