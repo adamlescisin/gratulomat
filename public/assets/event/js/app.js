@@ -66,7 +66,15 @@
     countdown(); setInterval(countdown, 1000);
     if (!c.submissions_open) { $('[data-closed]').hidden = false; $('[data-composer]').hidden = true; }
     if (!PROMPTS.length) $('.prompt')?.remove();
-    if (c.kino_open) $('[data-kino-link]').hidden = false;
+    if (c.kino_open) {
+      $('[data-kino-link]').hidden = false;
+      // dole: odkaz a QR na výslednou prezentaci (automaticky po uzávěrce, pokud to organizátor povolil)
+      const box = $('[data-share]');
+      if (box) {
+        box.hidden = false;
+        if (window.qrcode) { const qr = qrcode(0, 'M'); qr.addData(new URL($('a', box).href, location.href).href); qr.make(); $('[data-share-qr]').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2, scalable: true }); }
+      }
+    }
     bindComposer();
   }
 

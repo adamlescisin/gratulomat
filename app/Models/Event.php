@@ -145,7 +145,13 @@ class Event extends Model
     {
         $from = $this->show?->public_from;
 
-        return $from !== null && now()->gte($from);
+        return ($from !== null && now()->gte($from)) || $this->autoShared();
+    }
+
+    /** Organizátor povolil automatické nasdílení prezentace hostům po uzávěrce sběru. */
+    public function autoShared(): bool
+    {
+        return (bool) $this->setting('auto_share') && ($this->collect_until ?? $this->event_date)?->isPast();
     }
 
     /** Příspěvky ostatních: zapečetěné do data události; u smutečního rozloučení vidět hned. */

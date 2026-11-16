@@ -457,3 +457,10 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .theme-card__sw b { position: absolute; left: 12px; top: 10px; font: 700 1.5rem/1 var(--serif); }
 .theme-card__sw i { position: absolute; right: 12px; bottom: 12px; width: 26px; height: 26px; border-radius: 50%; }
 .theme-card small { font-size: .78rem; line-height: 1.35; color: var(--paper-dim); }
+
+/* Stránka pro hosty: sdílení hotové prezentace */
+.share-show { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin: 2rem 0; }
+.share-show__text { flex: 1 1 280px; }
+.share-show__text .btn { margin-top: .6rem; }
+.share-show__qr { flex: 0 0 150px; width: 150px; padding: 8px; background: #fff; border-radius: 14px; }
+.share-show__qr svg { display: block; width: 100%; height: auto; }

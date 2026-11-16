@@ -46,6 +46,8 @@ class EventAdminController extends Controller
             'show' => [
                 'public_from' => $event->show?->public_from?->toIso8601String(),
                 'is_public' => $event->showPublic(),
+                'auto_share' => (bool) $event->setting('auto_share'),
+                'auto_share_at' => ($event->collect_until ?? $event->event_date)?->toIso8601String(),
                 'game_enabled' => (bool) $event->show?->game_enabled,
             ],
             'households' => $event->households()->orderBy('label')->get()->map(fn (Household $h) => [
@@ -170,6 +172,11 @@ class EventAdminController extends Controller
             $data['game_enabled'] = $request->boolean('game_enabled') && EventRules::has($event, 'game');
         }
         $show->update($data);
+        // „Zavřít pro hosty“ vypne i automatické nasdílení po uzávěrce
+        if (array_key_exists('public_from', $data) && $data['public_from'] === null && $event->setting('auto_share')) {
+            $event->settings = [...($event->settings ?? []), 'auto_share' => false];
+            $event->save();
+        }
 
         return response()->json(['ok' => true]);
     }
@@ -182,6 +189,7 @@ class EventAdminController extends Controller
             'title' => 'sometimes|required|string|max:140',
             'theme' => 'sometimes|string|in:'.implode(',', array_keys(Themes::ALL)),
             'mode' => 'sometimes|in:light,dark',
+            'auto_share' => 'sometimes|boolean',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
         if (isset($v['title'])) {
@@ -202,6 +210,9 @@ class EventAdminController extends Controller
         $settings = $event->settings ?? [];
         if (isset($mode)) {
             $settings['mode'] = $mode;
+        }
+        if (array_key_exists('auto_share', $v)) {
+            $settings['auto_share'] = (bool) $v['auto_share'];
         }
         if (array_key_exists('invite_text', $v)) {
             $settings['invite_text'] = $v['invite_text'];

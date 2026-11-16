@@ -130,7 +130,16 @@
   </section>
   <section class="teaser" data-teaser hidden>
     <div class="teaser__envelope" aria-hidden="true">✉️</div>
-    <p>{{ __('guest.teaser') }}</p>
+    <p>{{ __('guest.teaser', ['deadline' => ($event->collect_until ?? $event->event_date)?->timezone('Europe/Prague')->locale(app()->getLocale())->isoFormat('LL')]) }}@unless ($funeral) {{ __('guest.teaser_surprise') }}@endunless</p>
+  </section>
+
+  <section class="share-show card" data-share hidden>
+    <div class="share-show__text">
+      <h2 class="h2">{{ $funeral ? __('guest.share_title_funeral') : __('guest.share_title') }}</h2>
+      <p class="muted">{{ __('guest.share_text') }}</p>
+      <a class="btn btn--gold" href="{{ route('event.kino', $event) }}">{{ __('guest.share_button') }}</a>
+    </div>
+    <div class="share-show__qr" data-share-qr aria-hidden="true"></div>
   </section>
 
   <footer class="foot">
@@ -155,5 +164,6 @@
 ];
 @endphp
 <script>window.GM = {!! json_encode($gm, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!};</script>
+<script src="{{ asset('assets/event/vendor/qrcode.js') }}" defer></script>
 <script src="{{ asset('assets/event/js/app.js') }}?v={{ @filemtime(public_path('assets/event/js/app.js')) }}" defer></script>
 @endsection
