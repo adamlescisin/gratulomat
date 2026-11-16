@@ -10,7 +10,7 @@
 <header class="wz-head"><div class="in"><a href="/" aria-label="Gratulomat – úvod" style="display:flex">@include('partials.logo-ink', ['width' => 170])</a></div></header>
 <main>
   <div class="done-card" data-done data-status="{{ $order->status }}" data-status-url="{{ route('wizard.status', $order) }}">
-    <p class="kick">Objednávka {{ $order->number }}@if ($order->is_test) · test@endif</p>
+    <p class="kick">Objednávka {{ $order->number }}{{ $order->is_test ? " · test" : "" }}</p>
     @if ($order->status === 'fulfilled')
       <h1 class="display">Hotovo! 🎉</h1>
       <p>Událost <strong>{{ $order->config['name'] }}</strong> je připravená. Na <strong>{{ $order->email }}</strong> jsme poslali odkaz do administrace – tam přidáte gratulanty a rozešlete pozvánky.</p>
