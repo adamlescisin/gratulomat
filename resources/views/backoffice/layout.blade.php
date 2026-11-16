@@ -14,6 +14,7 @@
     <a href="{{ route('backoffice') }}" @if (request()->routeIs('backoffice')) aria-current="page" @endif>Přehled</a>
     <a href="{{ route('backoffice.events') }}" @if (request()->routeIs('backoffice.events')) aria-current="page" @endif>Události</a>
     <a href="{{ route('backoffice.waitlist') }}" @if (request()->routeIs('backoffice.waitlist')) aria-current="page" @endif>Čekací listina</a>
+    <a href="{{ route('backoffice.discounts') }}" @if (request()->routeIs('backoffice.discounts')) aria-current="page" @endif>Slevové kódy</a>
     <a href="{{ route('backoffice.mode') }}" @if (request()->routeIs('backoffice.mode')) aria-current="page" @endif>Režim webu</a>
     <span class="spacer"></span>
     <a href="/" target="_blank">Otevřít web ↗</a>

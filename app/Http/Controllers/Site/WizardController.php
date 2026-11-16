@@ -6,10 +6,10 @@ use App\Domain\Orders\OrderService;
 use App\Domain\Orders\SlugService;
 use App\Domain\Orders\StripeGateway;
 use App\Domain\Orders\WizardConfig;
-use App\Domain\Pricing\PricingService;
 use App\Http\Controllers\Controller;
 use App\Mail\NewOrderNotice;
 use App\Mail\VipInquiryReceived;
+use App\Models\DiscountCode;
 use App\Models\Order;
 use App\Models\Setting;
 use Illuminate\Http\JsonResponse;
@@ -27,6 +27,7 @@ class WizardController extends Controller
             'preset' => in_array($request->query('tarif'), ['party', 'premiera', 'vip'], true) ? $request->query('tarif') : null,
             'cancelled' => $request->boolean('zruseno'),
             'testMode' => $this->isTest($request),
+            'operator' => (bool) $request->user()?->isOperator(),
         ]);
     }
 
@@ -43,20 +44,25 @@ class WizardController extends Controller
         ]);
     }
 
-    public function quote(Request $request, PricingService $pricing): JsonResponse
+    public function quote(Request $request, OrderService $orders): JsonResponse
     {
         $cfg = WizardConfig::fromRequest((array) $request->input('config', []));
-        $q = $pricing->quote($cfg->eventConfig());
+        [$q, $discount] = $orders->quote($cfg);
+        $code = $cfg->data['discount'];
 
-        return response()->json([...$q->toArray(), 'plan_name' => config("gratulomat.plans.{$q->plan}.name")]);
+        return response()->json([...$q->toArray(), 'plan_name' => config("gratulomat.plans.{$q->plan}.name"),
+            'discount' => $code === '' ? null : ['code' => $code, 'valid' => (bool) $discount, 'percent' => $discount?->percent,
+                'message' => $discount ? "Sleva {$discount->percent} % je uplatněná." : ($q->isInquiry ? 'U VIP poptávky slevu domluvíme individuálně.' : 'Tento slevový kód neplatí nebo už byl vyčerpán.')],
+        ]);
     }
 
     public function submit(Request $request, OrderService $orders, StripeGateway $stripe)
     {
         $cfg = WizardConfig::fromRequest((array) json_decode((string) $request->input('config'), true));
+        $manual = $request->boolean('manual') && $request->user()?->isOperator();
         $v = $request->validate([
             'email' => 'required|email:rfc|max:191',
-            'terms' => 'accepted',
+            'terms' => $manual ? 'nullable' : 'accepted',
             'company' => 'nullable|boolean',
             'company_name' => 'required_if:company,1|nullable|string|max:160',
             'company_ico' => ['required_if:company,1', 'nullable', 'regex:/^\d{8}$/'],
@@ -74,15 +80,26 @@ class WizardController extends Controller
         if ($errors = $cfg->errors()) {
             return back()->withErrors($errors)->withInput();
         }
+        if ($cfg->data['discount'] !== '' && ! DiscountCode::usable($cfg->data['discount'])) {
+            return back()->withErrors(['discount' => 'Slevový kód neplatí nebo už byl vyčerpán.'])->withInput();
+        }
         $company = $request->boolean('company') ? [
             'name' => $v['company_name'], 'ico' => $v['company_ico'], 'dic' => isset($v['company_dic']) ? strtoupper($v['company_dic']) : null,
             'street' => $v['company_street'], 'city' => $v['company_city'], 'zip' => preg_replace('/\s/', '', $v['company_zip']),
         ] : null;
 
         try {
-            $order = $orders->create($cfg, $v['email'], $company, $this->isTest($request));
+            $order = $orders->create($cfg, $v['email'], $company, $this->isTest($request), $manual);
         } catch (Throwable $e) {
             return back()->withErrors(['slug' => $e->getMessage()])->withInput();
+        }
+
+        // Provozovatel: ruční založení bez platby a bez dokladu
+        if ($manual) {
+            $orders->fulfill($order);
+            Log::info('Událost založena ručně provozovatelem', ['order' => $order->number, 'by' => $request->user()->email]);
+
+            return redirect()->route('wizard.done', ['objednavka' => $order->id]);
         }
 
         // VIP: poptávka bez platby

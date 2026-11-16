@@ -60,6 +60,10 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::get('/cekaci-listina', 'waitlist')->name('backoffice.waitlist');
     Route::get('/cekaci-listina.csv', 'waitlistCsv')->name('backoffice.waitlist.csv');
     Route::delete('/cekaci-listina/{entry}', 'waitlistDelete')->name('backoffice.waitlist.delete');
+    Route::get('/slevy', 'discounts')->name('backoffice.discounts');
+    Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');
+    Route::post('/slevy/{discount}/prepnout', 'discountToggle')->name('backoffice.discounts.toggle');
+    Route::delete('/slevy/{discount}', 'discountDelete')->name('backoffice.discounts.delete');
     Route::get('/rezim', 'mode')->name('backoffice.mode');
     Route::post('/rezim', 'setMode');
     Route::post('/rezim/kontrola', 'setChecklist')->name('backoffice.checklist');

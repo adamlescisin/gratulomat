@@ -6,6 +6,7 @@ use App\Domain\Pricing\PricingService;
 use App\Mail\EventReady;
 use App\Mail\FreeEventConfirm;
 use App\Mail\NewOrderNotice;
+use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Invoice;
 use App\Models\Order;
@@ -23,27 +24,48 @@ class OrderService
 {
     public function __construct(private PricingService $pricing) {}
 
-    public function create(WizardConfig $cfg, string $email, ?array $company, bool $isTest): Order
+    /** Cena objednávky včetně případné slevy (jediný zdroj pravdy pro průvodce i objednávku). */
+    public function quote(WizardConfig $cfg): array
     {
         $quote = $this->pricing->quote($cfg->eventConfig());
+        $discount = DiscountCode::usable($cfg->data['discount'] ?? null);
+        if ($discount) {
+            $quote = $this->pricing->applyDiscount($quote, $discount->percent, $discount->code);
+        }
 
-        return DB::transaction(function () use ($cfg, $email, $company, $isTest, $quote) {
+        return [$quote, $quote->isInquiry ? null : $discount];
+    }
+
+    /**
+     * @param  bool  $manual  provozovatel zakládá ručně bez platby (i VIP) – bez Stripe a bez dokladu
+     */
+    public function create(WizardConfig $cfg, string $email, ?array $company, bool $isTest, bool $manual = false): Order
+    {
+        [$quote, $discount] = $this->quote($cfg);
+
+        return DB::transaction(function () use ($cfg, $email, $company, $isTest, $quote, $discount, $manual) {
             if (SlugService::status($cfg->data['slug']) !== 'ok') {
                 throw new RuntimeException('Tahle adresa už je obsazená. Zvolte prosím jinou.');
             }
 
+            $inquiry = $quote->isInquiry && ! $manual;
+            $discountHalere = (int) -collect($quote->lines)->where('code', 'discount')->sum('total');
+
             return Order::create([
                 'number' => Order::nextNumber($isTest),
-                'kind' => $quote->isInquiry ? 'vip' : 'initial',
-                'status' => $quote->isInquiry ? 'inquiry' : 'pending',
+                'kind' => $manual ? 'manual' : ($quote->isInquiry ? 'vip' : 'initial'),
+                'status' => $inquiry ? 'inquiry' : 'pending',
                 'email' => mb_strtolower($email),
                 'config' => $cfg->data,
                 'company' => $company,
                 'slug' => $cfg->data['slug'],
                 'plan' => $quote->plan,
                 'lines' => $quote->lines,
-                'total_halere' => $quote->totalHalere,
-                'vat_halere' => $quote->vatHalere,
+                'total_halere' => $quote->isInquiry && $manual ? 0 : $quote->totalHalere,
+                'vat_halere' => $quote->isInquiry && $manual ? 0 : $quote->vatHalere,
+                'discount_code' => $discount?->code,
+                'discount_percent' => $discount?->percent,
+                'discount_halere' => $discountHalere,
                 'is_test' => $isTest,
                 'expires_at' => now()->addMinutes($quote->totalHalere === 0 ? 60 * 24 : 30),
             ]);
@@ -82,11 +104,14 @@ class OrderService
 
             $order->update([
                 'status' => 'fulfilled', 'event_id' => $event->id,
-                'paid_at' => $order->total_halere > 0 ? now() : null,
+                'paid_at' => $order->total_halere > 0 && $order->kind !== 'manual' ? now() : null,
                 'stripe_payment_intent' => $paymentIntent ?? $order->stripe_payment_intent,
             ]);
 
-            if ($order->total_halere > 0 && ! $order->is_test) {
+            if ($order->discount_code) {
+                DiscountCode::where('code', $order->discount_code)->increment('used_count');
+            }
+            if ($order->total_halere > 0 && ! $order->is_test && $order->kind !== 'manual') {
                 $this->queueInvoice($order);
             }
 

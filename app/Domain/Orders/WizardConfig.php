@@ -3,6 +3,7 @@
 namespace App\Domain\Orders;
 
 use App\Domain\Pricing\EventConfig;
+use App\Models\DiscountCode;
 use Illuminate\Support\Carbon;
 
 /**
@@ -63,6 +64,7 @@ class WizardConfig
             'archive' => in_array($archive, self::ARCHIVE_MONTHS, true) ? $archive : 1,
             'book' => $bool('book'),
             'archExt' => $bool('archExt'),
+            'discount' => mb_substr(DiscountCode::normalize($in['discount'] ?? ''), 0, 40),
         ];
         foreach (array_keys(self::FEATURE_MAP) as $k) {
             $data[$k] = $bool($k);

@@ -102,7 +102,15 @@
         <input class="inp" name="company_city" placeholder="Obec" value="{{ old('company_city') }}">
         <input class="inp" name="company_zip" placeholder="PSČ" inputmode="numeric" maxlength="6" value="{{ old('company_zip') }}">
       </div>
-      <label class="chk"><input type="checkbox" name="terms" value="1" data-terms @checked(old('terms'))> <span>Souhlasím s <a href="{{ route('terms') }}" target="_blank">obchodními podmínkami</a> a beru na vědomí <a href="{{ route('privacy') }}" target="_blank">zásady ochrany osobních údajů</a></span></label>
+      <div class="fld">
+        <label for="w-discount">Slevový kód <span class="hint" style="font-weight:400">(nepovinné)</span></label>
+        <div class="discount"><input class="inp" id="w-discount" data-k="discount" autocomplete="off" placeholder="např. JARO20"><button type="button" class="b-line" data-discount-apply>Použít</button></div>
+        <span class="msg" data-discount-msg>@error('discount'){{ $message }}@enderror</span>
+      </div>
+      @if ($operator)
+      <label class="chk manual"><input type="checkbox" name="manual" value="1" data-manual @checked(old('manual'))> <span><strong>Založit ručně bez platby</strong> (provozovatel) – událost se založí hned, organizátorovi přijde odkaz do administrace. Bez platby a bez dokladu.</span></label>
+      @endif
+      <label class="chk" data-terms-row><input type="checkbox" name="terms" value="1" data-terms @checked(old('terms'))> <span>Souhlasím s <a href="{{ route('terms') }}" target="_blank">obchodními podmínkami</a> a beru na vědomí <a href="{{ route('privacy') }}" target="_blank">zásady ochrany osobních údajů</a></span></label>
     </section>
 
     <div class="nav">
@@ -128,6 +136,7 @@
 <script>
 window.GMW = {!! json_encode([
     'preset' => $preset,
+    'operator' => $operator,
     'old' => old('config') ? json_decode(old('config'), true) : null,
     'plans' => collect(config('gratulomat.plans'))->map(fn ($p) => ['name' => $p['name'], 'guests' => $p['guests']]),
     'urls' => ['slug' => url('/api/slug-check'), 'quote' => url('/api/quote')],

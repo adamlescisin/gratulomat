@@ -26,7 +26,7 @@
     step: 0, maxStep: 0, name: '', slug: '', slugTouched: false, occasion: 'birthday', date: today.toISOString().slice(0, 10),
     recipient: 'person', recName: '', startYear: '', guests: 5, importList: false, anonLink: false, langs: false,
     theme: 'zaklad', mode: 'light', voice: false, offline: false, nowm: false, video: false, game: false, mp4: false, reminders: false,
-    collect: 14, archive: 1, book: false, archExt: false, vipSetup: false, vipEdit: false,
+    collect: 14, archive: 1, discount: '', book: false, archExt: false, vipSetup: false, vipEdit: false,
   };
   try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) S = { ...S, ...saved }; } catch {}
   if (W.old) S = { ...S, ...W.old, step: 6, maxStep: 6 };
@@ -36,6 +36,7 @@
   let slugState = { status: null, suggestions: [] }, quote = null;
 
   const funeral = () => S.occasion === 'funeral';
+  const manual = () => !!(W.operator && $('[data-manual]')?.checked);
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch {} };
   const slugify = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
   const set = (patch, opts = {}) => { S = { ...S, ...patch }; save(); render(); if (opts.slug) checkSlug(); if (opts.quote !== false) requestQuote(); };
@@ -150,8 +151,11 @@
     const q = quote;
     $('[data-tier]').textContent = q ? q.plan_name : '…';
     $('[data-total]').textContent = q ? (q.inquiry ? 'od ' + kc(q.total) : kc(q.total)) : '';
-    $('[data-lines]').innerHTML = q ? (q.inquiry ? `<div><span>Tarif VIP</span><b>od ${kc(q.total)}</b></div>` : q.lines.map(l => `<div><span>${esc(l.name)}${l.qty > 1 ? ' × ' + l.qty : ''}</span><b>${kc(l.total / 100)}</b></div>`).join('')) : '';
+    $('[data-lines]').innerHTML = q ? (q.inquiry ? `<div><span>Tarif VIP</span><b>od ${kc(q.total)}</b></div>` : q.lines.map(l => `<div class="${l.code === 'discount' ? 'disc' : ''}"><span>${esc(l.name)}${l.qty > 1 ? ' × ' + l.qty : ''}</span><b>${l.total < 0 ? '−' + kc(-l.total / 100) : kc(l.total / 100)}</b></div>`).join('')) : '';
     $('[data-reasons]').innerHTML = q ? q.reasons.map(r => `<div>• ${esc(r)}</div>`).join('') : '';
+    const dm = $('[data-discount-msg]');
+    if (q && q.discount) { dm.textContent = q.discount.message; dm.className = 'msg ' + (q.discount.valid ? 'ok' : 'bad'); }
+    else if (q && !S.discount) { dm.textContent = ''; }
     $('[data-meta-guests]').textContent = S.guests;
     $('[data-meta-cap]').textContent = q ? q.guest_limit : '';
     $('[data-meta-collect]').textContent = COLLECT.find(c => c[0] === S.collect)[1];
@@ -160,7 +164,7 @@
   function valid(i) {
     if (i === 0) return S.name.trim().length > 1 && slugState.status === 'ok' && !!S.date;
     if (i === 1) return S.recName.trim().length > 0 && (!S.startYear || /^(19|20)\d\d$/.test(S.startYear));
-    if (i === 6) return /.+@.+\..+/.test($('#w-email').value) && $('[data-terms]').checked;
+    if (i === 6) return /.+@.+\..+/.test($('#w-email').value) && (manual() || $('[data-terms]').checked) && !(quote && quote.discount && !quote.discount.valid);
     return true;
   }
   function renderNav() {
@@ -168,8 +172,10 @@
     $('[data-back]').hidden = S.step === 0;
     const btn = $('[data-next]');
     btn.disabled = !ok;
-    btn.textContent = !last ? 'Pokračovat →' : !q ? 'Počítám cenu…' : q.inquiry ? 'Odeslat VIP poptávku' : q.total === 0 ? 'Založit událost zdarma' : `Zaplatit ${kc(q.total)} přes Stripe`;
-    $('[data-block]').textContent = ok ? '' : S.step === 0 ? 'Doplňte název, volnou adresu a datum' : S.step === 1 ? 'Doplňte jméno (rok ve tvaru 1967)' : S.step === 6 ? 'Doplňte e-mail a souhlas' : '';
+    const tr = $('[data-terms-row]'); if (tr) tr.hidden = manual();
+    $('#w-email').previousElementSibling.textContent = manual() ? 'E-mail organizátora' : 'Váš e-mail';
+    btn.textContent = !last ? 'Pokračovat →' : manual() ? 'Založit ručně bez platby' : !q ? 'Počítám cenu…' : q.inquiry ? 'Odeslat VIP poptávku' : q.total === 0 ? 'Založit událost zdarma' : `Zaplatit ${kc(q.total)} přes Stripe`;
+    $('[data-block]').textContent = ok ? '' : S.step === 0 ? 'Doplňte název, volnou adresu a datum' : S.step === 1 ? 'Doplňte jméno (rok ve tvaru 1967)' : S.step === 6 ? (quote && quote.discount && !quote.discount.valid ? 'Opravte nebo smažte slevový kód' : manual() ? 'Doplňte e-mail organizátora' : 'Doplňte e-mail a souhlas') : '';
   }
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -180,12 +186,13 @@
     if (k === 'name') { const p = { name: e.target.value }; if (!S.slugTouched) p.slug = slugify(e.target.value); set(p, { slug: !S.slugTouched }); return; }
     if (k === 'slug') { const v = slugify(e.target.value); e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''); set({ slug: v, slugTouched: true }, { slug: true, quote: false }); return; }
     if (k === 'guests') { set({ guests: parseInt(e.target.value, 10) || 1 }); return; }
+    if (k === 'discount') { S.discount = e.target.value.toUpperCase().replace(/\s+/g, ''); save(); if (!S.discount) { requestQuote(); } return; }
     set({ [k]: e.target.value }, { quote: k !== 'recName' && k !== 'startYear' });
   });
   document.addEventListener('change', e => {
     if (e.target.dataset.tog) set({ [e.target.dataset.tog]: e.target.checked });
     if (e.target.matches('[data-company]')) $('[data-company-fields]').hidden = !e.target.checked;
-    if (e.target.matches('[data-terms], [data-company]')) renderNav();
+    if (e.target.matches('[data-terms], [data-company], [data-manual]')) renderNav();
   });
   document.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -203,6 +210,7 @@
       set(p);
     }
     if (b.dataset.theme) set({ theme: b.dataset.theme });
+    if (b.matches('[data-discount-apply]')) requestQuote();
     if (b.dataset.sug) set({ slug: b.dataset.sug, slugTouched: true }, { slug: true, quote: false });
     if (b.matches('[data-back]')) { S.step = Math.max(0, S.step - 1); save(); render(); }
     if (b.matches('[data-next]')) {
@@ -214,6 +222,7 @@
     }
   });
 
+  document.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.matches('#w-discount')) { e.preventDefault(); requestQuote(); } });
   render();
   if (S.slug) checkSlug();
   requestQuote();

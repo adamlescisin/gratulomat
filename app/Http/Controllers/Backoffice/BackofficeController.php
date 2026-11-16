@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backoffice;
 
 use App\Http\Controllers\Controller;
+use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Household;
 use App\Models\Media;
@@ -50,6 +51,49 @@ class BackofficeController extends Controller
             'events' => Event::withCount(['households', 'memories'])->with('organizers')->orderBy('event_date')->get(),
             'mode' => Setting::siteMode(),
         ]);
+    }
+
+    public function discounts()
+    {
+        return view('backoffice.discounts', ['codes' => DiscountCode::latest()->get(), 'mode' => Setting::siteMode()]);
+    }
+
+    public function discountStore(Request $request)
+    {
+        $request->merge(['code' => DiscountCode::normalize($request->input('code'))]);
+        $v = $request->validate([
+            'code' => ['required', 'regex:/^[A-Z0-9_-]{3,40}$/', 'unique:discount_codes,code'],
+            'percent' => 'required|integer|min:1|max:100',
+            'max_uses' => 'nullable|integer|min:1',
+            'valid_until' => 'nullable|date|after_or_equal:today',
+            'note' => 'nullable|string|max:200',
+        ], [
+            'code.regex' => 'Kód: 3–40 znaků, písmena bez diakritiky, číslice, - a _.',
+            'code.unique' => 'Tento kód už existuje.',
+            'percent.*' => 'Sleva musí být 1–100 %.',
+            'valid_until.after_or_equal' => 'Platnost nemůže končit v minulosti.',
+        ]);
+        DiscountCode::create($v);
+        Log::info('Slevový kód vytvořen', ['code' => $v['code'], 'percent' => $v['percent'], 'by' => $request->user()->email]);
+
+        return redirect()->route('backoffice.discounts')->with('ok', "Kód {$v['code']} (−{$v['percent']} %) je připravený.");
+    }
+
+    public function discountToggle(DiscountCode $discount)
+    {
+        $discount->update(['active' => ! $discount->active]);
+
+        return back()->with('ok', "Kód {$discount->code} je ".($discount->active ? 'zapnutý.' : 'vypnutý.'));
+    }
+
+    public function discountDelete(DiscountCode $discount)
+    {
+        if ($discount->used_count > 0) {
+            return back()->with('ok', "Kód {$discount->code} už byl použit – můžete ho jen vypnout.");
+        }
+        $discount->delete();
+
+        return back()->with('ok', "Kód {$discount->code} je smazaný.");
     }
 
     public function waitlist()

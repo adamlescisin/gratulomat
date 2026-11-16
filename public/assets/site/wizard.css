@@ -82,3 +82,7 @@ input[type=range] { width: 100%; accent-color: var(--coral); }
 .done-card p { margin: 0; font-size: 17px; line-height: 1.55; color: #57516A; }
 .wz [hidden] { display: none !important; }
 .wz [data-total] { white-space: nowrap; }
+.wz .discount { display: flex; gap: 10px; }
+.wz .discount .inp { flex: 1; text-transform: uppercase; }
+.wz .chk.manual { background: #FFF3D6; border-radius: 14px; padding: 12px 14px; }
+.wz .lines .disc b, .wz .lines .disc span { color: #7BE0C3; }

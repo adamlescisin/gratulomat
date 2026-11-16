@@ -30,7 +30,18 @@ class StripeGateway
     /** @return array{id: string, url: string} */
     public function createCheckout(Order $order): array
     {
-        $session = $this->client($order->is_test)->checkout->sessions->create([
+        $client = $this->client($order->is_test);
+        $items = array_values(array_filter($order->lines, fn ($l) => $l['total'] > 0));
+        $discounts = [];
+        if ($order->discount_halere > 0) {
+            // Stripe nepovoluje záporné položky → sleva jako jednorázový kupon na tuto objednávku
+            $coupon = $client->coupons->create([
+                'amount_off' => $order->discount_halere, 'currency' => 'czk', 'duration' => 'once', 'max_redemptions' => 1,
+                'name' => "Sleva {$order->discount_code} ({$order->discount_percent} %)",
+            ]);
+            $discounts = [['coupon' => $coupon->id]];
+        }
+        $params = [
             'mode' => 'payment',
             'currency' => 'czk',
             'customer_email' => $order->email,
@@ -40,13 +51,17 @@ class StripeGateway
             'line_items' => array_map(fn ($l) => [
                 'quantity' => $l['qty'],
                 'price_data' => ['currency' => 'czk', 'unit_amount' => $l['unit_price'], 'product_data' => ['name' => $l['name']]],
-            ], $order->lines),
+            ], $items),
             'locale' => 'cs',
             'success_url' => route('wizard.done').'?objednavka='.$order->id,
             'cancel_url' => route('wizard').'?zruseno=1',
             // Stripe vyžaduje aspoň 30 minut; rezerva kvůli rozdílu hodin
             'expires_at' => now()->addMinutes(35)->timestamp,
-        ]);
+        ];
+        if ($discounts) {
+            $params['discounts'] = $discounts;
+        }
+        $session = $client->checkout->sessions->create($params);
 
         return ['id' => $session->id, 'url' => $session->url];
     }

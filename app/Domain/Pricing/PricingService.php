@@ -178,6 +178,24 @@ final class PricingService
         return new Quote('vip', [], $vip['price'] * 100, 0, 0, $vip['guests'], $reasons, true);
     }
 
+    /** Procentní sleva z celé objednávky jako záporná položka; výsledná cena na celé koruny. */
+    public function applyDiscount(Quote $q, int $percent, string $code): Quote
+    {
+        if ($q->isInquiry || $q->totalHalere === 0 || $percent < 1) {
+            return $q;
+        }
+        $percent = min(100, $percent);
+        $after = (int) round($q->totalHalere * (100 - $percent) / 100 / 100) * 100;
+        $discount = $q->totalHalere - $after;
+        if ($discount <= 0) {
+            return $q;
+        }
+        $lines = [...$q->lines, ['code' => 'discount', 'name' => "Sleva {$code} ({$percent} %)", 'qty' => 1, 'unit_price' => -$discount, 'total' => -$discount]];
+        [$base, $vat] = $this->splitVat($lines);
+
+        return new Quote($q->plan, $lines, $after, $base, $vat, $q->guestLimit, $q->reasons, false);
+    }
+
     private function line(string $code, string $name, int $qty, int $unitCzk): array
     {
         return ['code' => $code, 'name' => $name, 'qty' => $qty, 'unit_price' => $unitCzk * 100, 'total' => $qty * $unitCzk * 100];
