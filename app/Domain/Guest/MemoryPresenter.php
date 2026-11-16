@@ -80,7 +80,7 @@ class MemoryPresenter
             'birth_year' => $event->start_year ?? $event->event_date->year,
             'age' => $event->age() ?? 0,
             'party_date' => $event->event_date->toIso8601String(),
-            'finale_title' => $event->setting('finale_title'),
+            'finale_title' => $event->finaleTitle(),
             'music' => $event->show?->music,
             'game' => (bool) $event->show?->game_enabled && ! $event->isFuneral(),
             'media_base' => $mediaBase,

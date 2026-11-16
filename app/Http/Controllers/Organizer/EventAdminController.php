@@ -39,6 +39,7 @@ class EventAdminController extends Controller
                 'game_available' => EventRules::has($event, 'game'),
                 'offline_available' => EventRules::has($event, 'offline'),
                 'import_available' => EventRules::has($event, 'import'),
+                'finale_title' => $event->setting('finale_title'), 'finale_default' => $event->defaultFinaleTitle(),
                 'theme' => $event->themeKey(), 'mode' => $event->themeMode(), 'themes' => Themes::forEvent($event),
                 'anon_available' => EventRules::has($event, 'anonymous_link'),
                 'anon_link' => EventRules::has($event, 'anonymous_link') && $event->setting('anon_token') ? route('event.anon', [$event, $event->setting('anon_token')]) : null,
@@ -192,6 +193,7 @@ class EventAdminController extends Controller
             'theme' => 'sometimes|string|in:'.implode(',', array_keys(Themes::ALL)),
             'mode' => 'sometimes|in:light,dark',
             'auto_share' => 'sometimes|boolean',
+            'finale_title' => 'sometimes|nullable|string|max:120',
             'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
@@ -216,6 +218,10 @@ class EventAdminController extends Controller
         }
         if (array_key_exists('wall_open_at', $v)) {
             $settings['wall_open_at'] = $v['wall_open_at'] ? Carbon::parse($v['wall_open_at'], 'Europe/Prague')->utc()->toIso8601String() : null;
+        }
+        if (array_key_exists('finale_title', $v)) {
+            $t = trim((string) $v['finale_title']);
+            $settings['finale_title'] = $t === '' || $t === $event->defaultFinaleTitle() ? null : $t;
         }
         if (array_key_exists('auto_share', $v)) {
             $settings['auto_share'] = (bool) $v['auto_share'];

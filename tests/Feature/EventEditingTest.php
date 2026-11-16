@@ -100,4 +100,23 @@ class EventEditingTest extends TestCase
         $this->postJson('/frantisek-40/admin/api/settings', ['invite_text' => 'Vlastní text {odkaz}'])->assertOk();
         $this->assertSame('Vlastní text {odkaz}', $event->fresh()->setting('invite_text'));
     }
+
+    public function test_finale_title_defaults_by_event_type(): void
+    {
+        [, $event] = $this->setupEvent();
+        $this->assertSame('Všechno nejlepší, Františku!', $event->finaleTitle());
+        $event->update(['type' => 'firemni-jubileum']);
+        $this->assertSame('Děkujeme, že jste součástí příběhu', $event->fresh()->finaleTitle());
+        $event->update(['type' => 'smutecni']);
+        $this->assertSame('Navždy v našich vzpomínkách', $event->fresh()->finaleTitle());
+        $event->update(['type' => 'svatba']);
+        $this->assertSame('Ať vám to spolu klape!', $event->fresh()->finaleTitle());
+
+        $this->actingAs(User::where('email', 'adam.lescisin@seznam.c.z')->first());
+        $this->postJson('/frantisek-40/admin/api/settings', ['finale_title' => 'Na zdraví novomanželů!'])->assertOk();
+        $this->assertSame('Na zdraví novomanželů!', $event->fresh()->finaleTitle());
+        $this->getJson('/frantisek-40/api/show')->assertOk()->assertJsonFragment(['finale_title' => 'Na zdraví novomanželů!']);
+        $this->postJson('/frantisek-40/admin/api/settings', ['finale_title' => ''])->assertOk();
+        $this->assertSame('Ať vám to spolu klape!', $event->fresh()->finaleTitle());
+    }
 }

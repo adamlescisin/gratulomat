@@ -10,6 +10,13 @@ return [
         'default' => ':go s námi vytvořit příběh vzpomínek a přání pro událost <em>:title</em>.',
         'smutecni' => 'zavzpomínejte s námi na <em>:acc</em>.',
     ],
+    'finale' => [
+        'narozeniny' => 'Všechno nejlepší, :voc!',
+        'svatba' => 'Ať vám to spolu klape!',
+        'vyroci-svatby' => 'Ať vám to spolu klape!',
+        'smutecni' => 'Navždy v našich vzpomínkách',
+        'default' => 'Děkujeme, že jste součástí příběhu',
+    ],
     'go_one' => 'pojď',
     'create_one' => '',
     'create_many' => '',

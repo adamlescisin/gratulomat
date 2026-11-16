@@ -77,6 +77,8 @@
         <p class="muted" style="font-size:.8rem;margin:.4rem 0 0">Stejný vzhled má i videoprezentace (Kino) a offline balíček.</p>
       </div>
       <p class="muted" style="margin:.2rem 0 1rem;font-size:.85rem">Datum události nebo délku archivu vám změníme na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
+      <label class="muted">Závěrečný titulek videoprezentace<br><input class="input" name="finale_title" maxlength="120">
+        <span style="display:block;font-size:.8rem">Prázdné = výchozí podle typu události.</span></label>
       <label class="muted">Uzávěrka sběru<br><input class="input" type="datetime-local" name="collect_until" style="width:auto"></label>
       <label class="muted">Odpečetit příspěvky hostům<br><input class="input" type="datetime-local" name="wall_open_at" style="width:auto">
         <span style="display:block;font-size:.8rem">Do té doby každý host vidí jen své příspěvky. Prázdné = při uzávěrce sběru.</span></label>

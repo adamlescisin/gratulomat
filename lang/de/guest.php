@@ -8,6 +8,13 @@ return [
         'default' => ':go und :create mit uns eine Geschichte aus Erinnerungen und Wünschen für <em>:title</em>.',
         'smutecni' => 'teilt eure Erinnerungen an <em>:name</em> mit uns.',
     ],
+    'finale' => [
+        'narozeniny' => 'Alles Gute, :name!',
+        'svatba' => 'Auf euch beide!',
+        'vyroci-svatby' => 'Auf euch beide!',
+        'smutecni' => 'Für immer in unseren Erinnerungen',
+        'default' => 'Danke, dass ihr Teil der Geschichte seid',
+    ],
     'go_one' => 'komm',
     'go_many' => 'kommt',
     'create_one' => 'gestalte',

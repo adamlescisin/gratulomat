@@ -97,6 +97,19 @@ class Event extends Model
         $this->recipient_forms = CzechNames::forms($this->recipient_name, $type) ?: null;
     }
 
+    /** Závěrečný titulek videoprezentace: vlastní z administrace, jinak výchozí podle typu události. */
+    public function finaleTitle(): string
+    {
+        return $this->setting('finale_title') ?: $this->defaultFinaleTitle();
+    }
+
+    public function defaultFinaleTitle(): string
+    {
+        $key = 'guest.finale.'.(trans()->has('guest.finale.'.$this->type, $this->locale) ? $this->type : 'default');
+
+        return __($key, ['voc' => $this->form('voc'), 'name' => $this->recipient_name], $this->locale);
+    }
+
     /** Grafická šablona stránky pro hosty (vesela | neutralni | exkluzivni | smutecni). */
     public function themeKey(): string
     {
