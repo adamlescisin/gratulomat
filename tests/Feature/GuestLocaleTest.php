@@ -47,4 +47,24 @@ class GuestLocaleTest extends TestCase
             $this->assertEqualsCanonicalizing($keys('cs'), $keys($locale), "lang/$locale.json neodpovídá cs.json");
         }
     }
+
+    public function test_guest_translation_groups_have_the_same_keys(): void
+    {
+        $keys = function (array $a, string $prefix = '') use (&$keys): array {
+            $out = [];
+            foreach ($a as $k => $v) {
+                // seznamy otázek se mohou lišit délkou, porovnáváme jen typy událostí
+                $out[] = $prefix.$k;
+                if (is_array($v) && ! array_is_list($v)) {
+                    $out = [...$out, ...$keys($v, $prefix.$k.'.')];
+                }
+            }
+
+            return $out;
+        };
+        $cs = $keys(require lang_path('cs/guest.php'));
+        foreach (config('gratulomat.locales.guest') as $locale) {
+            $this->assertEqualsCanonicalizing($cs, $keys(require lang_path("$locale/guest.php")), "lang/$locale/guest.php neodpovídá cs");
+        }
+    }
 }

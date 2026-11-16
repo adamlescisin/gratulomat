@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Event;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,11 +21,14 @@ class SiteMode
     {
         $mode = config('gratulomat.site_mode');
 
-        if ($mode === 'live' || $request->is(...self::ALWAYS) || $this->isTester($request)) {
+        $event = $request->route('event');
+        $eventOk = $event instanceof Event && $event->reachableBeforeLaunch();
+
+        if ($mode === 'live' || $request->is(...self::ALWAYS) || $this->isTester($request) || $eventOk) {
             return $next($request);
         }
 
-        if ($mode === 'maintenance') {
+        if ($mode === 'maintenance' && ! $eventOk) {
             return response()->view('site.maintenance', status: 503)->header('Retry-After', '600');
         }
 

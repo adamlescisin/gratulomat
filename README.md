@@ -18,8 +18,30 @@ Fáze 0 – základ:
 - jazyk rozhraní hosta: CS / EN / DE, přepínač, `Accept-Language`, `lang/*.json`
 - pomocný worker pro Mac Mini (`worker/`): vystavování dokladů v lokálním MyÚčtu
 
-Další fáze podle specifikace: datový model a události → stránka hosta a Kino z prototypu →
-průvodce a Stripe → back-office (Filament) → e-maily (Resend) → spuštění.
+Fáze 1 – události a stránka hosta (z prototypu adam50):
+
+- datový model: `events`, `households`, `memories`, `media`, `show_settings`
+- stránka hosta `/{slug}`: osobní pozvánka `/{slug}/g/{token}`, formulář v 6 krocích, vlastní vzpomínky, zeď ostatních (zapečetěná do data události, u smutečního rozloučení hned)
+- rozhraní hosta v CS / EN / DE (`lang/*/guest.php`), otázky „Došla slova?“ podle typu události, tvary jména adresáta
+- média jen přes aplikaci s kontrolou oprávnění a HTTP Range; fotky přes GD (bez EXIF/GPS, 2560 + 640 px); `memory.json` u každé vzpomínky
+- limity tarifu: přání od Párty, videa od Premiéry, počet fotek Ochutnávky
+- Kino `/{slug}/kino` – otevře se jen po zpřístupnění organizátorem
+- příkazy: `gratulomat:event`, `gratulomat:households`, `gratulomat:import-adam50`
+
+Další: administrace organizátora (pozvánky, moderace, zpřístupnění Kina, offline balíček) →
+nasazení na staging → průvodce a Stripe → back-office (Filament) → e-maily (Resend) → spuštění.
+
+## Beta: Adamových 50
+
+```bash
+php artisan gratulomat:event adamovych-50 --title="Adamových 50" --name=Adam \
+  --forms='{"dat":"Adamovi","acc":"Adama","voc":"Adame","gen":"Adama","loc":"Adamovi","ins":"Adamem","poss":"Adamových"}' \
+  --year=1977 --date="2027-01-23 18:00" --test
+php artisan gratulomat:import-adam50 adamovych-50 ~/domains/adam50.lescisin.cz/adam50-private/data
+```
+
+Tokeny pozvánek zůstávají; staré odkazy `adam50.lescisin.cz/g/<token>` stačí přesměrovat
+na `gratulomat.cz/adamovych-50/g/<token>`.
 
 ## Lokální vývoj
 

@@ -59,6 +59,21 @@ return [
         'photobook' => ['name' => 'Fotokniha', 'price' => 1290, 'min_plan' => 'party'],
     ],
 
+    // Výchozí štítky témat podle typu události (v primárním jazyce události; organizátor je může upravit).
+    'default_tags' => [
+        'default' => ['Rodina', 'Škola', 'Práce', 'Cesty', 'Sport', 'Mejdan', 'Trapas', 'Jen tak'],
+        'svatba' => ['Seznámení', 'Rodina', 'Přátelé', 'Cesty', 'Mejdan', 'Trapas', 'Jen tak'],
+        'firemni-jubileum' => ['Začátky', 'Projekty', 'Lidé', 'Akce', 'Úspěchy', 'Trapas'],
+        'smutecni' => ['Rodina', 'Přátelé', 'Práce', 'Cesty', 'Koníčky', 'Poslední setkání'],
+    ],
+
+    'memory_limits' => [
+        'files_per_memory' => 12,
+        'video_mb' => 200,   // jen tarify s funkcí „videos“
+        'audio_mb' => 25,
+        'audio_seconds' => 180,
+    ],
+
     'event_types' => [
         'narozeniny', 'svatba', 'vyroci-svatby', 'duchod', 'firemni-jubileum', 'rozlucka', 'sraz', 'smutecni',
     ],

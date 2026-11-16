@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Domain\Guest\GuestSession;
+use App\Models\Event;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -29,15 +31,21 @@ class SetGuestLocale
             return $chosen;
         }
 
+        $event = $request->route('event');
+        if ($event instanceof Event) {
+            $preferred = GuestSession::household($event)?->preferred_locale;
+            if ($preferred && in_array($preferred, $supported, true)) {
+                return $preferred;
+            }
+        }
+
         $browser = $request->getPreferredLanguage($supported);
         if ($browser && $request->headers->has('Accept-Language')) {
             return $browser;
         }
 
-        // Až bude model Event: primární jazyk události z route parametru {slug}.
-        $eventLocale = $request->attributes->get('event_locale');
-        if (is_string($eventLocale) && in_array($eventLocale, $supported, true)) {
-            return $eventLocale;
+        if ($event instanceof Event && in_array($event->locale, $supported, true)) {
+            return $event->locale;
         }
 
         return config('gratulomat.locales.default');
