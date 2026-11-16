@@ -21,6 +21,8 @@
         <env name="APP_ENV" value="testing"/>
         <env name="APP_KEY" value="base64:pSXNrVyZueJ6/Xk6/ZyQaghWsPly+X824Hg+vyTP4DE="/>
         <env name="SITE_MODE" value="coming_soon"/>
+        <env name="OPERATOR_EMAILS" value=""/>
+        <env name="TESTER_CODES" value=""/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="CACHE_STORE" value="array"/>
