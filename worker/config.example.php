@@ -2,7 +2,7 @@
 
 return [
     'gratulomat_url' => 'https://gratulomat.cz',
-    'gratulomat_token' => '',                // token workeru z back-office
+    'gratulomat_token' => '',                // stejná hodnota jako WORKER_TOKEN v shared/.env na serveru
     'myucto_url' => 'http://127.0.0.1:8080', // lokální instance MyÚčto
     'myucto_token' => '',                    // mi_pat_…
     'myucto_supplier_id' => null,            // jen u tokenu nevázaného na firmu
