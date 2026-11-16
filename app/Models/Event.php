@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -43,6 +44,11 @@ class Event extends Model
     public function memories(): HasMany
     {
         return $this->hasMany(Memory::class);
+    }
+
+    public function organizers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'event_members')->withPivot('role')->withTimestamps();
     }
 
     public function show(): HasOne

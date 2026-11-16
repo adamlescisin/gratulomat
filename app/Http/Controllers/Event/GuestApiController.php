@@ -178,7 +178,7 @@ class GuestApiController extends Controller
 
     public function show(Event $event): JsonResponse
     {
-        if (! ($event->showPublic() && GuestSession::household($event))) {
+        if (! EventPageController::canWatch($event)) {
             return response()->json(['error' => __('guest.kino_locked')], 403);
         }
 

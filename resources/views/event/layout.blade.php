@@ -1,5 +1,7 @@
-@php($offline = $offline ?? false)
-@php($assets = $offline ? 'assets' : asset('assets/event'))
+@php
+    $offline = $offline ?? false;
+    $assets = $offline ? 'assets' : asset('assets/event');
+@endphp
 <!doctype html>
 <html lang="{{ $offline ? $event->locale : app()->getLocale() }}">
 <head>

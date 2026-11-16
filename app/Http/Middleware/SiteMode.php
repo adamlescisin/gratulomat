@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 class SiteMode
 {
     /** Cesty, které fungují v každém režimu. */
-    private const ALWAYS = ['pristup', 'pristup/*', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
+    private const ALWAYS = ['pristup', 'pristup/*', 'prihlaseni', 'prihlaseni/*', 'odhlaseni', 'moje', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
 
     public function handle(Request $request, Closure $next): Response
     {

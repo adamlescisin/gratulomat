@@ -28,8 +28,17 @@ Fáze 1 – události a stránka hosta (z prototypu adam50):
 - Kino `/{slug}/kino` – otevře se jen po zpřístupnění organizátorem
 - příkazy: `gratulomat:event`, `gratulomat:households`, `gratulomat:import-adam50`
 
-Další: administrace organizátora (pozvánky, moderace, zpřístupnění Kina, offline balíček) →
-nasazení na staging → průvodce a Stripe → back-office (Filament) → e-maily (Resend) → spuštění.
+Fáze 2 – administrace organizátora a nasazení:
+
+- přihlášení organizátora odkazem z e-mailu (`/prihlaseni`, bez hesla, jednorázový odkaz), e-maily přes Resend
+- `/{slug}/admin`: přehled, hosté (hromadné přidání v limitu tarifu, QR + text pozvánky, nový odkaz),
+  moderace vzpomínek včetně soukromých přání, zpřístupnění videoprezentace (hned / k datu / zavřít),
+  hra v Kině (Premiéra+), uzávěrka sběru, text pozvánky
+- offline balíček ZIP (Párty+): Kino s vloženými daty – stačí otevřít `index.html`, i bez serveru
+- příkaz `gratulomat:organizer` (přidá organizátora a vypíše přihlašovací odkaz)
+- nasazení GitHub Actions → Hostinger přes SSH, viz [docs/DEPLOY.md](docs/DEPLOY.md)
+
+Další: průvodce a Stripe → back-office (Filament) → e-maily (Resend) → spuštění.
 
 ## Beta: Adamových 50
 

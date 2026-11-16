@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches: [main]
+    tags: ['v*']
   pull_request:
 
 jobs:
@@ -12,8 +14,42 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: mbstring, intl, gd, pdo_sqlite, curl, zip
+          extensions: mbstring, intl, gd, exif, pdo_sqlite, curl, zip
           coverage: none
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpunit
+
+  # main → staging.gratulomat.cz, tag v* → gratulomat.cz (viz docs/DEPLOY.md)
+  deploy:
+    needs: tests
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'production' || 'staging' }}
+    concurrency: deploy-${{ startsWith(github.ref, 'refs/tags/v') && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, gd, exif, curl, zip
+          coverage: none
+      - name: Build
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+          tar --exclude=.git --exclude=tests --exclude=node_modules --exclude=storage --exclude=.env -czf /tmp/release.tgz .
+      - name: Upload and activate
+        env:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          PHP_BIN: ${{ vars.PHP_BIN || 'php' }}
+        run: |
+          if [ -z "$SSH_HOST" ]; then echo "Chybí secrets prostředí – nasazení přeskočeno."; exit 0; fi
+          install -m 600 /dev/null ~/ssh_key && echo "$SSH_KEY" > ~/ssh_key
+          SSH="ssh -i ~/ssh_key -p ${SSH_PORT:-65002} -o StrictHostKeyChecking=accept-new $SSH_USER@$SSH_HOST"
+          REL=$(date +%Y%m%d%H%M%S)-${GITHUB_SHA::7}
+          scp -i ~/ssh_key -P ${SSH_PORT:-65002} -o StrictHostKeyChecking=accept-new /tmp/release.tgz scripts/deploy-remote.sh "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+          $SSH "PHP_BIN=$PHP_BIN bash $DEPLOY_PATH/deploy-remote.sh $DEPLOY_PATH $REL"

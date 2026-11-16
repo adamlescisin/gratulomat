@@ -3,6 +3,9 @@
 use App\Domain\Guest\GuestSession;
 use App\Http\Controllers\Event\EventPageController;
 use App\Http\Controllers\Event\GuestApiController;
+use App\Http\Controllers\Organizer\AuthController;
+use App\Http\Controllers\Organizer\EventAdminController;
+use App\Http\Middleware\EnsureOrganizer;
 use App\Http\Middleware\SiteMode;
 use App\Models\Household;
 use Illuminate\Http\Request;
@@ -34,6 +37,13 @@ Route::post('/pristup', function (Request $request) {
     ));
 })->middleware('throttle:10,1');
 
+// Organizátor: přihlášení odkazem z e-mailu.
+Route::get('/prihlaseni', [AuthController::class, 'form'])->name('login');
+Route::post('/prihlaseni', [AuthController::class, 'send'])->middleware('throttle:5,1');
+Route::get('/prihlaseni/odkaz/{user}', [AuthController::class, 'link'])->name('login.link');
+Route::post('/odhlaseni', [AuthController::class, 'logout'])->name('logout');
+Route::get('/moje', [AuthController::class, 'events'])->middleware('auth')->name('organizer.events');
+
 /*
  * Stránky událostí – vždy až na konci (zachytávají /{slug}).
  */
@@ -49,4 +59,15 @@ Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])-
     Route::get('/api/show', [GuestApiController::class, 'show']);
     Route::post('/api/memories/{memoryId?}', [GuestApiController::class, 'save'])->middleware('throttle:60,1');
     Route::delete('/api/memories/{memoryId}', [GuestApiController::class, 'destroy']);
+
+    Route::middleware(EnsureOrganizer::class)->prefix('admin')->group(function () {
+        Route::get('/', [EventAdminController::class, 'page'])->name('organizer.admin');
+        Route::get('/api/state', [EventAdminController::class, 'state']);
+        Route::post('/api/households', [EventAdminController::class, 'addHouseholds']);
+        Route::post('/api/households/{household}', [EventAdminController::class, 'updateHousehold'])->whereNumber('household');
+        Route::post('/api/memories/{memory}', [EventAdminController::class, 'updateMemory']);
+        Route::post('/api/show', [EventAdminController::class, 'updateShow']);
+        Route::post('/api/settings', [EventAdminController::class, 'updateSettings']);
+        Route::get('/offline.zip', [EventAdminController::class, 'offline'])->name('organizer.offline');
+    });
 });

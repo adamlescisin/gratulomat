@@ -1,10 +1,8 @@
 @extends('event.layout')
 @section('title', 'Kino · '.$event->title)
 @section('body_class', 'page-kino')
-@php($offline = $offline ?? false)
 @section('content')
 {{-- Kino běží v primárním jazyce události (texty a kapitoly), ne v jazyce rozhraní hosta. --}}
-@php(app()->setLocale($event->locale))
 <div class="kino" data-kino tabindex="-1">
   <div class="kino__stage" data-stage></div>
 
@@ -43,6 +41,10 @@
   </div>
 </div>
 @if ($event->show?->music)<audio data-music src="{{ $offline ? $event->show->music : asset($event->show->music) }}" loop preload="auto"></audio>@endif
-<script>window.GM = @json(['showUrl' => $showUrl]);</script>
+@php
+    $gm = ['showUrl' => $showUrl];
+    if (!empty($embeddedShow)) { $gm['demoShow'] = $embeddedShow; }
+@endphp
+<script>window.GM = {!! json_encode($gm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <script src="{{ $offline ? 'assets/js/kino.js' : asset('assets/event/js/kino.js').'?v='.@filemtime(public_path('assets/event/js/kino.js')) }}" defer></script>
 @endsection

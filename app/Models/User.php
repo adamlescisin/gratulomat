@@ -5,8 +5,11 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
@@ -22,7 +25,27 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'locale',
+        'last_login_at',
     ];
+
+    public function events(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_members')->withPivot('role')->withTimestamps();
+    }
+
+    public function organizes(Event $event): bool
+    {
+        return $this->events()->whereKey($event->id)->exists();
+    }
+
+    /** Přihlašovací odkaz (bez hesla), platný $minutes minut a jen jednou. */
+    public function loginLink(int $minutes = 30): string
+    {
+        return URL::temporarySignedRoute('login.link', now()->addMinutes($minutes), [
+            'user' => $this->id, 'nonce' => Str::random(16),
+        ]);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,6 +67,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
     }
 }
