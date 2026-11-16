@@ -60,8 +60,9 @@
       <div class="fld">
         <label for="w-guests" data-guests-label>Kolik gratulantů pozvete?</label>
         <div style="display:flex;align-items:baseline;gap:12px"><span class="big" data-guests-out>20</span><span class="hint" data-guests-hint></span></div>
-        <input id="w-guests" type="range" min="1" max="300" data-k="guests">
-        <div class="scale"><span>1</span><span>5 · Ochutnávka</span><span>25 · Párty</span><span>150 · Premiéra</span><span>300</span></div>
+        {{-- Nelineární posuvník: značky na škále jsou v rovnoměrných rozestupech a sedí s polohou jezdce --}}
+        <input id="w-guests" type="range" min="0" max="600" step="1" data-guests-range aria-label="Počet gratulantů">
+        <div class="scale" data-guests-scale></div>
         <span class="hint">Pár sdílí jeden odkaz – počítá se jako jeden <span data-guest-one>gratulant</span>.</span>
       </div>
       <div class="fld" data-toggles="guestFeatures"></div>

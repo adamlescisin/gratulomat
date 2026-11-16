@@ -35,6 +35,11 @@
   if (W.preset === 'party') Object.assign(S, { voice: true, nowm: true, offline: true, guests: Math.max(S.guests, 20), collect: 30, archive: 3 });
   let slugState = { status: null, suggestions: [] }, quote = null;
 
+  // Posuvník hostů: úseky mezi limity tarifů mají stejnou délku (1 → 5 → 25 → 150 → 300)
+  const TICKS = [1, ...['ochutnavka', 'party', 'premiera'].map(k => W.plans[k].guests), 300];
+  const SEG = 600 / (TICKS.length - 1);
+  const toGuests = pos => { const i = Math.min(TICKS.length - 2, Math.floor(pos / SEG)); return Math.round(TICKS[i] + (TICKS[i + 1] - TICKS[i]) * (pos - i * SEG) / SEG); };
+  const toPos = g => { for (let i = 0; i < TICKS.length - 1; i++) if (g <= TICKS[i + 1]) return Math.round(i * SEG + SEG * (g - TICKS[i]) / (TICKS[i + 1] - TICKS[i])); return 600; };
   const funeral = () => S.occasion === 'funeral';
   const manual = () => !!(W.operator && $('[data-manual]')?.checked);
   const save = () => { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch {} };
@@ -78,6 +83,8 @@
 
     $$('[data-k]').forEach(el => { if (document.activeElement !== el) el.value = S[el.dataset.k] ?? ''; });
     $('[data-guests-out]').textContent = S.guests;
+    const rg = $('[data-guests-range]'); if (document.activeElement !== rg) rg.value = toPos(S.guests);
+    $('[data-guests-scale]').innerHTML = TICKS.map((v, i) => `<span style="left:${(i / (TICKS.length - 1)) * 100}%">${v}${['', ' · Ochutnávka', ' · Párty', ' · Premiéra', ''][i] || ''}</span>`).join('');
     $('[data-guests-hint]').textContent = S.guests <= 5 ? 'vejde se do Ochutnávky' : S.guests <= 25 ? 'vejde se do Párty' : S.guests <= 150 ? 'Párty s balíčky, nebo Premiéra' : 'Premiéra s balíčky nebo VIP';
     $('[data-guests-label]').textContent = fu ? 'Kolik hostů pozvete ke vzpomínání?' : 'Kolik gratulantů pozvete?';
     $('[data-guest-one]').textContent = fu ? 'host' : 'gratulant';
@@ -181,6 +188,7 @@
 
   // --- události ---
   document.addEventListener('input', e => {
+    if (e.target.matches('[data-guests-range]')) { set({ guests: toGuests(+e.target.value) }); return; }
     const k = e.target.dataset.k;
     if (!k) { if (e.target.matches('#w-email')) renderNav(); return; }
     if (k === 'name') { const p = { name: e.target.value }; if (!S.slugTouched) p.slug = slugify(e.target.value); set(p, { slug: !S.slugTouched }); return; }

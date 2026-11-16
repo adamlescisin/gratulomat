@@ -86,3 +86,9 @@ input[type=range] { width: 100%; accent-color: var(--coral); }
 .wz .discount .inp { flex: 1; text-transform: uppercase; }
 .wz .chk.manual { background: #FFF3D6; border-radius: 14px; padding: 12px 14px; }
 .wz .lines .disc b, .wz .lines .disc span { color: #7BE0C3; }
+.wz .scale[data-guests-scale] { position: relative; display: block; height: 34px; margin: 2px 9px 0; }
+.wz .scale[data-guests-scale] span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; padding-top: 8px; }
+.wz .scale[data-guests-scale] span::before { content: ''; position: absolute; top: 0; left: 50%; width: 1px; height: 6px; background: rgba(28,22,51,.3); }
+.wz .scale[data-guests-scale] span:first-child { transform: none; } .wz .scale[data-guests-scale] span:first-child::before { left: 0; }
+.wz .scale[data-guests-scale] span:last-child { transform: translateX(-100%); } .wz .scale[data-guests-scale] span:last-child::before { left: auto; right: 0; }
+@media (max-width: 560px) { .wz .scale[data-guests-scale] span { font-size: 11px; } }
