@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\Setting;
 use App\Models\TesterCode;
 use App\Models\WaitlistEntry;
+use App\Support\Legal;
 use App\Support\MailBrand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -192,6 +193,50 @@ class BackofficeController extends Controller
         Log::info('Událost upravena provozovatelem', ['event' => $event->slug, 'changes' => $changes, 'by' => $request->user()->email]);
 
         return redirect()->route('backoffice.event', $event)->with('ok', $changes ? 'Událost je uložená.' : 'Beze změn.');
+    }
+
+    public function legal(Request $request)
+    {
+        return view('backoffice.legal', ['mode' => Setting::siteMode(), 'edit' => in_array($request->query('varianta'), ['test', 'live'], true) ? $request->query('varianta') : Legal::variant()]);
+    }
+
+    public function legalSave(Request $request)
+    {
+        $by = $request->user()->email;
+        if ($request->has('identity')) {
+            $v = $request->validate([
+                'identity.name' => 'nullable|string|max:160', 'identity.ico' => ['nullable', 'regex:/^\d{8}$/'], 'identity.dic' => ['nullable', 'regex:/^[A-Z]{2}\d{8,10}$/i'],
+                'identity.address' => 'nullable|string|max:255', 'identity.register' => 'nullable|string|max:255', 'identity.email' => 'nullable|email:rfc|max:191',
+                'identity.phone' => 'nullable|string|max:40', 'identity.vat_payer' => 'nullable|boolean',
+            ], ['identity.ico.regex' => 'IČO má 8 číslic.', 'identity.dic.regex' => 'DIČ ve tvaru CZ12345678.']);
+            $identity = array_map(fn ($x) => is_string($x) ? trim($x) : $x, $v['identity'] ?? []);
+            $identity['dic'] = isset($identity['dic']) ? strtoupper($identity['dic']) : null;
+            $identity['vat_payer'] = $request->boolean('identity.vat_payer') ? '1' : '0';
+            Setting::put('legal_identity', $identity);
+            Log::info('Identifikace provozovatele upravena', ['by' => $by]);
+
+            return back()->with('ok', 'Identifikace provozovatele je uložená.');
+        }
+        if ($request->has('legal_variant')) {
+            $request->validate(['legal_variant' => 'required|in:auto,test,live']);
+            Setting::put('legal_variant', $request->input('legal_variant'));
+            Log::info('Přepínač právních textů změněn', ['to' => $request->input('legal_variant'), 'by' => $by]);
+
+            return back()->with('ok', 'Na webu teď platí: '.Legal::VARIANTS[Legal::variant()].'.');
+        }
+        $v = $request->validate([
+            'variant' => 'required|in:test,live', 'terms' => 'nullable|string|max:100000', 'privacy' => 'nullable|string|max:100000',
+            'terms_from' => 'nullable|date', 'privacy_from' => 'nullable|date',
+        ]);
+        $changed = [];
+        foreach (array_keys(Legal::DOCS) as $doc) {
+            if (Legal::save($doc, $v['variant'], (string) ($v[$doc] ?? ''), $v["{$doc}_from"] ?? null, $by)) {
+                $changed[] = Legal::DOCS[$doc];
+            }
+        }
+
+        return redirect()->route('backoffice.legal', ['varianta' => $v['variant']])
+            ->with('ok', $changed ? 'Uloženo ('.Legal::VARIANTS[$v['variant']].'): '.implode(', ', $changed).'. Předchozí verze zůstává v archivu.' : 'Beze změn.');
     }
 
     public function waitlist()

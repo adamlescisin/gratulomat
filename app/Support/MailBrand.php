@@ -46,7 +46,9 @@ class MailBrand
 
     public static function footer(): string
     {
-        return (string) (self::get('footer') ?: "Gratulomat · [gratulomat.cz](https://gratulomat.cz)\nDotazy: ".config('gratulomat.notify_email'));
+        $id = Legal::identityLine();
+
+        return (string) (self::get('footer') ?: "Gratulomat · [gratulomat.cz](https://gratulomat.cz)\nDotazy: ".Legal::identity()['email'].($id ? "\nProvozovatel: $id" : ''));
     }
 
     public static function logoWidth(): int

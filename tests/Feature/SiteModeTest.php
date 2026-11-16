@@ -32,7 +32,7 @@ class SiteModeTest extends TestCase
             ->assertSee('/favicon.svg', false);
         // ostatní stránky v režimu Připravujeme taky
         $this->get('/nejaka-akce')->assertSee('Vzpomínky, které se promítají.');
-        $this->get('/ochrana-soukromi')->assertOk()->assertSee('Jak nakládáme s vaším e-mailem');
+        $this->get('/ochrana-soukromi')->assertOk()->assertSee('Zásady zpracování osobních údajů');
         // adresy mimo všechny routy (roboti: /wp-login.php, /a/b/c) nesmí skončit chybou 500
         $this->get('/wp-login.php')->assertOk()->assertSee('Vzpomínky, které se promítají.');
         $this->get('/a/b/c/d')->assertOk()->assertSee('Vzpomínky, které se promítají.');

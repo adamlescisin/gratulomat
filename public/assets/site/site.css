@@ -63,3 +63,8 @@ input[type=checkbox] { accent-color: var(--coral); }
 .legal h1 { color: var(--cream); font-size: clamp(36px, 5vw, 56px); line-height: 1; margin: 16px 0 24px; }
 .legal h2 { color: var(--cream); font-family: "Bricolage Grotesque", sans-serif; font-size: 22px; margin: 32px 0 8px; }
 @media (prefers-reduced-motion: reduce) { .press { transition: none; } }
+
+.legal__body ul, .legal__body ol { padding-left: 1.3em; }
+.legal__body h3 { color: var(--cream); font-size: 18px; margin: 24px 0 6px; }
+.legal__body a, .legal a { color: var(--cream); }
+.legal__id { margin-top: 40px; font-size: 14px; opacity: .8; }

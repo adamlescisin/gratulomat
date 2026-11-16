@@ -36,8 +36,8 @@ Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
 // Přístup testerů v režimu Připravujeme.
 Route::get('/pristup', fn () => view('site.coming-soon', ['openCode' => true]))->name('access');
 Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware('throttle:6,1')->name('waitlist');
-Route::get('/ochrana-soukromi', fn () => view('site.privacy'))->name('privacy');
-Route::get('/obchodni-podminky', fn () => view('site.terms'))->name('terms');
+Route::get('/ochrana-soukromi', fn () => view('site.legal', ['doc' => 'privacy']))->name('privacy');
+Route::get('/obchodni-podminky', fn () => view('site.legal', ['doc' => 'terms']))->name('terms');
 Route::post('/pristup', function (Request $request) {
     $code = strtoupper(trim((string) $request->input('code')));
     if (! TesterCode::isValidCode($code)) {
@@ -83,6 +83,8 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');
     Route::post('/slevy/{discount}/prepnout', 'discountToggle')->name('backoffice.discounts.toggle');
     Route::delete('/slevy/{discount}', 'discountDelete')->name('backoffice.discounts.delete');
+    Route::get('/pravni', 'legal')->name('backoffice.legal');
+    Route::post('/pravni', 'legalSave')->name('backoffice.legal.save');
     Route::get('/emaily', 'mailBrand')->name('backoffice.mail');
     Route::post('/emaily', 'mailBrandSave')->name('backoffice.mail.save');
     Route::get('/emaily/nahled', 'mailPreview')->name('backoffice.mail.preview');

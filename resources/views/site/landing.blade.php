@@ -194,7 +194,7 @@
       <a href="#cenik">Ceník</a><a href="#otazky">Otázky</a>
       <a href="{{ route('privacy') }}">Ochrana soukromí</a><a href="{{ route('terms') }}">Obchodní podmínky</a>
       <a href="mailto:{{ config('gratulomat.notify_email') }}">Kontakt</a>
-      <span style="padding:8px 0">© {{ date('Y') }} Gratulomat · gratulomat.cz</span>
+      <span style="padding:8px 0">© {{ date('Y') }} Gratulomat · gratulomat.cz @if ($legalId = \App\Support\Legal::identityLine())<br><small>Provozovatel: {{ $legalId }}</small>@endif</span>
     </nav>
   </div>
 </footer>
