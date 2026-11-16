@@ -51,7 +51,10 @@ final class PricingService
 
         // 1) Funkce
         foreach ($cfg->features as $feature) {
-            $raise($this->features[$feature], "Funkce „{$feature}“ je od tarifu {$this->plans[$this->features[$feature]]['name']}.");
+            $raise($this->features[$feature], __('pricing.feature_reason', [
+                'feature' => __('pricing.feature.'.$feature),
+                'plan' => $this->plans[$this->features[$feature]]['name'],
+            ]));
         }
 
         // 2) Délka sběru
@@ -59,6 +62,16 @@ final class PricingService
             if ($cfg->collectDays <= $this->plans[$code]['collect_days']) {
                 if ($idx > 0) {
                     $raise($code, "Sběr {$cfg->collectDays} dní je od tarifu {$this->plans[$code]['name']}.");
+                }
+                break;
+            }
+        }
+
+        // 2b) Délka archivu po události
+        foreach ($codes as $idx => $code) {
+            if ($cfg->archiveMonths <= $this->plans[$code]['archive_months']) {
+                if ($idx > 0) {
+                    $raise($code, "Archiv {$cfg->archiveMonths} měs. je od tarifu {$this->plans[$code]['name']}.");
                 }
                 break;
             }

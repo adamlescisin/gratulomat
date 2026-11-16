@@ -18,5 +18,19 @@
     "Přání": "Wish",
     "Tohle přání je veřejné a může být zveřejněno ve finální prezentaci": "This wish is public and may be shown in the final presentation",
     "Štítky": "Tags",
-    "Uložit vzpomínku": "Save memory"
+    "Uložit vzpomínku": "Save memory",
+    "pricing.feature_reason": "\":feature\" is available from the :plan plan.",
+    "pricing.feature.wishes": "Voice and written wishes",
+    "pricing.feature.no_watermark": "Presentation without watermark",
+    "pricing.feature.offline": "Offline package",
+    "pricing.feature.all_themes": "Premium look",
+    "pricing.feature.dark_mode": "Dark mode",
+    "pricing.feature.videos": "Videos from guests",
+    "pricing.feature.import": "Guest import",
+    "pricing.feature.anonymous_link": "Anonymous invitation",
+    "pricing.feature.game": "\"Guess who wrote it\" game",
+    "pricing.feature.mp4": "MP4 film download",
+    "pricing.feature.reminders": "E-mail reminders",
+    "pricing.feature.translations": "Custom text translations",
+    "pricing.feature.vip_services": "VIP services"
 }

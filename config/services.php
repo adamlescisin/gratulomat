@@ -35,4 +35,17 @@ return [
         ],
     ],
 
+    // Stripe: testovací klíče pro testery a režim Připravujeme, ostré po spuštění.
+    'stripe' => [
+        'test_secret' => env('STRIPE_TEST_SECRET'),
+        'test_webhook_secret' => env('STRIPE_TEST_WEBHOOK_SECRET'),
+        'live_secret' => env('STRIPE_LIVE_SECRET'),
+        'live_webhook_secret' => env('STRIPE_LIVE_WEBHOOK_SECRET'),
+    ],
+
+    // Pomocný worker na Mac Mini (doklady v MyÚčtu, videa).
+    'worker' => [
+        'token' => env('WORKER_TOKEN'),
+    ],
+
 ];

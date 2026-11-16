@@ -41,8 +41,12 @@ class SiteModeTest extends TestCase
     public function test_tester_code_unlocks_site(): void
     {
         $this->post('/pristup', ['code' => 'beta-1234'])->assertRedirect('/')->assertCookie('gm_tester', 'BETA-1234');
+        // tester vidí landing page (ne coming soon) a dostane se do průvodce
         $this->withCookie('gm_tester', 'BETA-1234')->get('/')->assertOk()
-            ->assertSee('Přístup testera aktivní')->assertDontSee('Mám přístupový kód');
+            ->assertSee('Ze vzpomínek vašich blízkých film')->assertSee('/zalozit')->assertDontSee('Mám přístupový kód');
+        $this->withCookie('gm_tester', 'BETA-1234')->get('/zalozit')->assertOk()->assertSee('Testovací režim');
+        $this->defaultCookies = [];
+        $this->get('/zalozit')->assertSee('Vzpomínky, které se promítají.'); // veřejnost: coming soon
     }
 
     public function test_tester_codes_from_backoffice_count_uses_and_expire(): void

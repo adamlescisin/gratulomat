@@ -18,5 +18,19 @@
     "Přání": "Přání",
     "Tohle přání je veřejné a může být zveřejněno ve finální prezentaci": "Tohle přání je veřejné a může být zveřejněno ve finální prezentaci",
     "Štítky": "Štítky",
-    "Uložit vzpomínku": "Uložit vzpomínku"
+    "Uložit vzpomínku": "Uložit vzpomínku",
+    "pricing.feature_reason": "Funkce „:feature“ je od tarifu :plan.",
+    "pricing.feature.wishes": "Hlasová a psaná přání",
+    "pricing.feature.no_watermark": "Videoprezentace bez vodoznaku",
+    "pricing.feature.offline": "Offline balíček",
+    "pricing.feature.all_themes": "Prémiový vzhled",
+    "pricing.feature.dark_mode": "Tmavý režim",
+    "pricing.feature.videos": "Videa od gratulantů",
+    "pricing.feature.import": "Import gratulantů",
+    "pricing.feature.anonymous_link": "Anonymní pozvánka",
+    "pricing.feature.game": "Hra „Hádej, kdo to napsal“",
+    "pricing.feature.mp4": "Film MP4 ke stažení",
+    "pricing.feature.reminders": "Připomínky e-mailem",
+    "pricing.feature.translations": "Překlady vlastních textů",
+    "pricing.feature.vip_services": "Služby VIP"
 }

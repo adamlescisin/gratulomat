@@ -6,7 +6,7 @@ use App\Domain\Pricing\EventConfig;
 use App\Domain\Pricing\PricingService;
 use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\DataProvider;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class PricingServiceTest extends TestCase
 {
@@ -93,5 +93,11 @@ class PricingServiceTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
         $this->service()->quote(new EventConfig(features: ['teleport']));
+    }
+
+    public function test_archive_length_raises_plan(): void
+    {
+        $this->assertSame('party', $this->service()->quote(new EventConfig(archiveMonths: 3))->plan);
+        $this->assertSame('premiera', $this->service()->quote(new EventConfig(archiveMonths: 12))->plan);
     }
 }

@@ -18,7 +18,7 @@ class SiteMode
 {
     /** Cesty, které fungují v každém režimu. */
     private const ALWAYS = ['pristup', 'pristup/*', 'prihlaseni', 'prihlaseni/*', 'odhlaseni', 'moje', 'backoffice', 'backoffice/*',
-        'cekaci-listina', 'ochrana-soukromi', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
+        'cekaci-listina', 'ochrana-soukromi', 'obchodni-podminky', 'jazyk/*', 'up', 'api/stripe/webhook', 'api/worker/*'];
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -27,7 +27,12 @@ class SiteMode
         $event = $request->route('event');
         $eventOk = $event instanceof Event && $event->reachableBeforeLaunch();
 
-        if ($mode === 'live' || $request->is(...self::ALWAYS) || $eventOk || $this->isTester($request) || $request->user()?->isOperator()) {
+        $tester = $this->isTester($request);
+        $request->attributes->set('is_tester', $tester);
+        $full = $mode === 'live' || $tester || $request->user()?->isOperator();
+        $request->attributes->set('site_full_access', $full);
+
+        if ($full || $request->is(...self::ALWAYS) || $eventOk) {
             return $next($request);
         }
 

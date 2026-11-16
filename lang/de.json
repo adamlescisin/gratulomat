@@ -18,5 +18,19 @@
     "Přání": "Wunsch",
     "Tohle přání je veřejné a může být zveřejněno ve finální prezentaci": "Dieser Wunsch ist öffentlich und darf in der Abschlusspräsentation gezeigt werden",
     "Štítky": "Schlagwörter",
-    "Uložit vzpomínku": "Erinnerung speichern"
+    "Uložit vzpomínku": "Erinnerung speichern",
+    "pricing.feature_reason": "„:feature“ ist ab dem Tarif :plan verfügbar.",
+    "pricing.feature.wishes": "Sprach- und Textwünsche",
+    "pricing.feature.no_watermark": "Präsentation ohne Wasserzeichen",
+    "pricing.feature.offline": "Offline-Paket",
+    "pricing.feature.all_themes": "Premium-Design",
+    "pricing.feature.dark_mode": "Dunkler Modus",
+    "pricing.feature.videos": "Videos von Gästen",
+    "pricing.feature.import": "Gästeimport",
+    "pricing.feature.anonymous_link": "Anonyme Einladung",
+    "pricing.feature.game": "Spiel „Wer hat das geschrieben?“",
+    "pricing.feature.mp4": "MP4-Film zum Herunterladen",
+    "pricing.feature.reminders": "E-Mail-Erinnerungen",
+    "pricing.feature.translations": "Übersetzung eigener Texte",
+    "pricing.feature.vip_services": "VIP-Leistungen"
 }

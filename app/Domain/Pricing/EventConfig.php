@@ -17,6 +17,7 @@ final class EventConfig
         public readonly int $collectDays = 14,
         public readonly int $extraArchiveYears = 0,
         public readonly int $photobooks = 0,
+        public readonly int $archiveMonths = 1,
     ) {}
 
     public static function fromArray(array $data): self
@@ -28,6 +29,7 @@ final class EventConfig
             collectDays: max(1, (int) ($data['collect_days'] ?? 14)),
             extraArchiveYears: max(0, (int) ($data['extra_archive_years'] ?? 0)),
             photobooks: max(0, (int) ($data['photobooks'] ?? 0)),
+            archiveMonths: max(1, (int) ($data['archive_months'] ?? 1)),
         );
     }
 }

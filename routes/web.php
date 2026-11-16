@@ -7,6 +7,7 @@ use App\Http\Controllers\Event\GuestApiController;
 use App\Http\Controllers\Organizer\AuthController;
 use App\Http\Controllers\Organizer\EventAdminController;
 use App\Http\Controllers\Site\WaitlistController;
+use App\Http\Controllers\Site\WizardController;
 use App\Http\Middleware\EnsureOperator;
 use App\Http\Middleware\EnsureOrganizer;
 use App\Models\Household;
@@ -14,8 +15,8 @@ use App\Models\TesterCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Dokud není hotová landing page, je úvodní stránkou coming soon (i v ostrém provozu).
-Route::get('/', fn () => view('site.coming-soon'))->name('home');
+// Úvod: veřejnost v režimu Připravujeme vidí coming soon; testeři, provozovatelé a ostrý provoz landing page.
+Route::get('/', fn () => request()->attributes->get('site_full_access') ? view('site.landing') : view('site.coming-soon'))->name('home');
 
 // Přepínač jazyka rozhraní (stránka hosta). Obsah události se nepřekládá.
 Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
@@ -32,6 +33,7 @@ Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
 Route::get('/pristup', fn () => view('site.coming-soon', ['openCode' => true]))->name('access');
 Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware('throttle:6,1')->name('waitlist');
 Route::get('/ochrana-soukromi', fn () => view('site.privacy'))->name('privacy');
+Route::get('/obchodni-podminky', fn () => view('site.terms'))->name('terms');
 Route::post('/pristup', function (Request $request) {
     $code = strtoupper(trim((string) $request->input('code')));
     if (! TesterCode::isValidCode($code)) {
@@ -64,6 +66,13 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/rezim/kody', 'addCode')->name('backoffice.codes');
     Route::delete('/rezim/kody/{code}', 'deleteCode')->name('backoffice.codes.delete');
 });
+
+// Průvodce založením události a platba.
+Route::get('/zalozit', [WizardController::class, 'page'])->name('wizard');
+Route::post('/zalozit', [WizardController::class, 'submit'])->middleware('throttle:10,1')->name('wizard.submit');
+Route::get('/zalozit/hotovo', [WizardController::class, 'done'])->name('wizard.done');
+Route::get('/zalozit/stav/{order}', [WizardController::class, 'status'])->name('wizard.status');
+Route::get('/zalozit/potvrdit/{order}', [WizardController::class, 'confirm'])->name('wizard.confirm');
 
 /*
  * Stránky událostí – vždy až na konci (zachytávají /{slug}).

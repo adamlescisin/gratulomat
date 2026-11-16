@@ -86,3 +86,16 @@ RewriteRule ^(.*)$ https://gratulomat.cz/adamovych-50 [R=302,L]
 ```
 
 Datum oslavy (`--date`) upravte podle skutečnosti; jde změnit i později v databázi.
+
+## Platby (Stripe)
+
+1. Stripe Dashboard → Developers → API keys: zkopírujte **Secret key** (test: `sk_test_…`).
+2. Developers → Webhooks → Add endpoint: `https://gratulomat.cz/api/stripe/webhook`, události
+   `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.expired`,
+   `charge.refunded`, `charge.dispute.created`. Zkopírujte **Signing secret** (`whsec_…`).
+3. Na serveru do `shared/.env` doplňte `STRIPE_TEST_SECRET`, `STRIPE_TEST_WEBHOOK_SECRET` (a po spuštění
+   `STRIPE_LIVE_*` z live režimu Stripe) a `WORKER_TOKEN` (např. `openssl rand -hex 32`, stejná hodnota
+   ve `worker/config.php` na Mac Mini). Pak `php artisan config:cache`.
+
+Dokud je web v režimu coming soon, objednávky jsou testovací (číslo `T-…`, příznak test u události)
+a nevystavuje se doklad. Testovací karta: `4242 4242 4242 4242`, libovolné datum a CVC.
