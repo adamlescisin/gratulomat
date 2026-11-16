@@ -225,12 +225,12 @@ class BackofficeController extends Controller
             return back()->with('ok', 'Na webu teď platí: '.Legal::VARIANTS[Legal::variant()].'.');
         }
         $v = $request->validate([
-            'variant' => 'required|in:test,live', 'terms' => 'nullable|string|max:100000', 'privacy' => 'nullable|string|max:100000',
-            'terms_from' => 'nullable|date', 'privacy_from' => 'nullable|date',
+            'variant' => 'required|in:test,live',
+            ...collect(array_keys(Legal::DOCS))->flatMap(fn ($d) => [$d => 'nullable|string|max:100000', "{$d}_from" => 'nullable|date'])->all(),
         ]);
         $changed = [];
         foreach (array_keys(Legal::DOCS) as $doc) {
-            if (Legal::save($doc, $v['variant'], (string) ($v[$doc] ?? ''), $v["{$doc}_from"] ?? null, $by)) {
+            if ($request->has($doc) && Legal::save($doc, $v['variant'], (string) ($v[$doc] ?? ''), $v["{$doc}_from"] ?? null, $by)) {
                 $changed[] = Legal::DOCS[$doc];
             }
         }

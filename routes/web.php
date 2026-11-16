@@ -38,6 +38,7 @@ Route::get('/pristup', fn () => view('site.coming-soon', ['openCode' => true]))-
 Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware('throttle:6,1')->name('waitlist');
 Route::get('/ochrana-soukromi', fn () => view('site.legal', ['doc' => 'privacy']))->name('privacy');
 Route::get('/obchodni-podminky', fn () => view('site.legal', ['doc' => 'terms']))->name('terms');
+Route::get('/pravidla-pro-hosty', fn () => view('site.legal', ['doc' => 'guest_rules']))->name('guest-rules');
 Route::post('/pristup', function (Request $request) {
     $code = strtoupper(trim((string) $request->input('code')));
     if (! TesterCode::isValidCode($code)) {

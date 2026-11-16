@@ -117,6 +117,7 @@
         <div class="progress" data-progress hidden><i></i></div>
         <button class="btn btn--gold btn--lg" type="submit" data-submit>{{ __('guest.save') }}</button>
         <p class="error" data-error role="alert"></p>
+        <p class="hint legal-note">{!! __('guest.rules_note', ['link' => '<a href="'.route('guest-rules').'" target="_blank" rel="noopener">'.e(__('guest.rules_link_inline')).'</a>']) !!}</p>
       </div>
     </form>
   </section>
@@ -157,6 +158,7 @@
 
   <footer class="foot">
     <p>{{ __('guest.foot') }}</p>
+    <p class="foot__legal"><a href="{{ route('guest-rules') }}" target="_blank" rel="noopener">{{ __('guest.rules_link') }}</a> · <a href="{{ route('privacy') }}" target="_blank" rel="noopener">{{ __('guest.privacy_link') }}</a></p>
     @if ($footUrl = $event->loopUrl('guest_footer'))<p class="foot__made"><a href="{{ $footUrl }}" target="_blank" rel="noopener">{{ __('guest.loop.made_by') }}</a></p>@endif
   </footer>
 </main>

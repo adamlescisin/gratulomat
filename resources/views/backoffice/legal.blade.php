@@ -9,7 +9,7 @@
 @endphp
 <section class="panel">
   <h2 style="margin:0">Které texty platí na webu</h2>
-  <p class="muted" style="margin:0">Teď se zobrazují <strong>{{ $L::VARIANTS[$active] }}</strong> texty (režim webu: {{ ['coming_soon' => 'Připravujeme', 'maintenance' => 'Údržba', 'live' => 'Spuštěno'][$mode] ?? $mode }}). Platí pro <a href="{{ route('terms') }}" target="_blank">obchodní podmínky</a> i <a href="{{ route('privacy') }}" target="_blank">zásady zpracování osobních údajů</a>.</p>
+  <p class="muted" style="margin:0">Teď se zobrazují <strong>{{ $L::VARIANTS[$active] }}</strong> texty (režim webu: {{ ['coming_soon' => 'Připravujeme', 'maintenance' => 'Údržba', 'live' => 'Spuštěno'][$mode] ?? $mode }}). Platí pro <a href="{{ route('terms') }}" target="_blank">obchodní podmínky</a>, <a href="{{ route('privacy') }}" target="_blank">zásady zpracování osobních údajů</a> i <a href="{{ route('guest-rules') }}" target="_blank">pravidla pro hosty</a> (odkaz pod formulářem příspěvku na stránce hosta).</p>
   <form method="post" action="{{ route('backoffice.legal.save') }}" class="row" style="flex-wrap:wrap">@csrf
     @foreach (['auto' => 'Automaticky podle režimu webu (Připravujeme → testovací, spuštění a údržba → ostré)', 'test' => 'Vždy testovací', 'live' => 'Vždy ostré'] as $k => $label)
       <label style="display:flex;gap:8px;align-items:center"><input type="radio" name="legal_variant" value="{{ $k }}" @checked($L::mode() === $k)> {{ $label }}</label>
@@ -49,7 +49,7 @@
     @foreach ($L::DOCS as $doc => $label)
       @php($meta = $L::meta($doc, $edit))
       <label>{{ $label }} <span class="muted" style="font-weight:400">@if (! empty($meta['version'])) verze {{ $meta['version'] }}, uloženo {{ \Illuminate\Support\Carbon::parse($meta['updated_at'])->timezone('Europe/Prague')->format('j. n. Y H:i') }} ({{ $meta['by'] }}) @else výchozí text @endif</span>
-        <textarea class="inp" name="{{ $doc }}" rows="16" style="padding:12px;font:14px/1.5 ui-monospace,Menlo,monospace">{{ old($doc, \App\Models\Setting::get("legal_{$doc}_{$edit}") ? $L::raw($doc, $edit) : ($edit === 'test' ? $L::raw($doc, 'test') : '')) }}</textarea>
+        <textarea class="inp" name="{{ $doc }}" rows="16" style="padding:12px;font:14px/1.5 ui-monospace,Menlo,monospace">{{ old($doc, \App\Models\Setting::get("legal_{$doc}_{$edit}") ? $L::raw($doc, $edit) : (is_file(resource_path("legal/{$doc}_{$edit}.md")) ? $L::raw($doc, $edit) : '')) }}</textarea>
       </label>
       <label style="max-width:240px">Účinné od<input class="inp" type="date" name="{{ $doc }}_from" value="{{ old("{$doc}_from", $meta['effective_from'] ?? '') }}"></label>
     @endforeach

@@ -486,3 +486,4 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .upgrade__sum div { display: flex; justify-content: space-between; gap: 1rem; padding: .25rem 0; }
 .upgrade__total { border-top: 1px solid var(--line); margin-top: .3rem; padding-top: .5rem !important; font-weight: 700; }
 .alert--ok { color: var(--teal-text); }
+.legal-note { margin-top: .6rem; font-size: .85rem; } .legal-note a, .foot__legal a { color: inherit; } .foot__legal { margin-top: .4rem; font-size: .85rem; opacity: .8; }

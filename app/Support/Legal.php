@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
  */
 class Legal
 {
-    public const DOCS = ['terms' => 'Obchodní podmínky', 'privacy' => 'Zásady zpracování osobních údajů'];
+    public const DOCS = ['terms' => 'Obchodní podmínky', 'privacy' => 'Zásady zpracování osobních údajů', 'guest_rules' => 'Pravidla pro hosty'];
 
     public const VARIANTS = ['test' => 'Testovací (Připravujeme)', 'live' => 'Ostré (spuštění a údržba)'];
 

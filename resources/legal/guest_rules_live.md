@@ -1,0 +1,8 @@
+1. **Co můžete nahrát.** Vlastní vzpomínky, fotografie, videa a přání, ke kterým máte práva. Na fotkách a videích s jinými lidmi počítejte s tím, že je uvidí oslavenec, organizátor a případně další hosté.
+2. **Co nahrát nesmíte.** Obsah urážlivý, pornografický nebo násilný, obsah zachycující děti v intimních situacích, cizí díla bez svolení autora, osobní údaje třetích osob nad rámec vzpomínky (např. rodná čísla, adresy) a reklamu.
+3. **Kdo váš příspěvek uvidí.** Organizátor a oslavenec vždy. Ostatní hosté až poté, co se příspěvky odpečetí (k datu, které nastaví organizátor, jinak při uzávěrce sběru) nebo co organizátor zpřístupní videoprezentaci; u smutečního rozloučení jsou veřejné vzkazy vidět hned.
+4. **Přání.** Zaškrtnutím „Tohle přání je veřejné a může být zveřejněno ve finální prezentaci“ souhlasíte s jeho promítnutím. Bez zaškrtnutí zůstane přání soukromé: uslyší nebo přečte ho jen oslavenec a organizátor.
+5. **Licence.** Nahráním obsahu poskytujete organizátorovi a oslavenci bezplatnou nevýhradní licenci k jeho použití pro soukromé účely v souvislosti s událostí (videoprezentace, offline balíček, film, fotokniha) a provozovateli ({provozovatel}) v rozsahu nutném k provozu služby. Autorská práva zůstávají vám.
+6. **Úprava a smazání.** Své příspěvky můžete upravit nebo smazat do uzávěrky sběru. Později o smazání požádejte organizátora nebo nás na {email}. Obsah, který si už někdo stáhl (offline balíček, film), nedokážeme odstranit z jeho zařízení.
+7. **Nevhodný obsah.** Nevhodný příspěvek nahlaste organizátorovi nebo nám na {email}. Obsah porušující tato pravidla může organizátor nebo provozovatel skrýt či smazat.
+8. **Osobní údaje.** Jak s vašimi údaji zacházíme, popisují [Zásady zpracování osobních údajů](/ochrana-soukromi).
