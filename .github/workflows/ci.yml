@@ -20,13 +20,14 @@ jobs:
       - run: vendor/bin/pint --test
       - run: vendor/bin/phpunit
 
-  # main → staging.gratulomat.cz, tag v* → gratulomat.cz (viz docs/DEPLOY.md)
+  # Dokud neexistuje staging, nasazuje main rovnou na gratulomat.cz (web je v režimu Připravujeme).
+  # Po založení stagingu: nastavit proměnnou repozitáře STAGING=1 → main jde na staging, tag v* na produkci.
   deploy:
     needs: tests
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
-    environment: ${{ startsWith(github.ref, 'refs/tags/v') && 'production' || 'staging' }}
-    concurrency: deploy-${{ startsWith(github.ref, 'refs/tags/v') && 'production' || 'staging' }}
+    environment: ${{ (vars.STAGING == '1' && !startsWith(github.ref, 'refs/tags/v')) && 'staging' || 'production' }}
+    concurrency: deploy-${{ (vars.STAGING == '1' && !startsWith(github.ref, 'refs/tags/v')) && 'staging' || 'production' }}
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2

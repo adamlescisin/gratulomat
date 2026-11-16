@@ -1,6 +1,7 @@
 # Nasazení na Hostinger (Cloud Startup)
 
-`main` → **staging.gratulomat.cz**, tag `v*` → **gratulomat.cz**. Nasazuje GitHub Actions
+Zatím `main` → **gratulomat.cz** (v režimu Připravujeme). Po založení stagingu a nastavení proměnné
+repozitáře `STAGING=1`: `main` → **staging.gratulomat.cz**, tag `v*` → **gratulomat.cz**. Nasazuje GitHub Actions
 (`.github/workflows/ci.yml`) až po úspěšných testech: sestaví `vendor/`, nahraje archiv přes SSH
 a spustí `scripts/deploy-remote.sh` (vydání do `releases/`, sdílené `.env` a `storage/`, migrace,
 přepnutí symlinku `current`). Hostinger Git deploy se nepoužívá.
