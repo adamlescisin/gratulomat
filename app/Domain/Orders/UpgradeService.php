@@ -46,7 +46,7 @@ class UpgradeService
         }
 
         $lines = [];
-        $diff = ($plans[$target]['price'] - $plans[$current]['price']) * 100;
+        $diff = max(0, $plans[$target]['price'] - $plans[$current]['price']) * 100; // při akci na vyšší tarif nesmí vyjít záporně
         if ($target !== $current) {
             $lines[] = ['code' => 'upgrade_'.$target, 'name' => "Navýšení tarifu {$plans[$current]['name']} → {$plans[$target]['name']}", 'qty' => 1, 'unit_price' => $diff, 'total' => $diff];
         }

@@ -12,6 +12,16 @@
     $plans = config('gratulomat.plans');
     $kc = fn ($n) => number_format($n, 0, ',', ' ').' Kč';
     $addons = config('gratulomat.addons');
+    // Cena tarifu z back-office ceníku; při plošné akci s přeškrtnutou původní cenou
+    $price = function (string $code, string $prefix = '') use ($plans, $kc) {
+        $p = $plans[$code];
+        if (empty($p['sale'])) {
+            return '<div class="price">'.e($prefix.$kc($p['price'])).'</div>';
+        }
+
+        return '<div class="price-was"><s>'.e($kc($p['list_price'])).'</s> <span class="sale-tag">−'.$p['sale']['percent'].' % do '.\Carbon\Carbon::parse($p['sale']['until'])->format('j. n.').'</span></div>'
+            .'<div class="price price--sale">'.e($prefix.$kc($p['price'])).'</div>';
+    };
 @endphp
 @if (\App\Models\Setting::siteMode() !== 'live')
   <div class="beta" role="status">Testovací verze – platby probíhají v testovacím režimu Stripe (karta 4242 4242 4242 4242), nic se neúčtuje.</div>
@@ -118,26 +128,26 @@
       <div class="plans">
         <div class="plan">
           <h3>{{ $plans['ochutnavka']['name'] }}</h3>
-          <div><div class="price">{{ $kc($plans['ochutnavka']['price']) }}</div><div class="per">na vyzkoušení</div></div>
+          <div>{!! $price('ochutnavka') !!}<div class="per">na vyzkoušení</div></div>
           <ul class="ticks">@foreach (['Až '.$plans['ochutnavka']['guests'].' gratulantů', 'Až '.$plans['ochutnavka']['photos'].' fotek', 'Videoprezentace s vodoznakem', 'Sběr gratulací '.$plans['ochutnavka']['collect_days'].' dní', 'Kdykoliv volitelný upgrade na vyšší tarif – nic se neztratí', 'Administrace pozvánek a obsahu'] as $t)<li>{!! $tick() !!}<span>{{ $t }}</span></li>@endforeach</ul>
           <a class="btn btn--line" href="{{ route('wizard') }}">Začít zdarma</a>
         </div>
         <div class="plan">
           <h3>{{ $plans['party']['name'] }}</h3>
-          <div><div class="price">{{ $kc($plans['party']['price']) }}</div><div class="per">jednorázově za událost</div></div>
+          <div>{!! $price('party') !!}<div class="per">jednorázově za událost</div></div>
           <ul class="ticks">@foreach (['Až '.$plans['party']['guests'].' gratulantů', 'Neomezeně fotek', 'Hlasová i psaná přání', 'Videoprezentace bez vodoznaku + offline balíček', 'Světlý i tmavý vzhled', 'Sběr gratulací až '.$plans['party']['collect_days'].' dní', 'Administrace pozvánek a obsahu'] as $t)<li>{!! $tick() !!}<span>{{ $t }}</span></li>@endforeach</ul>
           <a class="btn btn--line" href="{{ route('wizard', ['tarif' => 'party']) }}">Vybrat Párty</a>
         </div>
         <div class="plan plan--hi">
           <span class="badge">Doporučujeme</span>
           <h3>{{ $plans['premiera']['name'] }}</h3>
-          <div><div class="price">{{ $kc($plans['premiera']['price']) }}</div><div class="per">jednorázově za událost</div></div>
+          <div>{!! $price('premiera') !!}<div class="per">jednorázově za událost</div></div>
           <ul class="ticks">@foreach (['Až '.$plans['premiera']['guests'].' gratulantů', 'Anonymní pozvánka', 'Import gratulantů ze seznamu nebo kontaktů', 'Videa od gratulantů', 'Film MP4 ke stažení (připravujeme)', 'Hra „Hádej, kdo to napsal“', 'Připomínky gratulantům e-mailem', 'Archiv '.$plans['premiera']['archive_months'].' měsíců'] as $t)<li>{!! $tick('#FFC433') !!}<span>{{ $t }}</span></li>@endforeach</ul>
           <a class="btn" href="{{ route('wizard', ['tarif' => 'premiera']) }}">Vybrat Premiéru</a>
         </div>
         <div class="plan">
           <h3>{{ $plans['vip']['name'] }}</h3>
-          <div><div class="price">od {{ $kc($plans['vip']['price']) }}</div><div class="per">uděláme to za vás</div></div>
+          <div>{!! $price('vip', 'od ') !!}<div class="per">uděláme to za vás</div></div>
           <ul class="ticks">@foreach (['Vše z Premiéry', 'Nastavení a pozvánky za vás', 'Obvoláme, kdo ještě nepřispěl', 'Sestříháme a doladíme film', 'Podpora v den oslavy'] as $t)<li>{!! $tick() !!}<span>{{ $t }}</span></li>@endforeach</ul>
           <a class="btn btn--line" href="{{ route('wizard', ['tarif' => 'vip']) }}">Domluvit se</a>
         </div>

@@ -85,6 +85,7 @@ input[type=range] { width: 100%; accent-color: var(--coral); }
 .wz .discount { display: flex; gap: 10px; }
 .wz .discount .inp { flex: 1; text-transform: uppercase; }
 .wz .chk.manual { background: #FFF3D6; border-radius: 14px; padding: 12px 14px; }
+.aside .lines s { font-weight: 400; opacity: .6; margin-right: 4px; }
 .wz .lines .disc b, .wz .lines .disc span { color: #7BE0C3; }
 .wz .scale[data-guests-scale] { position: relative; display: block; height: 34px; margin: 2px 9px 0; }
 .wz .scale[data-guests-scale] span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; padding-top: 8px; }

@@ -125,8 +125,8 @@
       ['reminders', fu ? 'Připomínky hostům e-mailem' : 'Připomínky gratulantům e-mailem', 'Automaticky upozorníme ty, kdo ještě nepřispěli', 2],
     ].filter(Boolean));
     toggles('addons', [
-      ['book', 'Fotokniha', 'Tištěná kniha ze vzpomínek, od 1 290 Kč', 1],
-      ['archExt', 'Archiv o rok déle', '290 Kč / rok', 1],
+      ['book', 'Fotokniha', 'Tištěná kniha ze vzpomínek, od ' + kc(W.addons.photobook), 1],
+      ['archExt', 'Archiv o rok déle', kc(W.addons.archive_year) + ' / rok', 1],
       ['vipSetup', 'Nastavení a pozvánky za vás', 'Vše připravíme a obvoláme gratulanty', 3],
       ['vipEdit', 'Sestřih filmu na míru', 'Doladíme pořadí, hudbu a titulky', 3],
     ]);
@@ -162,7 +162,7 @@
     const q = quote;
     $('[data-tier]').textContent = q ? q.plan_name : '…';
     $('[data-total]').textContent = q ? (q.inquiry ? 'od ' + kc(q.total) : kc(q.total)) : '';
-    $('[data-lines]').innerHTML = q ? (q.inquiry ? `<div><span>Tarif VIP</span><b>od ${kc(q.total)}</b></div>` : q.lines.map(l => `<div class="${l.code === 'discount' ? 'disc' : ''}"><span>${esc(l.name)}${l.qty > 1 ? ' × ' + l.qty : ''}</span><b>${l.total < 0 ? '−' + kc(-l.total / 100) : kc(l.total / 100)}</b></div>`).join('')) : '';
+    $('[data-lines]').innerHTML = q ? (q.inquiry ? `<div><span>Tarif VIP</span><b>od ${kc(q.total)}</b></div>` : q.lines.map(l => `<div class="${l.code === 'discount' ? 'disc' : ''}"><span>${esc(l.name)}${l.qty > 1 ? ' × ' + l.qty : ''}</span><b>${l.list_unit_price ? `<s>${kc(l.list_unit_price / 100)}</s> ` : ''}${l.total < 0 ? '−' + kc(-l.total / 100) : kc(l.total / 100)}</b></div>`).join('')) : '';
     $('[data-reasons]').innerHTML = q ? q.reasons.map(r => `<div>• ${esc(r)}</div>`).join('') : '';
     const dm = $('[data-discount-msg]');
     if (q && q.discount) { dm.textContent = q.discount.message; dm.className = 'msg ' + (q.discount.valid ? 'ok' : 'bad'); }

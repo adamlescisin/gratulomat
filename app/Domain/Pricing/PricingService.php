@@ -106,7 +106,7 @@ final class PricingService
 
         $plan = $codes[$level];
         $lines = [];
-        $lines[] = $this->line($plan, 'Tarif '.$this->plans[$plan]['name'], 1, $this->plans[$plan]['price']);
+        $lines[] = $this->planLine($plan);
         if ($packs > 0) {
             $lines[] = $this->line('guest_pack', $this->addons['guest_pack']['name'], $packs, $this->addons['guest_pack']['price']);
         }
@@ -194,6 +194,19 @@ final class PricingService
         [$base, $vat] = $this->splitVat($lines);
 
         return new Quote($q->plan, $lines, $after, $base, $vat, $q->guestLimit, $q->reasons, false);
+    }
+
+    /** Řádek tarifu; při plošné akci s poznámkou a původní cenou pro přeškrtnutí. */
+    private function planLine(string $plan): array
+    {
+        $p = $this->plans[$plan];
+        $sale = $p['sale'] ?? null;
+        $line = $this->line($plan, 'Tarif '.$p['name'].($sale ? " (akce −{$sale['percent']} %)" : ''), 1, $p['price']);
+        if ($sale && isset($p['list_price']) && $p['list_price'] > $p['price']) {
+            $line['list_unit_price'] = $p['list_price'] * 100;
+        }
+
+        return $line;
     }
 
     private function line(string $code, string $name, int $qty, int $unitCzk): array

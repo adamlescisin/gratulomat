@@ -80,6 +80,8 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/objednavky/{order}/vyrizeno/{code}', [OrdersController::class, 'todoDone'])->where('code', '[a-z_]+')->name('backoffice.order.todo');
     Route::post('/objednavky/{order}/email', [OrdersController::class, 'email'])->name('backoffice.order.email');
     Route::post('/objednavky/{order}/poznamka', [OrdersController::class, 'note'])->name('backoffice.order.note');
+    Route::get('/cenik', 'prices')->name('backoffice.prices');
+    Route::post('/cenik', 'pricesSave')->name('backoffice.prices.save');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
     Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');
     Route::post('/slevy/{discount}/prepnout', 'discountToggle')->name('backoffice.discounts.toggle');

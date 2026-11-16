@@ -15,6 +15,7 @@
     <a href="{{ route('backoffice.events') }}" @if (request()->routeIs('backoffice.events')) aria-current="page" @endif>Události</a>
     <a href="{{ route('backoffice.orders') }}" @if (request()->routeIs('backoffice.order*')) aria-current="page" @endif>Objednávky</a>
     <a href="{{ route('backoffice.waitlist') }}" @if (request()->routeIs('backoffice.waitlist')) aria-current="page" @endif>Čekací listina</a>
+    <a href="{{ route('backoffice.prices') }}" @if (request()->routeIs('backoffice.prices*')) aria-current="page" @endif>Ceník</a>
     <a href="{{ route('backoffice.discounts') }}" @if (request()->routeIs('backoffice.discounts')) aria-current="page" @endif>Slevové kódy</a>
     <a href="{{ route('backoffice.legal') }}" @if (request()->routeIs('backoffice.legal*')) aria-current="page" @endif>Právní náležitosti</a>
     <a href="{{ route('backoffice.mail') }}" @if (request()->routeIs('backoffice.mail*')) aria-current="page" @endif>E-maily</a>

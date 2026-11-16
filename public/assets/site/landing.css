@@ -61,6 +61,9 @@
 .plan--hi { background: var(--ink); color: var(--cream); }
 .plan h3 { margin: 0; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 24px; }
 .plan .price { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 38px; letter-spacing: -.02em; }
+.plan .price-was { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 16px; color: #57516A; } .plan--hi .price-was { color: var(--muted); }
+.plan .sale-tag { padding: 3px 10px; border-radius: 999px; background: #D9432A; color: #fff; font-size: 13px; font-weight: 700; }
+.plan .price--sale { color: #D9432A; } .plan--hi .price--sale { color: var(--sun); }
 .plan .per { font-size: 14px; color: #57516A; } .plan--hi .per { color: var(--muted); }
 .plan ul { flex: 1; }
 .plan .badge { align-self: flex-start; padding: 6px 12px; border-radius: 999px; background: var(--sun); color: var(--ink); font-size: 13px; font-weight: 700; }

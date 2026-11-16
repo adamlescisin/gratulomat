@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Backoffice;
 
+use App\Domain\Pricing\PriceList;
 use App\Http\Controllers\Controller;
 use App\Mail\LoginLink;
 use App\Models\DiscountCode;
@@ -57,6 +58,51 @@ class BackofficeController extends Controller
             'events' => Event::withCount(['households', 'memories'])->with('organizers')->orderBy('event_date')->get(),
             'mode' => Setting::siteMode(),
         ]);
+    }
+
+    public function prices()
+    {
+        return view('backoffice.prices', [
+            'rows' => PriceList::rows(),
+            'plans' => config('gratulomat.plans'),
+            'history' => (array) Setting::get(PriceList::HISTORY, []),
+            'mode' => Setting::siteMode(),
+        ]);
+    }
+
+    public function pricesSave(Request $request)
+    {
+        $codes = array_keys(config('gratulomat.plans'));
+        $rules = $messages = [];
+        foreach ($codes as $code) {
+            $name = config("gratulomat.plans.$code.name");
+            $rules["plans.$code.price"] = 'required|integer|min:0|max:1000000';
+            $rules["plans.$code.sale_percent"] = 'nullable|integer|min:0|max:90';
+            $rules["plans.$code.sale_until"] = 'nullable|date|after_or_equal:today';
+            $messages["plans.$code.price.*"] = "{$name}: zadejte cenu v celých korunách (0 a víc).";
+            $messages["plans.$code.sale_percent.*"] = "{$name}: sleva může být 0–90 %.";
+            $messages["plans.$code.sale_until.after_or_equal"] = "{$name}: akce nemůže končit v minulosti.";
+            $messages["plans.$code.sale_until.date"] = "{$name}: neplatné datum konce akce.";
+        }
+        $v = $request->validate($rules, $messages);
+
+        // Pořadí tarifů musí zůstat vzestupné, jinak by výběr „nejlevnější varianty“ přestal dávat smysl.
+        $prev = null;
+        foreach ($codes as $code) {
+            if ((int) ($v['plans'][$code]['sale_percent'] ?? 0) > 0 && empty($v['plans'][$code]['sale_until'])) {
+                return back()->withInput()->withErrors(['plans' => config("gratulomat.plans.$code.name").': u slevy vyplňte, do kdy platí.']);
+            }
+            $p = (int) $v['plans'][$code]['price'];
+            if ($prev !== null && $p < $prev[1]) {
+                return back()->withInput()->withErrors(['plans' => 'Základní cena tarifu '.config("gratulomat.plans.$code.name")." nesmí být nižší než u tarifu {$prev[0]}."]);
+            }
+            $prev = [config("gratulomat.plans.$code.name"), $p];
+        }
+
+        PriceList::save($v['plans'], $request->user()->email);
+        Log::info('Ceník upraven', ['by' => $request->user()->email]);
+
+        return redirect()->route('backoffice.prices')->with('ok', 'Ceník je uložený. Nové ceny platí hned pro landing page, průvodce i navýšení tarifu; zaplacené objednávky se nemění.');
     }
 
     public function discounts()
