@@ -6,6 +6,8 @@ use App\Domain\Guest\EventRules;
 use App\Domain\Guest\GuestImport;
 use App\Domain\Guest\MemoryPresenter;
 use App\Domain\Guest\Themes;
+use App\Domain\Orders\StripeGateway;
+use App\Domain\Orders\UpgradeService;
 use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
@@ -14,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 /** Administrace organizátora: /{slug}/admin (specifikace „Administrace organizátora“). */
 class EventAdminController extends Controller
@@ -39,7 +42,12 @@ class EventAdminController extends Controller
                 'game_available' => EventRules::has($event, 'game'),
                 'offline_available' => EventRules::has($event, 'offline'),
                 'import_available' => EventRules::has($event, 'import'),
+                'reminders_available' => EventRules::has($event, 'reminders'), 'reminders' => (bool) $event->setting('reminders', true),
                 'finale_title' => $event->setting('finale_title'), 'finale_default' => $event->defaultFinaleTitle(),
+                'plan' => $event->plan, 'plan_name' => config("gratulomat.plans.{$event->plan}.name"), 'is_archived' => $event->isArchived(),
+                'purged' => $event->status === 'purged', 'upgrade_plans' => collect(config('gratulomat.plans'))
+                    ->filter(fn ($p, $k) => array_search($k, array_keys(config('gratulomat.plans')), true) >= array_search($event->plan, array_keys(config('gratulomat.plans')), true) && ! ($p['inquiry'] ?? false))
+                    ->map(fn ($p, $k) => ['key' => $k, 'name' => $p['name'], 'price' => $p['price'], 'guests' => $p['guests']])->values(),
                 'theme' => $event->themeKey(), 'mode' => $event->themeMode(), 'themes' => Themes::forEvent($event),
                 'anon_available' => EventRules::has($event, 'anonymous_link'),
                 'anon_link' => EventRules::has($event, 'anonymous_link') && $event->setting('anon_token') ? route('event.anon', [$event, $event->setting('anon_token')]) : null,
@@ -54,13 +62,49 @@ class EventAdminController extends Controller
                 'game_enabled' => (bool) $event->show?->game_enabled,
             ],
             'households' => $event->households()->orderBy('label')->get()->map(fn (Household $h) => [
-                'id' => $h->id, 'label' => $h->label, 'source' => $h->source, 'email' => $h->email, 'names' => $h->names, 'relation' => $h->relation,
+                'id' => $h->id, 'label' => $h->label, 'source' => $h->source, 'email' => $h->email,
+                'mail_status' => $h->email_opt_out ? 'odhlásil' : ($h->invited_at ? 'pozván '.$h->invited_at->timezone('Europe/Prague')->format('j. n.') : ($h->invite_queued_at ? 'odesílá se' : null)), 'names' => $h->names, 'relation' => $h->relation,
                 'last_seen' => $h->last_seen_at?->toIso8601String(), 'memories' => (int) ($counts[$h->id] ?? 0),
                 'link' => $h->link(),
             ]),
             'memories' => MemoryPresenter::all($event, true),
             'media_base' => url($event->slug.'/m'),
         ]);
+    }
+
+    /** Navýšení tarifu a doplňky: cena (vždy ze serveru). */
+    public function upgradeQuote(Request $request, Event $event, UpgradeService $upgrades): JsonResponse
+    {
+        return response()->json($upgrades->quote($event, $request->only(['plan', 'guest_packs', 'archive_years', 'photobook'])));
+    }
+
+    /** Navýšení tarifu: objednávka a platba přes Stripe. */
+    public function upgrade(Request $request, Event $event, UpgradeService $upgrades, StripeGateway $stripe): JsonResponse
+    {
+        try {
+            $order = $upgrades->createOrder($event, $request->user()->email, $request->only(['plan', 'guest_packs', 'archive_years', 'photobook']), UpgradeService::isTest($event));
+            $session = $stripe->createCheckout($order);
+            $order->update(['stripe_session_id' => $session['id']]);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            Log::error('Navýšení: platbu se nepodařilo zahájit: '.$e->getMessage(), ['event' => $event->slug]);
+
+            return response()->json(['error' => 'Platbu se teď nepodařilo zahájit. Zkuste to prosím za chvíli.'], 502);
+        }
+
+        return response()->json(['url' => $session['url']]);
+    }
+
+    /** Pozvánky e-mailem: zařadí do fronty hosty s e-mailem (vybrané nebo všechny dosud nepozvané). */
+    public function sendInvites(Request $request, Event $event): JsonResponse
+    {
+        $q = $event->households()->whereNotNull('email')->where('email_opt_out', false);
+        $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
+        $ids ? $q->whereKey($ids)->update(['invite_queued_at' => now(), 'invited_at' => null])
+            : $q->whereNull('invited_at')->whereNull('invite_queued_at')->update(['invite_queued_at' => now()]);
+
+        return response()->json(['queued' => $event->households()->whereNotNull('invite_queued_at')->whereNull('invited_at')->count()]);
     }
 
     /** Import ze souboru (CSV, Excel) – od tarifu Premiéra. */
@@ -136,8 +180,10 @@ class EventAdminController extends Controller
         } else {
             $label = trim((string) $request->input('label'));
             abort_if($label === '', 422);
+            $email = mb_strtolower(trim((string) $request->input('email', $h->email)));
+            abort_if($email !== '' && ! filter_var($email, FILTER_VALIDATE_EMAIL), 422, 'Neplatný e-mail.');
             $h->update(['label' => mb_substr($label, 0, 160), 'names' => Household::splitNames($label),
-                'relation' => trim((string) $request->input('relation')) ?: null]);
+                'relation' => trim((string) $request->input('relation')) ?: null, 'email' => $email ?: null]);
         }
 
         return response()->json(['ok' => true]);
@@ -194,6 +240,7 @@ class EventAdminController extends Controller
             'mode' => 'sometimes|in:light,dark',
             'auto_share' => 'sometimes|boolean',
             'finale_title' => 'sometimes|nullable|string|max:120',
+            'reminders' => 'sometimes|boolean',
             'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
@@ -218,6 +265,9 @@ class EventAdminController extends Controller
         }
         if (array_key_exists('wall_open_at', $v)) {
             $settings['wall_open_at'] = $v['wall_open_at'] ? Carbon::parse($v['wall_open_at'], 'Europe/Prague')->utc()->toIso8601String() : null;
+        }
+        if (array_key_exists('reminders', $v)) {
+            $settings['reminders'] = (bool) $v['reminders'];
         }
         if (array_key_exists('finale_title', $v)) {
             $t = trim((string) $v['finale_title']);

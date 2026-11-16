@@ -26,6 +26,8 @@
     const d = window.GM.demoShow || await (await fetch(window.GM.showUrl, { credentials: 'same-origin' })).json();
     if (d.error) throw new Error(d.error);
     P.data = d;
+    // vodoznak pro tarify bez „Videoprezentace bez vodoznaku“ (Ochutnávka)
+    if (d.watermark && !$('.kino__wm')) kino.append(h('a', { class: 'kino__wm', href: 'https://gratulomat.cz', target: '_blank', rel: 'noopener' }, 'Vytvořeno v Gratulomatu · gratulomat.cz'));
     const url = (m, f) => `${d.media_base}/${m.id}/${f}`;
     d.memories.forEach(m => m.media.forEach(x => { x.url = x.url || url(m, x.file); x.thumbUrl = x.thumbUrl || (x.thumb ? url(m, x.thumb) : x.url); }));
 

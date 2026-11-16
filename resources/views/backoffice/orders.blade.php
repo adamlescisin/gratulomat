@@ -25,7 +25,7 @@
         <td>{{ $o->email }}@if ($o->company)<br><span class="muted">{{ $o->company['name'] }}</span>@endif</td>
         <td>{{ $o->config['name'] ?? '' }}<br><span class="muted">/{{ $o->slug }} · {{ config("gratulomat.plans.{$o->plan}.name", $o->plan) }}</span></td>
         <td style="white-space:nowrap">{{ $o->status === 'inquiry' ? '—' : $o->totalCzk() }}@if ($o->discount_code)<br><span class="muted">sleva {{ $o->discount_code }}</span>@endif @if ($o->refunded_halere)<br><span class="muted">vráceno {{ \App\Models\Order::czk($o->refunded_halere) }}</span>@endif</td>
-        <td>{{ $o->statusLabel() }}</td>
+        <td>{{ $o->statusLabel() }}@if ($o->kind === 'upgrade')<br><span class="muted">navýšení</span>@endif @if ($o->openTodo())<br><span class="tag">K VYŘÍZENÍ</span>@endif</td>
         <td>@php($inv = $o->invoices->firstWhere('kind', 'invoice')){{ $inv ? ($inv->number ?: (['queued' => 've frontě', 'issued' => 'vystaven', 'sent' => 'odeslán'][$inv->status] ?? $inv->status)) : '—' }}</td>
       </tr>
     @empty

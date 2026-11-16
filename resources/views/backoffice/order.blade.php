@@ -27,6 +27,15 @@
   </table></div>
   @endif
 
+  @if ($order->todo)
+  <h3 style="margin:8px 0 0">K vyřízení</h3>
+  @foreach ($order->todo as $t)
+    <div class="row" style="align-items:center">
+      <span>{{ empty($t['done_at']) ? '⏳' : '✅' }} {{ $t['name'] }}@if (! empty($t['done_at'])) <span class="muted">({{ \Illuminate\Support\Carbon::parse($t['done_at'])->timezone('Europe/Prague')->format('j. n. Y') }})</span>@endif</span>
+      @if (empty($t['done_at']))<form method="post" action="{{ route('backoffice.order.todo', [$order, $t['code']]) }}">@csrf<button class="b b--sm b--ghost">Vyřízeno</button></form>@endif
+    </div>
+  @endforeach
+  @endif
   <h3 style="margin:8px 0 0">Doklady</h3>
   @forelse ($order->invoices as $inv)
     <div class="row" style="align-items:center">

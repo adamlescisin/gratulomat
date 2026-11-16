@@ -188,6 +188,11 @@ class WizardConfig
     /** Všechny funkce zaplaceného tarifu (organizátor je může zapnout i později). */
     private function featuresForPlan(string $plan): array
     {
+        return self::featuresFor($plan, $this->isFuneral());
+    }
+
+    public static function featuresFor(string $plan, bool $funeral): array
+    {
         $codes = array_keys(config('gratulomat.plans'));
         $level = array_search($plan, $codes, true);
         $out = [];
@@ -196,7 +201,7 @@ class WizardConfig
                 $out[] = $feature;
             }
         }
-        if ($this->isFuneral()) {
+        if ($funeral) {
             $out = array_values(array_diff($out, config('gratulomat.funeral.disabled_features')));
         }
 

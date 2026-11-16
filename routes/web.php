@@ -11,9 +11,11 @@ use App\Http\Controllers\Site\WaitlistController;
 use App\Http\Controllers\Site\WizardController;
 use App\Http\Middleware\EnsureOperator;
 use App\Http\Middleware\EnsureOrganizer;
+use App\Http\Middleware\EventNotArchived;
 use App\Models\Household;
 use App\Models\TesterCode;
 use App\Support\MailBrand;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -74,6 +76,7 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/objednavky/{order}/vip-rucne', [OrdersController::class, 'vipManual'])->name('backoffice.order.vipManual');
     Route::post('/objednavky/{order}/uloha/{job}', [OrdersController::class, 'retryJob'])->name('backoffice.order.retry');
     Route::get('/objednavky/{order}/doklad/{invoice}', [OrdersController::class, 'invoicePdf'])->name('backoffice.order.pdf');
+    Route::post('/objednavky/{order}/vyrizeno/{code}', [OrdersController::class, 'todoDone'])->where('code', '[a-z_]+')->name('backoffice.order.todo');
     Route::post('/objednavky/{order}/email', [OrdersController::class, 'email'])->name('backoffice.order.email');
     Route::post('/objednavky/{order}/poznamka', [OrdersController::class, 'note'])->name('backoffice.order.note');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
@@ -109,13 +112,15 @@ Route::get('/zalozit/potvrdit/{order}', [WizardController::class, 'confirm'])->n
 /*
  * Stránky událostí – vždy až na konci (zachytávají /{slug}).
  */
-Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])->group(function () {
+Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])->middleware(EventNotArchived::class)->group(function () {
     Route::get('/', [EventPageController::class, 'show'])->name('event.show');
     Route::get('/g/{token}', [EventPageController::class, 'invite'])->where('token', '[A-Za-z0-9]{6,32}')->name('event.invite');
     Route::get('/p/{token}', [EventPageController::class, 'anonForm'])->where('token', '[a-z0-9]{8,32}')->name('event.anon');
     Route::post('/p/{token}', [EventPageController::class, 'anonJoin'])->where('token', '[a-z0-9]{8,32}')->middleware('throttle:10,1')->name('event.anon.join');
     Route::post('/prihlasit', [EventPageController::class, 'login'])->middleware('throttle:20,1')->name('event.login');
     Route::get('/odhlasit', [EventPageController::class, 'logout'])->name('event.logout');
+    Route::match(['get', 'post'], '/odhlasit-emaily/{household}', [EventPageController::class, 'unsubscribe'])->whereNumber('household')->middleware('signed')->name('event.unsubscribe')
+        ->withoutMiddleware([ValidateCsrfToken::class]);
     Route::get('/kino', [EventPageController::class, 'kino'])->name('event.kino');
     Route::get('/m/{memoryId}/{file}', [EventPageController::class, 'media'])->name('event.media');
 
@@ -130,6 +135,9 @@ Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])-
         Route::post('/api/households', [EventAdminController::class, 'addHouseholds']);
         Route::post('/api/import', [EventAdminController::class, 'import']);
         Route::post('/api/anon-link', [EventAdminController::class, 'anonLink']);
+        Route::post('/api/send-invites', [EventAdminController::class, 'sendInvites'])->middleware('throttle:10,1');
+        Route::post('/api/upgrade-quote', [EventAdminController::class, 'upgradeQuote']);
+        Route::post('/api/upgrade', [EventAdminController::class, 'upgrade'])->middleware('throttle:10,1');
         Route::post('/api/households/{household}', [EventAdminController::class, 'updateHousehold'])->whereNumber('household');
         Route::post('/api/memories/{memory}', [EventAdminController::class, 'updateMemory']);
         Route::post('/api/show', [EventAdminController::class, 'updateShow']);

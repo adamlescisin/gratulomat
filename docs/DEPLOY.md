@@ -26,8 +26,11 @@ přepnutí symlinku `current`). Hostinger Git deploy se nepoužívá.
    (např. `/home/u123456789/domains/staging.gratulomat.cz`). U `production` zapnout
    „Required reviewers“, ať tag nejde ven bez potvrzení. Volitelná proměnná `PHP_BIN`,
    pokud `php` v SSH není 8.3 (např. `/opt/alt/php83/usr/bin/php`).
-6. **hPanel → Cron**: každou minutu
-   `cd ~/domains/staging.gratulomat.cz/current && php artisan schedule:run >> /dev/null 2>&1`
+6. **hPanel → Pokročilé → Cron Jobs**: každou minutu (`* * * * *`)
+   `cd ~/domains/gratulomat.cz/current && /opt/alt/php83/usr/bin/php artisan schedule:run >> /dev/null 2>&1`
+   Plánovač spouští: `gratulomat:guest-mail` (každou minutu – pozvánky a připomínky po dávkách)
+   a `gratulomat:archive` (denně 3:15 – upozornění 7 dní před koncem archivu, úklid médií 30 dní po něm).
+   Ruční kontrola: `php artisan gratulomat:archive --dry-run`.
 7. První nasazení: push do `main`. Po něm `php artisan key:generate` jen pokud `.env` nemá `APP_KEY`.
 
 ## shared/.env (staging)

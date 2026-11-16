@@ -17,6 +17,8 @@ return [
         'smutecni' => 'Navždy v našich vzpomínkách',
         'default' => 'Děkujeme, že jste součástí příběhu',
     ],
+    'archived' => 'Tato událost už skončila a její stránka není dostupná. Pokud potřebujete archiv prodloužit, obraťte se na organizátora.',
+    'unsubscribed' => 'Hotovo – další e-maily k této události vám už posílat nebudeme.',
     'go_one' => 'pojď',
     'create_one' => '',
     'create_many' => '',

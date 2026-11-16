@@ -15,6 +15,8 @@ return [
         'smutecni' => 'Für immer in unseren Erinnerungen',
         'default' => 'Danke, dass ihr Teil der Geschichte seid',
     ],
+    'archived' => 'Diese Veranstaltung ist beendet und ihre Seite nicht mehr verfügbar. Wenn das Archiv verlängert werden soll, wenden Sie sich bitte an den Veranstalter.',
+    'unsubscribed' => 'Erledigt – wir senden Ihnen keine weiteren E-Mails zu dieser Veranstaltung.',
     'go_one' => 'komm',
     'go_many' => 'kommt',
     'create_one' => 'gestalte',

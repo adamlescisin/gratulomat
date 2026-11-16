@@ -99,6 +99,14 @@ class EventPageController extends Controller
         return $limit !== null && $event->households()->count() >= $limit;
     }
 
+    /** Odhlášení e-mailů k události (odkaz v patičce pozvánky / List-Unsubscribe). */
+    public function unsubscribe(Event $event, int $household)
+    {
+        $event->households()->whereKey($household)->update(['email_opt_out' => true]);
+
+        return response()->view('event.landing', ['event' => $event, 'notice' => __('guest.unsubscribed')]);
+    }
+
     public function logout(Event $event)
     {
         GuestSession::logout($event);

@@ -16,7 +16,7 @@ class Order extends Model
 
     protected $casts = [
         'config' => 'array', 'company' => 'array', 'lines' => 'array', 'is_test' => 'boolean',
-        'paid_at' => 'datetime', 'expires_at' => 'datetime', 'refunded_at' => 'datetime', 'history' => 'array',
+        'paid_at' => 'datetime', 'expires_at' => 'datetime', 'refunded_at' => 'datetime', 'history' => 'array', 'todo' => 'array',
     ];
 
     public const STATUS_LABELS = [
@@ -41,6 +41,11 @@ class Order extends Model
     {
         $this->history = [...($this->history ?? []), ['at' => now()->toIso8601String(), 'text' => $text, 'by' => $by]];
         $this->save();
+    }
+
+    public function openTodo(): array
+    {
+        return array_values(array_filter($this->todo ?? [], fn ($t) => empty($t['done_at'])));
     }
 
     public function refundableHalere(): int

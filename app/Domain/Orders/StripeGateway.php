@@ -53,8 +53,8 @@ class StripeGateway
                 'price_data' => ['currency' => 'czk', 'unit_amount' => $l['unit_price'], 'product_data' => ['name' => $l['name']]],
             ], $items),
             'locale' => 'cs',
-            'success_url' => route('wizard.done').'?objednavka='.$order->id,
-            'cancel_url' => route('wizard').'?zruseno=1',
+            'success_url' => $order->kind === 'upgrade' ? route('organizer.admin', $order->slug).'?navyseni=ok' : route('wizard.done').'?objednavka='.$order->id,
+            'cancel_url' => $order->kind === 'upgrade' ? route('organizer.admin', $order->slug).'?navyseni=zruseno' : route('wizard').'?zruseno=1',
             // Stripe vyžaduje aspoň 30 minut; rezerva kvůli rozdílu hodin
             'expires_at' => now()->addMinutes(max(35, min($expiresMinutes, 60 * 23)))->timestamp,
         ];

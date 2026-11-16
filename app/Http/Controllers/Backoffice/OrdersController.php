@@ -23,7 +23,7 @@ use Throwable;
 class OrdersController extends Controller
 {
     public const FILTERS = [
-        '' => 'Vše', 'paid' => 'Zaplacené', 'pending' => 'Čeká na platbu', 'inquiry' => 'VIP poptávky',
+        '' => 'Vše', 'todo' => 'K vyřízení', 'paid' => 'Zaplacené', 'upgrade' => 'Navýšení', 'pending' => 'Čeká na platbu', 'inquiry' => 'VIP poptávky',
         'refunded' => 'Vrácené', 'manual' => 'Ruční', 'closed' => 'Zrušené / vypršelé',
     ];
 
@@ -42,6 +42,7 @@ class OrdersController extends Controller
                 ['Čeká na platbu', Order::where('status', 'pending')->where('total_halere', '>', 0)->count()],
                 ['Otevřené VIP poptávky', Order::where('status', 'inquiry')->count()],
                 ['Doklady s chybou', WorkerJob::where('status', 'failed')->count()],
+                ['K vyřízení (fotokniha, VIP)', Order::whereNotNull('todo')->where('todo', 'like', '%"done_at":null%')->count()],
             ],
         ]);
     }
@@ -168,6 +169,15 @@ class OrdersController extends Controller
         return back()->with('ok', 'E-mail je změněný.'.($order->event && $request->boolean('move_owner') ? ' Odkaz do administrace pošlete tlačítkem „Znovu poslat odkaz“.' : ''));
     }
 
+    public function todoDone(Request $request, Order $order, string $code)
+    {
+        $order->todo = array_map(fn ($t) => $t['code'] === $code && empty($t['done_at']) ? [...$t, 'done_at' => now()->toIso8601String(), 'by' => $request->user()->email] : $t, $order->todo ?? []);
+        $order->save();
+        $order->log("Vyřízeno: {$code}", $request->user()->email);
+
+        return back()->with('ok', 'Označeno jako vyřízené.');
+    }
+
     public function note(Request $request, Order $order)
     {
         $order->update(['note' => $request->validate(['note' => 'nullable|string|max:2000'])['note']]);
@@ -179,6 +189,8 @@ class OrdersController extends Controller
     {
         $q = Order::query()->with(['event', 'invoices']);
         match ($request->query('stav')) {
+            'todo' => $q->whereNotNull('todo')->where('todo', 'like', '%"done_at":null%'),
+            'upgrade' => $q->where('kind', 'upgrade'),
             'paid' => $q->whereNotNull('paid_at')->whereColumn('refunded_halere', '<', 'total_halere'),
             'pending' => $q->where('status', 'pending'),
             'inquiry' => $q->where('status', 'inquiry'),

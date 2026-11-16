@@ -47,7 +47,7 @@ class StripeWebhookController extends Controller
         switch ($event->type) {
             case 'checkout.session.completed':
             case 'checkout.session.async_payment_succeeded':
-                if ($order && StripeGateway::isPaid($obj)) {
+                if ($order && $order->status !== 'fulfilled' && StripeGateway::isPaid($obj)) {
                     $order->update(['status' => 'paid', 'paid_at' => now(), 'stripe_payment_intent' => $obj->payment_intent ?? null]);
                     $orders->fulfill($order, $obj->payment_intent ?? null);
                 }

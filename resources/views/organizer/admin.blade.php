@@ -13,6 +13,9 @@
   </nav>
 </header>
 <main class="admin">
+  @if (request('navyseni') === 'ok')<p class="alert alert--ok" data-upgrade-banner>Děkujeme za platbu. Navýšení se projeví během pár vteřin, jakmile Stripe platbu potvrdí – stránka se obnoví sama.</p>@endif
+  @if (request('navyseni') === 'zruseno')<p class="alert">Platba byla zrušena, nic se nezměnilo.</p>@endif
+  <p class="alert" data-archived hidden></p>
   <section class="kpis" data-kpis></section>
 
   <section class="card">
@@ -26,6 +29,20 @@
     </div>
     <label class="check"><input type="checkbox" data-auto-share> Po uzávěrce sběru (<span data-auto-share-at></span>) prezentaci hostům automaticky nasdílet – na jejich stránce se dole objeví odkaz a QR kód</label>
     <label class="check" data-game-wrap hidden><input type="checkbox" data-game> Hra „Hádej, kdo to napsal“ v Kině</label>
+  </section>
+
+  <section class="card" data-plan-card>
+    <h2 class="h2">Tarif a doplňky</h2>
+    <p class="muted" data-plan-now></p>
+    <form data-upgrade class="upgrade">
+      <label class="muted">Tarif<br><select class="input" name="plan" data-up-plan></select></label>
+      <label class="muted">Balíčky +{{ config('gratulomat.addons.guest_pack.size') }} hostů ({{ config('gratulomat.addons.guest_pack.price') }} Kč)<br><input class="input" type="number" name="guest_packs" min="0" max="20" value="0"></label>
+      <label class="muted">Archiv o rok déle ({{ config('gratulomat.addons.archive_year.price') }} Kč / rok)<br><input class="input" type="number" name="archive_years" min="0" max="5" value="0"></label>
+      <label class="check"><input type="checkbox" name="photobook" value="1"> Fotokniha ze vzpomínek (od {{ config('gratulomat.addons.photobook.price') }} Kč) – ozveme se s návrhem</label>
+      <div class="upgrade__sum" data-up-sum></div>
+      <button class="btn btn--gold" type="submit" data-up-pay disabled>Vyberte změnu</button>
+    </form>
+    <p class="muted" style="font-size:.85rem">Tarif VIP vám rádi připravíme na míru – napište na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
   </section>
 
   <section class="card">
@@ -44,6 +61,13 @@
           <form data-file-import class="row"><input type="file" name="file" accept=".csv,.txt,.xlsx" required> <button class="btn btn--ghost btn--sm" type="submit">Importovat</button></form>
         </div>
         <p class="muted" data-file-import-off hidden>Import seznamu (CSV, Excel) je součástí tarifu Premiéra.</p>
+      </div>
+      <div class="guest-tool">
+        <h3 class="h3">Pozvánky e-mailem</h3>
+        <p class="muted" data-mail-info></p>
+        <button class="btn btn--gold btn--sm" data-action="send-invites">Poslat pozvánky e-mailem</button>
+        <label class="check" data-reminders-wrap hidden><input type="checkbox" data-reminders> 3 dny před uzávěrkou připomenout e-mailem těm, kdo ještě nepřispěli</label>
+        <p class="muted" data-reminders-off hidden style="font-size:.85rem">Automatické připomínky jsou součástí tarifu Premiéra.</p>
       </div>
       <div class="guest-tool" data-anon-wrap>
         <h3 class="h3">Anonymní pozvánka</h3>

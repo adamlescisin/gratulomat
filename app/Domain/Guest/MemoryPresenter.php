@@ -81,6 +81,7 @@ class MemoryPresenter
             'age' => $event->age() ?? 0,
             'party_date' => $event->event_date->toIso8601String(),
             'finale_title' => $event->finaleTitle(),
+            'watermark' => ! EventRules::has($event, 'no_watermark'),
             'music' => $event->show?->music,
             'game' => (bool) $event->show?->game_enabled && ! $event->isFuneral(),
             'media_base' => $mediaBase,

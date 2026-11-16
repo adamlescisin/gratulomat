@@ -41,7 +41,7 @@
     $('[data-hh-count]').textContent = `(${hh.length}${E.guest_limit ? ' z ' + E.guest_limit : ''})`;
     $('[data-households] tbody').innerHTML = hh.map(x => `
       <tr class="${x.memories ? '' : 'is-silent'}">
-        <td><strong>${esc(x.label)}</strong>${x.source === 'anonymous' ? ' <span class="badge" title="Přihlásil se sám přes anonymní pozvánku">sám</span>' : x.source === 'import' ? ' <span class="badge">import</span>' : ''}<br><span class="muted">${esc(x.names.join(' · '))}${x.email ? ' · ' + esc(x.email) : ''}</span></td>
+        <td><strong>${esc(x.label)}</strong>${x.source === 'anonymous' ? ' <span class="badge" title="Přihlásil se sám přes anonymní pozvánku">sám</span>' : x.source === 'import' ? ' <span class="badge">import</span>' : ''}<br><span class="muted">${esc(x.names.join(' · '))}${x.email ? ' · ' + esc(x.email) : ''}${x.mail_status ? ` · <em>${esc(x.mail_status)}</em>` : ''}</span></td>
         <td>${esc(x.relation || '')}</td>
         <td>${x.memories}</td>
         <td class="muted">${x.last_seen ? fmt(x.last_seen) : '—'}</td>
@@ -53,6 +53,16 @@
           <button class="btn btn--ghost btn--sm btn--danger" data-del="${x.id}">×</button>
         </div></td>
       </tr>`).join('');
+
+    // pozvánky e-mailem
+    const withMail = hh.filter(x => x.email && x.mail_status !== 'odhlásil'), notInvited = withMail.filter(x => !x.mail_status);
+    $('[data-mail-info]').textContent = withMail.length
+      ? `E-mail má ${withMail.length} z ${hh.length} hostů, zatím nepozváno: ${notInvited.length}. Použije se text pozvánky z Nastavení, odpovědi chodí na váš e-mail.`
+      : 'Zatím žádný host nemá e-mail. Doplňte ho přes „Upravit“ nebo importem seznamu.';
+    $('[data-action="send-invites"]').disabled = !notInvited.length;
+    $('[data-action="send-invites"]').textContent = notInvited.length ? `Poslat pozvánky e-mailem (${notInvited.length})` : 'Všichni s e-mailem jsou pozvaní';
+    $('[data-reminders-wrap]').hidden = !E.reminders_available; $('[data-reminders-off]').hidden = E.reminders_available;
+    $('[data-reminders]').checked = E.reminders;
 
     // import a anonymní pozvánka (od Premiéry)
     $('[data-file-import-on]').hidden = !E.import_available; $('[data-file-import-off]').hidden = E.import_available;
@@ -89,6 +99,9 @@
       </article>`;
     }).join('') || '<p class="empty">Zatím žádné vzpomínky.</p>';
 
+    // tarif a doplňky
+    renderPlan();
+
     // nastavení
     const bn = $('.brand__name'); if (bn) bn.textContent = `${E.title} · administrace`;
     const f = $('[data-settings]');
@@ -96,6 +109,33 @@
     if (!f.dataset.loaded) { f.dataset.theme = E.theme; f.dataset.mode = E.mode; }
     renderThemes();
     if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; field(f, 'finale_title').value = E.finale_title || ''; field(f, 'finale_title').placeholder = E.finale_default; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); if (S.show.wall_open_at) field(f, 'wall_open_at').value = localInput(S.show.wall_open_at); if (E.funeral) field(f, 'wall_open_at').closest('label').hidden = true; f.dataset.loaded = '1'; }
+  }
+
+  function renderPlan() {
+    const E = S.event, f = $('[data-upgrade]');
+    $('[data-plan-now]').textContent = `Teď: ${E.plan_name} · hosté až ${E.guest_limit ?? '∞'} · archiv do ${E.archive_until ? new Date(E.archive_until).toLocaleDateString('cs-CZ') : '—'}`;
+    const ar = $('[data-archived]');
+    ar.hidden = !E.is_archived && !E.purged;
+    ar.textContent = E.purged ? 'Archiv této události vypršel a fotky, videa a vzkazy byly smazány.'
+      : 'Viditelnost (archiv) této události skončila – hosté ji už nevidí. Prodlužte archiv níže, jinak budou fotky a vzkazy po 30 dnech smazány.';
+    $('[data-plan-card]').hidden = E.purged;
+    if (!f.dataset.ready) {
+      $('[data-up-plan]').innerHTML = E.upgrade_plans.map(p => `<option value="${p.key}">${esc(p.name)}${p.key === E.plan ? ' (současný)' : ` – až ${p.guests} hostů`}</option>`).join('');
+      f.dataset.ready = '1';
+    }
+  }
+  let upTimer;
+  async function upgradeQuote() {
+    const f = $('[data-upgrade]'), body = { plan: field(f, 'plan').value, guest_packs: +field(f, 'guest_packs').value || 0, archive_years: +field(f, 'archive_years').value || 0, photobook: field(f, 'photobook').checked };
+    const q = await post('upgrade-quote', body);
+    const kc = h => (h / 100).toLocaleString('cs-CZ') + ' Kč';
+    $('[data-up-sum]').innerHTML = q.errors.length ? `<p class="alert">${esc(q.errors[0])}</p>`
+      : q.lines.length ? `${q.lines.map(l => `<div><span>${esc(l.name)}${l.qty > 1 ? ' × ' + l.qty : ''}</span><b>${kc(l.total)}</b></div>`).join('')}
+        <div class="upgrade__total"><span>Doplatek celkem (s DPH)</span><b>${kc(q.total)}</b></div>
+        <p class="muted" style="font-size:.85rem">Po zaplacení: hosté až ${q.guests} · archiv do ${new Date(q.archive_until).toLocaleDateString('cs-CZ')}</p>` : '';
+    const btn = $('[data-up-pay]');
+    btn.disabled = !!q.errors.length || q.total <= 0;
+    btn.textContent = q.total > 0 && !q.errors.length ? `Zaplatit ${kc(q.total)} přes Stripe` : 'Vyberte změnu';
   }
 
   function renderThemes() {
@@ -132,6 +172,15 @@
         toast(`Importováno: ${j.added}${j.duplicates ? ` · ${j.duplicates} už v seznamu` : ''}${j.skipped ? ` · ${j.skipped} nad limit tarifu (${j.limit})` : ''}`);
       });
     }
+    if (e.target.matches('[data-upgrade]')) {
+      e.preventDefault();
+      const f = e.target, btn = $('[data-up-pay]');
+      btn.disabled = true; btn.textContent = 'Přesměrovávám na platbu…';
+      post('upgrade', { plan: field(f, 'plan').value, guest_packs: +field(f, 'guest_packs').value || 0, archive_years: +field(f, 'archive_years').value || 0, photobook: field(f, 'photobook').checked })
+        .then(r => { location.href = r.url; })
+        .catch(err => { toast(err.message); upgradeQuote(); });
+      return;
+    }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
       run(() => post('settings', { finale_title: field(e.target, 'finale_title').value, wall_open_at: field(e.target, 'wall_open_at').value || null, theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
@@ -146,8 +195,11 @@
       const x = S.households.find(y => y.id == t.dataset.edit);
       const label = prompt('Jména (např. „Petra a Honza“):', x.label); if (label == null) return;
       const relation = prompt('Vztah (nepovinné):', x.relation || ''); if (relation == null) return;
-      run(() => post(`households/${x.id}`, { label, relation }));
+      const email = prompt('E-mail pro pozvánku (nepovinné):', x.email || ''); if (email == null) return;
+      run(() => post(`households/${x.id}`, { label, relation, email }));
     }
+    if (t.dataset.action === 'send-invites' && confirm('Poslat pozvánky e-mailem všem dosud nepozvaným hostům s e-mailem?'))
+      run(async () => { const r = await post('send-invites', {}); toast(`Ve frontě: ${r.queued} – odesíláme postupně během pár minut`); }, null);
     if (t.dataset.pickTheme) { $('[data-settings]').dataset.theme = t.dataset.pickTheme; renderThemes(); return; }
     if (t.dataset.pickMode) { $('[data-settings]').dataset.mode = t.dataset.pickMode; renderThemes(); return; }
     if (t.dataset.anon === 'copy') { navigator.clipboard?.writeText(S.event.anon_link).then(() => toast('Odkaz zkopírován ✓')); }
@@ -164,6 +216,13 @@
     if (a === 'close-qr') $('[data-qr]').close();
     if (a === 'copy-msg') navigator.clipboard.writeText($('[data-qr-msg]').value).then(() => toast('Zkopírováno – vložte do WhatsAppu nebo e-mailu.'));
   });
+  $('[data-upgrade]').addEventListener('input', () => { clearTimeout(upTimer); upTimer = setTimeout(upgradeQuote, 250); });
+  if (new URLSearchParams(location.search).get('navyseni') === 'ok') {
+    // čekání na potvrzení platby webhookem
+    const plan0 = () => S.event && `${S.event.plan}|${S.event.guest_limit}|${S.event.archive_until}`; let first = null, n = 0;
+    const iv = setInterval(async () => { await load(); first ??= plan0(); if (plan0() !== first || ++n > 20) { clearInterval(iv); $('[data-upgrade-banner]')?.remove(); history.replaceState(null, '', location.pathname); if (n <= 20) toast('Navýšení je aktivní ✓'); } }, 3000);
+  }
+  $('[data-reminders]').addEventListener('change', e => run(() => post('settings', { reminders: e.target.checked }), e.target.checked ? 'Připomínky zapnuty' : 'Připomínky vypnuty'));
   $('[data-auto-share]').addEventListener('change', e => run(() => post('settings', { auto_share: e.target.checked }), e.target.checked ? 'Po uzávěrce se prezentace hostům nasdílí sama' : 'Automatické nasdílení vypnuto'));
   $('[data-game]').addEventListener('change', e => run(() => post('show', { game_enabled: e.target.checked })));
 

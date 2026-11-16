@@ -15,6 +15,8 @@ return [
         'smutecni' => 'Forever in our memories',
         'default' => 'Thank you for being part of the story',
     ],
+    'archived' => 'This event has ended and its page is no longer available. If you need the archive extended, please contact the organiser.',
+    'unsubscribed' => 'Done – we will not send you any more e-mails about this event.',
     'go_one' => 'come',
     'create_one' => '',
     'create_many' => '',

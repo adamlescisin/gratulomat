@@ -7,6 +7,7 @@ use App\Mail\EventReady;
 use App\Mail\FreeEventConfirm;
 use App\Mail\NewOrderNotice;
 use App\Mail\PaymentLink;
+use App\Mail\UpgradeDone;
 use App\Models\DiscountCode;
 use App\Models\Event;
 use App\Models\Invoice;
@@ -84,6 +85,9 @@ class OrderService
     /** Zaplaceno (webhook) nebo potvrzeno (Ochutnávka) → událost. Idempotentní. */
     public function fulfill(Order $order, ?string $paymentIntent = null): Event
     {
+        if ($order->kind === 'upgrade') {
+            return $this->fulfillUpgrade($order, $paymentIntent);
+        }
         $event = DB::transaction(function () use ($order, $paymentIntent) {
             $order = Order::whereKey($order->id)->lockForUpdate()->first();
             if ($order->event_id) {
@@ -110,6 +114,7 @@ class OrderService
                 'stripe_payment_intent' => $paymentIntent ?? $order->stripe_payment_intent,
             ]);
 
+            $this->assignTodo($order);
             if ($order->discount_code) {
                 DiscountCode::where('code', $order->discount_code)->increment('used_count');
             }
@@ -130,6 +135,58 @@ class OrderService
         }
 
         return $event;
+    }
+
+    /** Úkoly pro provozovatele (fotokniha, VIP služby) – vyřizují se ručně v back-office. */
+    public function assignTodo(Order $order): void
+    {
+        $todo = [];
+        if (collect($order->lines)->contains('code', 'photobook')) {
+            $todo[] = ['code' => 'photobook', 'name' => 'Fotokniha – připravit návrh a domluvit tisk', 'done_at' => null];
+        }
+        $cfg = $order->config ?? [];
+        if ($order->plan === 'vip' || ! empty($cfg['vipSetup'])) {
+            $todo[] = ['code' => 'vip_setup', 'name' => 'VIP – nastavení události a pozvánky za zákazníka', 'done_at' => null];
+        }
+        if (! empty($cfg['vipEdit'])) {
+            $todo[] = ['code' => 'vip_edit', 'name' => 'VIP – sestřih filmu na míru', 'done_at' => null];
+        }
+        if ($todo) {
+            $order->todo = [...($order->todo ?? []), ...$todo];
+            $order->save();
+        }
+    }
+
+    /** Navýšení tarifu / doplňky k existující události (idempotentní). */
+    private function fulfillUpgrade(Order $order, ?string $paymentIntent): Event
+    {
+        $done = DB::transaction(function () use ($order, $paymentIntent) {
+            $order = Order::whereKey($order->id)->lockForUpdate()->first();
+            if ($order->status === 'fulfilled' || ! empty($order->config['upgrade']['applied_at'])) {
+                return false;
+            }
+            app(UpgradeService::class)->apply($order);
+            $order->config = [...$order->config, 'upgrade' => [...$order->config['upgrade'], 'applied_at' => now()->toIso8601String()]];
+            $this->assignTodo($order);
+            $order->update(['status' => 'fulfilled', 'paid_at' => now(), 'stripe_payment_intent' => $paymentIntent ?? $order->stripe_payment_intent]);
+            $order->log('Navýšení provedeno: tarif '.config("gratulomat.plans.{$order->plan}.name").', hosté '.$order->event->limit('guests').', archiv do '.$order->event->archive_until->toDateString());
+            if ($order->total_halere > 0 && ! $order->is_test) {
+                $this->queueInvoice($order);
+            }
+
+            return true;
+        });
+        $order->refresh();
+        if ($done) {
+            try {
+                Mail::to($order->email)->send(new UpgradeDone($order));
+                Mail::to(config('gratulomat.notify_email'))->send(new NewOrderNotice($order, $order->event));
+            } catch (Throwable $e) {
+                Log::error('E-mail k navýšení se nepodařilo odeslat: '.$e->getMessage(), ['order' => $order->number]);
+            }
+        }
+
+        return $order->event;
     }
 
     /**

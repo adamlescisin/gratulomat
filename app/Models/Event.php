@@ -97,6 +97,16 @@ class Event extends Model
         $this->recipient_forms = CzechNames::forms($this->recipient_name, $type) ?: null;
     }
 
+    /** Uplynula viditelnost (archiv)? Platí do konce dne archive_until (Praha). */
+    public function isArchived(): bool
+    {
+        return $this->archive_until !== null
+            && now()->gt($this->archive_until->copy()->shiftTimezone('Europe/Prague')->endOfDay());
+    }
+
+    /** Po kolika dnech od konce archivu se mažou média (lhůta na prodloužení). */
+    public const PURGE_GRACE_DAYS = 30;
+
     /** Závěrečný titulek videoprezentace: vlastní z administrace, jinak výchozí podle typu události. */
     public function finaleTitle(): string
     {
