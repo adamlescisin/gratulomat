@@ -9,10 +9,12 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <title>@yield('title', 'Gratulomat')</title>
+<meta name="theme-color" content="#FFF8EE">
 <link rel="stylesheet" href="{{ asset('assets/event/css/app.css') }}?v={{ @filemtime(public_path('assets/event/css/app.css')) }}">
+<link rel="stylesheet" href="{{ asset('assets/event/css/themes.css') }}?v={{ @filemtime(public_path('assets/event/css/themes.css')) }}">
 </head>
-<body class="@yield('body_class', 'page-landing')">
-<div class="grain" aria-hidden="true"></div>
+{{-- přihlášení a administrace organizátora vždy v brandu Gratulomatu --}}
+<body class="@yield('body_class', 'page-landing')" data-theme="brand" data-mode="light">
 @yield('content')
 </body>
 </html>

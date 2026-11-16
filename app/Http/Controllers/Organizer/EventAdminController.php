@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Organizer;
 use App\Domain\Guest\EventRules;
 use App\Domain\Guest\GuestImport;
 use App\Domain\Guest\MemoryPresenter;
+use App\Domain\Guest\Themes;
 use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
@@ -38,6 +39,7 @@ class EventAdminController extends Controller
                 'game_available' => EventRules::has($event, 'game'),
                 'offline_available' => EventRules::has($event, 'offline'),
                 'import_available' => EventRules::has($event, 'import'),
+                'theme' => $event->themeKey(), 'mode' => $event->themeMode(), 'themes' => Themes::forEvent($event),
                 'anon_available' => EventRules::has($event, 'anonymous_link'),
                 'anon_link' => EventRules::has($event, 'anonymous_link') && $event->setting('anon_token') ? route('event.anon', [$event, $event->setting('anon_token')]) : null,
             ],
@@ -178,16 +180,29 @@ class EventAdminController extends Controller
             'invite_text' => 'nullable|string|max:2000',
             'collect_until' => 'nullable|date',
             'title' => 'sometimes|required|string|max:140',
+            'theme' => 'sometimes|string|in:'.implode(',', array_keys(Themes::ALL)),
+            'mode' => 'sometimes|in:light,dark',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
         if (isset($v['title'])) {
             $event->title = trim($v['title']);
+        }
+        if (isset($v['theme']) || isset($v['mode'])) {
+            $theme = $v['theme'] ?? $event->themeKey();
+            $mode = $v['mode'] ?? $event->themeMode();
+            if (! Themes::allowed($event, $theme, $mode)) {
+                return response()->json(['error' => 'Tuto šablonu nebo tmavý režim váš tarif neobsahuje (od tarifu Párty).'], 422);
+            }
+            $event->theme = $theme;
         }
         if (isset($v['recipient_name']) && trim($v['recipient_name']) !== $event->recipient_name) {
             $event->recipient_name = trim($v['recipient_name']);
             $event->refreshRecipientForms();
         }
         $settings = $event->settings ?? [];
+        if (isset($mode)) {
+            $settings['mode'] = $mode;
+        }
         if (array_key_exists('invite_text', $v)) {
             $settings['invite_text'] = $v['invite_text'];
         }

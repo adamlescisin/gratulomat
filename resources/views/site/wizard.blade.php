@@ -138,6 +138,7 @@
 window.GMW = {!! json_encode([
     'preset' => $preset,
     'operator' => $operator,
+    'themes' => collect(\App\Domain\Guest\Themes::ALL)->map(fn ($t, $k) => ['key' => $k, 'name' => $t[0], 'desc' => $t[1], 'light' => $t[3], 'dark' => $t[4]])->values(),
     'old' => old('config') ? json_decode(old('config'), true) : null,
     'plans' => collect(config('gratulomat.plans'))->map(fn ($p) => ['name' => $p['name'], 'guests' => $p['guests']]),
     'urls' => ['slug' => url('/api/slug-check'), 'quote' => url('/api/quote')],

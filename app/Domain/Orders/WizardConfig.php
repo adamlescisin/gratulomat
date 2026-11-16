@@ -2,6 +2,7 @@
 
 namespace App\Domain\Orders;
 
+use App\Domain\Guest\Themes;
 use App\Domain\Pricing\EventConfig;
 use App\Models\DiscountCode;
 use Illuminate\Support\Carbon;
@@ -20,11 +21,8 @@ class WizardConfig
 
     public const RECIPIENTS = ['person' => 'osoba', 'couple' => 'par', 'team' => 'tym', 'company' => 'firma'];
 
-    /** vzhled => [název, nejnižší tarif] */
-    public const THEMES = [
-        'zaklad' => ['Základní', 'ochutnavka'], 'archiv' => ['Filmový archiv', 'party'], 'zahrada' => ['Zahradní slavnost', 'party'],
-        'elegant' => ['Elegance', 'party'], 'ticho' => ['Tichá vzpomínka', 'party'],
-    ];
+    /** šablony viz App\Domain\Guest\Themes (neutrální zdarma, u smutečního rozloučení i smuteční) */
+    public const THEMES = Themes::ALL;
 
     public const COLLECT_DAYS = [14, 30, 60, 90, 180];
 
@@ -43,7 +41,7 @@ class WizardConfig
     {
         $occasion = array_key_exists($in['occasion'] ?? '', self::OCCASIONS) ? $in['occasion'] : 'birthday';
         $funeral = $occasion === 'funeral';
-        $theme = array_key_exists($in['theme'] ?? '', self::THEMES) ? $in['theme'] : 'zaklad';
+        $theme = Themes::normalize($in['theme'] ?? null);
         $bool = fn ($k) => filter_var($in[$k] ?? false, FILTER_VALIDATE_BOOLEAN);
         $collect = (int) ($in['collect'] ?? 14);
         $archive = (int) ($in['archive'] ?? 1);
@@ -102,11 +100,10 @@ class WizardConfig
                 $f[] = $feature;
             }
         }
-        $themePlan = self::THEMES[$this->data['theme']][1];
-        if ($themePlan !== 'ochutnavka' && ! ($this->isFuneral() && $this->data['theme'] === 'ticho')) {
+        if (! Themes::isFree($this->data['theme'], $this->isFuneral())) {
             $f[] = 'all_themes';
         }
-        if ($this->data['mode'] === 'dark' && $this->data['theme'] === 'zaklad') {
+        if ($this->data['mode'] === 'dark') {
             $f[] = 'dark_mode';
         }
 

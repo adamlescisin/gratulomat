@@ -1,0 +1,114 @@
+/* ==========================================================================
+   Grafické šablony stránky pro hosty (a brand Gratulomatu pro administraci).
+   body[data-theme][data-mode] přepisuje proměnné z app.css. Kino (videoprezentace) zůstává filmové.
+   Šablony: vesela, neutralni, exkluzivni (původní Adamových 50), smutecni; režim light / dark.
+   ========================================================================== */
+
+@font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url(../fonts/bricolage-grotesque-latin-ext-opsz-normal.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Bricolage Grotesque"; font-style: normal; font-weight: 200 800; font-display: swap;
+  src: url(../fonts/bricolage-grotesque-latin-opsz-normal.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+/* odvozené proměnné je nutné přepočítat na úrovni body (jinak zůstanou z :root) */
+body[data-theme] {
+  --line: rgba(var(--fg-rgb), .12);
+  --paper-dim: rgba(var(--fg-rgb), .7);
+  --paper-mute: rgba(var(--fg-rgb), .48);
+  --shadow: 0 30px 60px -30px var(--surface-shadow), 0 0 0 1px var(--line);
+  --topbar-bg: color-mix(in srgb, var(--ink) 82%, transparent);
+  background-image:
+    radial-gradient(1200px 600px at 85% -10%, rgba(var(--accent-rgb), .14), transparent 60%),
+    radial-gradient(900px 500px at -10% 30%, rgba(var(--coral-rgb), .08), transparent 60%);
+}
+
+/* společné pro světlé režimy */
+body[data-mode="light"] {
+  color-scheme: light;
+  --tint: 28, 22, 51;
+  --surface-shadow: rgba(28, 22, 51, .18);
+  --field-bg: #fff;
+  --field-bg-focus: #fff;
+  --well-bg: rgba(28, 22, 51, .04);
+  --danger: #B3261E;
+}
+body[data-mode="light"] .grain { display: none; }
+body[data-mode="light"] .card, body[data-mode="light"] .kpi { background: var(--ink-2); }
+
+/* ---------- Veselá: Bricolage Grotesque + Inter, korálová, žlutá, mátová ---------- */
+body[data-theme="vesela"], body[data-theme="brand"] {
+  --serif: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --radius: 22px;
+}
+body[data-theme="vesela"][data-mode="light"], body[data-theme="brand"] {
+  --ink: #FFF8EE; --ink-2: #FFFFFF; --ink-3: #FBE9D7;
+  --paper: #1C1633; --fg-rgb: 28, 22, 51;
+  --gold: #FF5A3C; --gold-2: #E0452A; --accent-rgb: 255, 90, 60; --accent-3: #E0452A; --on-accent: #fff;
+  --coral: #FF5A3C; --coral-rgb: 255, 90, 60; --teal: #2EC4A0; --teal-text: #11806A;
+}
+body[data-theme="vesela"][data-mode="dark"] {
+  --ink: #1C1633; --ink-2: #251E42; --ink-3: #2F2752;
+  --paper: #FFF8EE; --fg-rgb: 255, 248, 238;
+  --gold: #FFC433; --gold-2: #FFD666; --accent-rgb: 255, 196, 51; --accent-3: #F2A900; --on-accent: #1C1633;
+  --coral: #FF5A3C; --coral-rgb: 255, 90, 60; --teal: #2EC4A0; --teal-text: #7BE0C3;
+}
+body[data-theme="vesela"] .display, body[data-theme="brand"] .display { font-weight: 800; letter-spacing: -.035em; }
+body[data-theme="vesela"] :is(.h2, .h3, .mem__title, .brand__name), body[data-theme="brand"] :is(.h2, .h3, .mem__title, .brand__name) { font-weight: 700; letter-spacing: -.01em; }
+body[data-theme="vesela"] .kpi b, body[data-theme="brand"] .kpi b { font-weight: 700; }
+
+/* ---------- Neutrální: Inter + Inter, klidná modrá ---------- */
+body[data-theme="neutralni"] { --serif: "Inter", system-ui, sans-serif; --radius: 14px; }
+body[data-theme="neutralni"][data-mode="light"] {
+  --ink: #F6F5F2; --ink-2: #FFFFFF; --ink-3: #ECEAE5;
+  --paper: #1F2328; --fg-rgb: 31, 35, 40;
+  --gold: #3E63DD; --gold-2: #2F52C4; --accent-rgb: 62, 99, 221; --accent-3: #2F52C4; --on-accent: #fff;
+  --coral: #D6543C; --coral-rgb: 214, 84, 60; --teal: #2E9E86; --teal-text: #1E7A66;
+}
+body[data-theme="neutralni"][data-mode="dark"] {
+  --ink: #15171A; --ink-2: #1E2125; --ink-3: #2A2E33;
+  --paper: #EDEEF0; --fg-rgb: 237, 238, 240;
+  --gold: #8DA4EF; --gold-2: #AFC0F5; --accent-rgb: 141, 164, 239; --accent-3: #6E88E0; --on-accent: #12151A;
+  --coral: #F08A73; --coral-rgb: 240, 138, 115; --teal: #5FC4AC; --teal-text: #8FDCC9;
+}
+body[data-theme="neutralni"] .display { font-weight: 700; letter-spacing: -.035em; }
+body[data-theme="neutralni"] :is(.h2, .h3, .mem__title, .brand__name) { font-weight: 650; letter-spacing: -.015em; }
+body[data-theme="neutralni"] :is(.mem__quote, .mem__by, .mem__wish, .prompt__text, .input--wish, .year__era, .hero__years) { font-style: normal; }
+body[data-theme="neutralni"] .kpi b { font-weight: 600; }
+
+/* ---------- Exkluzivní: Fraunces + Inter, zlato (tmavá = původní Adamových 50) ---------- */
+body[data-theme="exkluzivni"][data-mode="light"] {
+  --ink: #F5EFE3; --ink-2: #FFFDF8; --ink-3: #EADFC9;
+  --paper: #2A2118; --fg-rgb: 42, 33, 24;
+  --gold: #A8741F; --gold-2: #8C5F14; --accent-rgb: 168, 116, 31; --accent-3: #8C5F14; --on-accent: #FFFDF8;
+  --coral: #B5523B; --coral-rgb: 181, 82, 59; --teal: #3E8E80; --teal-text: #2D6E63;
+}
+/* tmavá exkluzivní = výchozí hodnoty z app.css */
+
+/* ---------- Smuteční: Fraunces (lehčí řez) + Inter, šalvěj a šedá ---------- */
+body[data-theme="smutecni"] { --radius: 12px; }
+body[data-theme="smutecni"][data-mode="light"] {
+  --ink: #EEF0EE; --ink-2: #FAFBFA; --ink-3: #E1E5E2;
+  --paper: #2F3A40; --fg-rgb: 47, 58, 64;
+  --gold: #5E6B73; --gold-2: #4A565D; --accent-rgb: 94, 107, 115; --accent-3: #4A565D; --on-accent: #fff;
+  --coral: #8C6A5D; --coral-rgb: 140, 106, 93; --teal: #7D8F6A; --teal-text: #5C6E4C;
+}
+body[data-theme="smutecni"][data-mode="dark"] {
+  --ink: #1B2023; --ink-2: #232A2E; --ink-3: #2E363B;
+  --paper: #E6EAE8; --fg-rgb: 230, 234, 232;
+  --gold: #A3B18A; --gold-2: #BFCBA8; --accent-rgb: 163, 177, 138; --accent-3: #8A9A70; --on-accent: #1B2023;
+  --coral: #C9A397; --coral-rgb: 201, 163, 151; --teal: #A3B18A; --teal-text: #C4D0AE;
+}
+body[data-theme="smutecni"] .display { font-weight: 300; }
+body[data-theme="smutecni"] .grain { display: none; }
+body[data-theme="smutecni"] .landing__fifty { display: none; }
+
+/* ---------- Brand Gratulomatu (přihlášení a administrace organizátora) ---------- */
+body[data-theme="brand"] { color-scheme: light; background-image: none; }
+body[data-theme="brand"] .topbar { background: rgba(255, 248, 238, .92); }
+body[data-theme="brand"] .btn--gold { background: var(--coral); color: #fff; box-shadow: none; }
+body[data-theme="brand"] .btn--ghost { box-shadow: inset 0 0 0 1.5px var(--paper); }
+body[data-theme="brand"] .brand__mark { color: #fff; background: var(--coral); font-style: normal; font-family: var(--serif); font-weight: 800; }
+body[data-theme="brand"] .card, body[data-theme="brand"] .kpi { box-shadow: 0 0 0 1px rgba(28, 22, 51, .08); }
+body[data-theme="brand"] a { color: var(--gold-2); }
+body[data-theme="brand"] a.brand, body[data-theme="brand"] a.btn--ghost { color: var(--paper); }

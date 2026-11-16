@@ -15,7 +15,8 @@
   ];
   const OCCASIONS = [['birthday', 'Narozeniny'], ['wedding', 'Svatba'], ['anniversary', 'Výročí svatby'], ['retire', 'Odchod do důchodu'], ['company', 'Firemní jubileum'], ['farewell', 'Rozlučka'], ['reunion', 'Sraz spolužáků'], ['funeral', 'Smuteční rozloučení']];
   const RECIPIENTS = [['person', 'Jeden člověk', 'Narozeniny, důchod, rozlučka'], ['couple', 'Pár', 'Svatba, výročí, společná oslava'], ['team', 'Tým nebo parta', 'Spolužáci, oddíl, kapela'], ['company', 'Firma', 'Výročí firmy nebo pobočky']];
-  const THEMES = [['zaklad', 'Základní', '#FFFFFF', '#1C1633', '#FF5A3C', 0], ['archiv', 'Filmový archiv', '#1C1633', '#FFC433', '#FF5A3C', 1], ['zahrada', 'Zahradní slavnost', '#EAF6EF', '#2EC4A0', '#1C1633', 1], ['elegant', 'Elegance', '#14213D', '#E5E5E5', '#C9A227', 1], ['ticho', 'Tichá vzpomínka', '#EEF0EE', '#5E6B73', '#A3B18A', 1]];
+  // [klíč, název, popis, světlá [pozadí, text, akcent], tmavá, úroveň] – stejné jako App\Domain\Guest\Themes
+  const THEMES = (W.themes || []).map(t => [t.key, t.name, t.desc, t.light, t.dark, t.key === 'neutralni' ? 0 : 1]);
   const COLLECT = [[14, '14 dní', 0], [30, '30 dní', 1], [60, '60 dní', 1], [90, '90 dní', 1], [180, '180 dní', 2]];
   const ARCHIVE = [[1, '1 měsíc', 0], [3, '3 měsíce', 1], [12, '12 měsíců', 2]];
   const TIER = ['Ochutnávka', 'Párty', 'Premiéra', 'VIP'];
@@ -25,11 +26,12 @@
   let S = {
     step: 0, maxStep: 0, name: '', slug: '', slugTouched: false, occasion: 'birthday', date: today.toISOString().slice(0, 10),
     recipient: 'person', recName: '', startYear: '', guests: 5, importList: false, anonLink: false, langs: false,
-    theme: 'zaklad', mode: 'light', voice: false, offline: false, nowm: false, video: false, game: false, reminders: false,
+    theme: 'neutralni', mode: 'light', voice: false, offline: false, nowm: false, video: false, game: false, reminders: false,
     collect: 14, archive: 1, discount: '', book: false, archExt: false, vipSetup: false, vipEdit: false,
   };
   try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) S = { ...S, ...saved }; } catch {}
   if (W.old) S = { ...S, ...W.old, step: 6, maxStep: 6 };
+  S.theme = ({ zaklad: 'neutralni', archiv: 'exkluzivni', zahrada: 'vesela', elegant: 'exkluzivni', ticho: 'smutecni' })[S.theme] || S.theme;
   if (W.preset === 'premiera') Object.assign(S, { voice: true, nowm: true, offline: true, video: true, game: true, guests: Math.max(S.guests, 30), collect: 60, archive: 12 });
   if (W.preset === 'vip') Object.assign(S, { vipSetup: true });
   if (W.preset === 'party') Object.assign(S, { voice: true, nowm: true, offline: true, guests: Math.max(S.guests, 20), collect: 30, archive: 3 });
@@ -102,9 +104,9 @@
     $('[data-collect-label]').textContent = fu ? 'Jak dlouho sbírat vzpomínky – i po rozloučení' : 'Jak dlouho sbírat gratulace';
     $('[data-collect-note]').textContent = fu ? `Hosté mohou přidávat vzpomínky a kondolence i po rozloučení. Sběr se uzavře ${Math.max(S.collect, 30)} dní po datu rozloučení.` : 'Sběr začne hned po založení a uzavře se nejpozději v den události.';
 
-    $('[data-themes]').innerHTML = THEMES.map(([v, l, bg, c1, c2, lv]) => {
-      const level = fu && v === 'ticho' ? 0 : lv;
-      return `<button type="button" class="theme" data-theme="${v}" aria-pressed="${S.theme === v}"><span class="sw" style="background:${bg}"><i style="background:${c1}"></i><i style="background:${c2}"></i></span><span class="nm"><strong>${l}</strong><span class="tag tag-${level}">${tag(level)}</span></span></button>`;
+    $('[data-themes]').innerHTML = THEMES.map(([v, l, desc, light, dark, lv]) => {
+      const level = fu && v === 'smutecni' ? 0 : lv, [bg, fg, ac] = S.mode === 'dark' ? dark : light;
+      return `<button type="button" class="theme" data-theme="${v}" aria-pressed="${S.theme === v}" title="${esc(desc)}"><span class="sw" style="background:${bg}"><b style="color:${fg}">Aa</b><i style="background:${ac}"></i><i style="background:${fg}"></i></span><span class="nm"><strong>${l}</strong><span class="tag tag-${level}">${tag(level)}</span></span></button>`;
     }).join('');
 
     toggles('guestFeatures', [
@@ -129,7 +131,7 @@
       ['vipEdit', 'Sestřih filmu na míru', 'Doladíme pořadí, hudbu a titulky', 3],
     ]);
 
-    const occ = OCCASIONS.find(o => o[0] === S.occasion)[1], th = THEMES.find(t => t[0] === S.theme)[1];
+    const occ = OCCASIONS.find(o => o[0] === S.occasion)[1], th = (THEMES.find(t => t[0] === S.theme) || THEMES[0])[1];
     $('[data-recap]').innerHTML = [
       ['Událost', `${S.name || '—'} · ${occ}`], ['Adresa', `gratulomat.cz/${S.slug || '…'}`],
       ['Pro', S.recName || '—'], ['Datum', S.date ? S.date.split('-').reverse().join('. ') : '—'],
@@ -211,8 +213,8 @@
       let v = b.dataset.val; if (['collect', 'archive'].includes(b.dataset.opt)) v = +v;
       const p = { [b.dataset.opt]: v };
       if (b.dataset.opt === 'occasion') {
-        if (v === 'funeral') Object.assign(p, { theme: 'ticho', mode: 'light', game: false, recipient: 'person' });
-        else if (S.theme === 'ticho') p.theme = 'zaklad';
+        if (v === 'funeral') Object.assign(p, { theme: 'smutecni', mode: 'light', game: false, recipient: 'person' });
+        else if (S.theme === 'smutecni') p.theme = 'neutralni';
         if (['wedding', 'anniversary'].includes(v)) p.recipient = 'couple';
         if (v === 'company') p.recipient = 'company';
         if (v === 'reunion') p.recipient = 'team';

@@ -90,7 +90,22 @@
     // nastavení
     const bn = $('.brand__name'); if (bn) bn.textContent = `${E.title} · administrace`;
     const f = $('[data-settings]');
+    // vzhled: šablona + světlý / tmavý režim
+    if (!f.dataset.loaded) { f.dataset.theme = E.theme; f.dataset.mode = E.mode; }
+    renderThemes();
     if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); f.dataset.loaded = '1'; }
+  }
+
+  function renderThemes() {
+    const f = $('[data-settings]'), E = S.event, mode = f.dataset.mode, darkOk = E.themes[0]?.dark_available;
+    $('[data-mode-pick]').innerHTML = [['light', '☀️ Světlý'], ['dark', '🌙 Tmavý']].map(([m, l]) =>
+      `<button type="button" class="btn btn--sm ${mode === m ? 'btn--gold' : 'btn--ghost'}" data-pick-mode="${m}" ${m === 'dark' && !darkOk ? 'disabled title="Tmavý režim je od tarifu Párty"' : ''}>${l}${m === 'dark' && !darkOk ? ' · od Párty' : ''}</button>`).join('');
+    $('[data-theme-pick]').innerHTML = E.themes.map(t => {
+      const [bg, fg, ac] = mode === 'dark' ? t.dark : t.light, on = f.dataset.theme === t.key;
+      return `<button type="button" class="theme-card ${on ? 'is-on' : ''}" data-pick-theme="${t.key}" ${t.available ? '' : 'disabled'} aria-pressed="${on}">
+        <span class="theme-card__sw" style="background:${bg};color:${fg}"><b style="font-family:${{ vesela: '\'Bricolage Grotesque\'', neutralni: 'Inter' }[t.key] || 'Fraunces'}, serif;font-weight:${t.key === 'vesela' ? 800 : t.key === 'neutralni' ? 700 : 400}">Aa</b><i style="background:${ac}"></i></span>
+        <strong>${esc(t.name)}</strong><small>${esc(t.desc)}</small><small class="muted">${esc(t.fonts)}${t.available ? '' : ' · od tarifu Párty'}</small></button>`;
+    }).join('');
   }
 
   const run = async (fn, okMsg) => { try { await fn(); if (okMsg) toast(okMsg); await load(); } catch (e) { toast(e.message); } };
@@ -117,7 +132,7 @@
     }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
-      run(() => post('settings', { title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
+      run(() => post('settings', { theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
     }
   });
 
@@ -131,6 +146,8 @@
       const relation = prompt('Vztah (nepovinné):', x.relation || ''); if (relation == null) return;
       run(() => post(`households/${x.id}`, { label, relation }));
     }
+    if (t.dataset.pickTheme) { $('[data-settings]').dataset.theme = t.dataset.pickTheme; renderThemes(); return; }
+    if (t.dataset.pickMode) { $('[data-settings]').dataset.mode = t.dataset.pickMode; renderThemes(); return; }
     if (t.dataset.anon === 'copy') { navigator.clipboard?.writeText(S.event.anon_link).then(() => toast('Odkaz zkopírován ✓')); }
     if (t.dataset.anon === 'enable') run(() => post('anon-link', { action: 'enable' }), 'Anonymní odkaz je připravený');
     if (t.dataset.anon === 'regenerate' && confirm('Vytvořit nový odkaz? Ten starý přestane fungovat.')) run(() => post('anon-link', { action: 'regenerate' }), 'Nový odkaz vytvořen');

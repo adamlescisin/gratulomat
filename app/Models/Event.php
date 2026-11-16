@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Domain\Guest\Themes;
 use App\Domain\Orders\CzechNames;
 use App\Domain\Orders\WizardConfig;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -93,6 +94,19 @@ class Event extends Model
     {
         $type = array_search($this->recipient_type, WizardConfig::RECIPIENTS, true) ?: 'person';
         $this->recipient_forms = CzechNames::forms($this->recipient_name, $type) ?: null;
+    }
+
+    /** Grafická šablona stránky pro hosty (vesela | neutralni | exkluzivni | smutecni). */
+    public function themeKey(): string
+    {
+        return Themes::normalize($this->theme);
+    }
+
+    public function themeMode(): string
+    {
+        $mode = $this->setting('mode') ?: (Themes::LEGACY[$this->theme][1] ?? 'light');
+
+        return $mode === 'dark' ? 'dark' : 'light';
     }
 
     public function setting(string $key, mixed $default = null): mixed

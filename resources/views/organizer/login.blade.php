@@ -2,7 +2,7 @@
 @section('title', 'Přihlášení · Gratulomat')
 @section('content')
 <main class="landing">
-  <p class="eyebrow">Gratulomat</p>
+  <a href="/" aria-label="Gratulomat" style="display:inline-block;margin-bottom:1.5rem">@include('partials.logo-ink', ['width' => 190])</a>
   <h1 class="display">Administrace události</h1>
   @if ($sent)
     <p class="lead">Pokud je {{ $sent }} e-mail organizátora, poslali jsme na něj přihlašovací odkaz. Platí 30 minut.</p>

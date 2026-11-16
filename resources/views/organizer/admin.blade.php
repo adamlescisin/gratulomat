@@ -69,6 +69,12 @@
         <label class="muted">Název události<br><input class="input" name="title" maxlength="140" required></label>
         <label class="muted" data-rec-label>Jméno oslavence / oslavenců<br><input class="input" name="recipient_name" maxlength="120" required></label>
       </div>
+      <div class="theme-pick">
+        <p class="muted" style="margin:.4rem 0 .5rem">Vzhled stránky pro hosty <a href="{{ route('event.show', $event) }}" target="_blank" style="font-size:.85rem">náhled ↗</a></p>
+        <div class="theme-modes" data-mode-pick></div>
+        <div class="theme-grid" data-theme-pick></div>
+        <p class="muted" style="font-size:.8rem;margin:.4rem 0 0">Videoprezentace (Kino) má vždy filmový tmavý vzhled.</p>
+      </div>
       <p class="muted" style="margin:.2rem 0 1rem;font-size:.85rem">Datum události nebo délku archivu vám změníme na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
       <label class="muted">Uzávěrka sběru<br><input class="input" type="datetime-local" name="collect_until" style="width:auto"></label>
       <p class="muted" style="margin-top:1rem">Text pozvánky – <code>{jmena}</code>, <code>{odkaz}</code> a <code>{datum}</code> se doplní u každého hosta.</p>
