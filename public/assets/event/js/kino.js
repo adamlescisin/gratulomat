@@ -40,19 +40,27 @@
     const undated = shuffle(stories.filter(m => !m.year));
     const wishes = shuffle(mem.filter(hasWish));
     const S = [{ type: 'title' }];
+    const tl = d.timeline !== false; // časová osa vypnutá → jen kapitoly Vzpomínky a Přání
+    if (!tl) {
+      const ms = stories.slice().sort((a, b) => a.created_at.localeCompare(b.created_at));
+      if (ms.length) {
+        S.push({ type: 'chapter', big: String(ms.length), label: 'Vzpomínky', meta: `${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
+        ms.forEach(m => S.push({ type: 'memory', m, chapter: 'Vzpomínky' }));
+      }
+    }
     const groups = new Map();
-    dated.forEach(m => { const dec = Math.floor(m.year / 10) * 10; groups.has(dec) || groups.set(dec, []); groups.get(dec).push(m); });
+    if (tl) dated.forEach(m => { const dec = Math.floor(m.year / 10) * 10; groups.has(dec) || groups.set(dec, []); groups.get(dec).push(m); });
     for (const [dec, ms] of groups) {
       const from = Math.max(dec, by), to = Math.min(dec + 9, new Date().getFullYear());
       S.push({ type: 'chapter', big: String(dec), label: DECADES[dec] || `${dec}s`, meta: `${d.celebrant_dative} ${from - by}–${to - by} · ${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
       ms.forEach(m => S.push({ type: 'memory', m, chapter: DECADES[dec] }));
     }
-    if (undated.length) {
+    if (tl && undated.length) {
       S.push({ type: 'chapter', big: '∞', label: 'Kdykoliv a pořád', meta: `${undated.length} ${plural(undated.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')} bez letopočtu` });
       undated.forEach(m => S.push({ type: 'memory', m, chapter: 'Kdykoliv a pořád' }));
     }
     if (wishes.length) {
-      S.push({ type: 'chapter', big: `${d.age}+`, label: 'Do dalších let', meta: `${wishes.length} ${plural(wishes.length, 'přání', 'přání', 'přání')}` });
+      S.push({ type: 'chapter', big: tl && d.age ? `${d.age}+` : String(wishes.length), label: tl ? 'Do dalších let' : 'Přání', meta: `${wishes.length} ${plural(wishes.length, 'přání', 'přání', 'přání')}` });
       wishes.forEach(m => S.push({ type: 'wish', m, chapter: 'Přání' }));
     }
     S.push({ type: 'finale' });
@@ -120,7 +128,8 @@
   const RENDER = {
     title() {
       const by = P.data.birth_year;
-      const count = h('div', { class: 's-title__count' }, by);
+      const tl = P.data.timeline !== false;
+      const count = h('div', { class: 's-title__count', style: tl ? null : 'display:none' }, by);
       const el = h('section', { class: 'slide s-title' }, h('div', {}, count,
         h('div', { class: 's-title__name' }, P.data.title),
         h('div', { class: 's-title__sub' }, [
@@ -131,7 +140,7 @@
         ].join(' · '))));
       return { el, dur: 9, tick(t) {
         const p = Math.min(1, Math.max(0, (t - .6) / 3.6)), e = 1 - Math.pow(1 - p, 3);
-        count.textContent = Math.round(by + P.data.age * e);
+        if (tl) count.textContent = Math.round(by + P.data.age * e);
         if (p >= 1) el.classList.add('is-done');
       } };
     },
@@ -151,7 +160,7 @@
       const readSec = Math.min(26, Math.max(6, 3 + words / 2.6)); // čte se nahlas a společně → pomaleji
       const by = m.authors.join(' a ');
       const captionParts = (excerpt) => [
-        m.year ? h('div', { class: 'caption__year' }, `${m.year} · ${d().celebrant_dative} ${m.year - d().birth_year}`) : null,
+        m.year && d().timeline !== false ? h('div', { class: 'caption__year' }, `${m.year} · ${d().celebrant_dative} ${m.year - d().birth_year}`) : null,
         m.title ? h('h2', { class: 'caption__title' }, m.title) : null,
         excerpt ? h('p', { class: 'caption__text' }, excerpt) : null,
         h('div', { class: 'caption__by' }, by),
@@ -202,7 +211,7 @@
         const spans = ws.filter(w => w.nodeType === 1);
         const el = h('section', { class: 'slide s-text' }, h('div', { class: 's-text__inner' },
           h('span', { class: 's-text__mark', 'aria-hidden': 'true' }, '“'), body,
-          h('div', { class: 'caption' }, m.year ? h('div', { class: 'caption__year' }, m.year) : null, m.title ? h('h2', { class: 'caption__title' }, m.title) : null, h('div', { class: 'caption__by' }, by))));
+          h('div', { class: 'caption' }, m.year && d().timeline !== false ? h('div', { class: 'caption__year' }, m.year) : null, m.title ? h('h2', { class: 'caption__title' }, m.title) : null, h('div', { class: 'caption__by' }, by))));
         if (!text && !audio) body.textContent = m.title || '';
         r = { el, dur: readSec + 2, tick(t) { const n = Math.ceil(spans.length * Math.min(1, t / (readSec * .7))); for (let i = 0; i < n; i++) spans[i].classList.add('is-on'); } };
         if (!text && audio) { body.textContent = '🎙️'; body.style.fontSize = '6rem'; }
@@ -226,7 +235,7 @@
       const readSec = Math.min(24, Math.max(6, 3 + words / 2.6));
       const el = h('section', { class: 'slide s-text s-wish' }, h('div', { class: 's-text__inner' },
         h('span', { class: 's-text__mark', 'aria-hidden': 'true' }, '🥂'), body,
-        h('div', { class: 'caption' }, h('div', { class: 'caption__year' }, 'Přání do dalších let'), h('div', { class: 'caption__by' }, by))));
+        h('div', { class: 'caption' }, h('div', { class: 'caption__year' }, d().timeline !== false ? 'Přání do dalších let' : 'Přání'), h('div', { class: 'caption__by' }, by))));
       const r = { el, dur: readSec + 2, tick(t) { const n = Math.ceil(spans.length * Math.min(1, t / (readSec * .7))); for (let i = 0; i < n; i++) spans[i].classList.add('is-on'); } };
       if (audio) attachAudio(r, audio);
       addGuess(r);
@@ -243,7 +252,7 @@
         h('div', { class: 's-finale__mosaic', style: `--cols:${cols};grid-template-rows:repeat(${rows},1fr)` }, tiles),
         h('div', { class: 's-finale__inner' },
           h('div', { class: 's-finale__title' }, (d().finale_title || `Všechno nejlepší, ${d().celebrant_vocative}!`)),
-          h('div', { class: 's-finale__sub' }, `${P.stats.people} lidí · ${P.stats.memories} vzpomínek · ${P.stats.wishes} přání · ${P.stats.photos} fotek · ${d().age} let`),
+          h('div', { class: 's-finale__sub' }, [`${P.stats.people} lidí`, `${P.stats.memories} vzpomínek`, `${P.stats.wishes} přání`, `${P.stats.photos} fotek`, d().timeline !== false && d().age ? `${d().age} let` : null].filter(Boolean).join(' · ')),
           loop && h('a', { class: 's-finale__loop', href: loop.url, target: '_blank', rel: 'noopener' }, loop.label)));
       return { el, dur: 30, enter() { fadeMusic(.8, 2000); confetti(); }, leave() { fadeMusic(.55, 1000); } };
     },
@@ -327,7 +336,7 @@
       } else if (s.type === 'memory') {
         const ph = s.m.media.find(x => x.kind === 'photo');
         btn = h('button', { class: 'ov', style: ph ? `background-image:url("${ph.thumbUrl}")` : '' },
-          h('span', {}, h('b', {}, s.m.title || (s.m.body || '').slice(0, 40) || '🎙️'), s.m.authors.join(' a ') + (s.m.year ? ` · ${s.m.year}` : '')));
+          h('span', {}, h('b', {}, s.m.title || (s.m.body || '').slice(0, 40) || '🎙️'), s.m.authors.join(' a ') + (s.m.year && P.data.timeline !== false ? ` · ${s.m.year}` : '')));
       } else btn = h('button', { class: 'ov ov--chapter' }, s.type === 'chapter' ? s.label : s.type === 'title' ? 'Úvod' : 'Finále');
       btn.dataset.i = i;
       btn.addEventListener('click', () => { overview(false); go(i); toggle(false); });

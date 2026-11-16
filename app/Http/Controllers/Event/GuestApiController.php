@@ -14,6 +14,7 @@ use App\Models\Memory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
@@ -55,6 +56,7 @@ class GuestApiController extends Controller
                 'celebrant' => $event->recipient_name,
                 'forms' => $event->recipient_forms ?? [],
                 'birth_year' => $event->start_year ?? $event->event_date->year,
+                'timeline' => $event->timeline(),
                 'party_date' => $event->event_date->toIso8601String(),
                 'party_place' => $event->event_place,
                 'title' => $event->title,
@@ -122,6 +124,10 @@ class GuestApiController extends Controller
         try {
             $data = ['authors' => $authors, 'title' => $title ?: null, 'body' => $body ?: null, 'year' => $year,
                 'tags' => $tags, 'wish_public' => $wishPublic, 'wish_text' => $wishText ?: null];
+            if (! $event->timeline()) {
+                // bez časové osy se rok nezadává; dříve zadaný rok zůstane pro případ, že ji organizátor zase zapne
+                $data = $isNew ? [...$data, 'year' => null] : Arr::except($data, 'year');
+            }
             if ($isNew) {
                 $memory = Memory::create([...$data, 'event_id' => $event->id, 'household_id' => $h->id]);
             } else {

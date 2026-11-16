@@ -6,6 +6,7 @@ return [
     'hello' => 'Hallo :names,',
     'hero' => [
         'default' => ':go und :create mit uns eine Geschichte aus Erinnerungen und Wünschen für <em>:title</em>.',
+        'podekovani' => ':go und :create mit uns ein Dankeschön für <em>:name</em>.',
         'smutecni' => 'teilt eure Erinnerungen an <em>:name</em> mit uns.',
     ],
     'finale' => [
@@ -13,6 +14,7 @@ return [
         'svatba' => 'Auf euch beide!',
         'vyroci-svatby' => 'Auf euch beide!',
         'smutecni' => 'Für immer in unseren Erinnerungen',
+        'podekovani' => 'Danke, :name!',
         'default' => 'Danke, dass ihr Teil der Geschichte seid',
     ],
     'archived' => 'Diese Veranstaltung ist beendet und ihre Seite nicht mehr verfügbar. Wenn das Archiv verlängert werden soll, wenden Sie sich bitte an den Veranstalter.',
@@ -25,6 +27,7 @@ return [
     'create_one' => 'gestalte',
     'create_many' => 'gestaltet',
     'lead' => 'Teilt eine Geschichte oder Erinnerung, ladet Fotos aus der Schublade hoch oder sprecht eine Nachricht auf. Daraus entsteht eine schöne audiovisuelle Präsentation mit Zeitleiste – und ihr seid ihre Mitautoren. Wenn der Veranstalter es möchte, teilt er das Ergebnis mit euch als Film.',
+    'lead_no_timeline' => 'Teilt eine Geschichte oder Erinnerung, ladet Fotos aus der Schublade hoch oder sprecht eine Nachricht auf. Daraus entsteht eine schöne audiovisuelle Präsentation – und ihr seid ihre Mitautoren. Wenn der Veranstalter es möchte, teilt er das Ergebnis mit euch als Film.',
     'lead_funeral' => 'Schreibt eine Erinnerung, fügt Fotos hinzu oder sprecht eine Nachricht auf. Gemeinsam gestalten wir ein stilles Andenken für Familie und Freunde.',
     'add_memory' => 'Erinnerung hinzufügen',
     'kino_link' => '🎬 Die Videopräsentation ist offen – noch einmal ansehen',
@@ -153,6 +156,14 @@ return [
             'Eine Firmenfeier, über die man noch heute spricht.',
             'Wer hat euch am meisten geholfen und wie?',
             'Was soll die Firma in den kommenden Jahren erleben?',
+        ],
+        'podekovani' => [
+            'Wann und wo hast du :name kennengelernt?',
+            'Was ist das Wertvollste, das :name dir beigebracht hat?',
+            'Ein Moment, in dem :name dir wirklich geholfen hat.',
+            'Ein Rat oder Satz von :name, den du bis heute kennst.',
+            'Ein gemeinsames Erlebnis, an das du gern zurückdenkst.',
+            'Wofür möchtest du :name am meisten danken?',
         ],
         'smutecni' => [
             'Wann und wo habt ihr euch zum ersten Mal getroffen?',

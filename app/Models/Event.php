@@ -133,6 +133,12 @@ class Event extends Model
         return $mode === 'dark' ? 'dark' : 'light';
     }
 
+    /** Časová osa: vzpomínky podle let a dekád (výchozí). Vypnuto = jen vzpomínky a přání, hosté rok nezadávají. */
+    public function timeline(): bool
+    {
+        return (bool) $this->setting('timeline', true);
+    }
+
     public function setting(string $key, mixed $default = null): mixed
     {
         return data_get($this->settings, $key, $default);

@@ -28,6 +28,8 @@
       <button class="btn btn--ghost btn--sm btn--danger" data-action="show-close">Zavřít pro hosty</button>
     </div>
     <label class="check"><input type="checkbox" data-auto-share> Po uzávěrce sběru (<span data-auto-share-at></span>) prezentaci hostům automaticky nasdílet – na jejich stránce se dole objeví odkaz a QR kód</label>
+    <label class="check"><input type="checkbox" data-timeline> Časová osa – vzpomínky řadit podle let a desetiletí
+      <span class="muted" style="display:block;font-size:.85rem">Vypnuto: ve videoprezentaci jen kapitoly Vzpomínky a Přání a hosté se na rok neptají. Už zadané roky zůstanou uložené pro případ, že časovou osu zase zapnete.</span></label>
     <label class="check" data-game-wrap hidden><input type="checkbox" data-game> Hra „Hádej, kdo to napsal“ v Kině</label>
   </section>
 

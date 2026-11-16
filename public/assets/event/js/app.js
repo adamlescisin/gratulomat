@@ -142,7 +142,7 @@
       card.append(h('div', { class: 'mem__quote', style: !m.title && b.length > 100 ? 'font-size:1.05rem' : null }, m.title || (b ? `„${b.length > 180 ? b.slice(0, 180).replace(/\s+\S*$/, '') + '…' : b}“` : t('voice_message'))));
     }
     const body = h('div', { class: 'mem__body' },
-      h('div', { class: 'mem__meta' }, m.year ? h('span', { class: 'mem__year' }, m.year) : null, m.tags.map(t => h('span', { class: 'mem__tag' }, t))),
+      h('div', { class: 'mem__meta' }, m.year && S.me.config.timeline !== false ? h('span', { class: 'mem__year' }, m.year) : null, m.tags.map(t => h('span', { class: 'mem__tag' }, t))),
       m.title && (photos.length || video) ? h('h3', { class: 'mem__title' }, m.title) : null,
       m.body && (photos.length || video || m.title) ? h('p', { class: 'mem__text' }, m.body) : null,
       m.wish_text && (m.body || m.title || photos.length || video) ? h('p', { class: 'mem__wish' }, '🥂 ' + m.wish_text, own ? h('small', {}, m.wish_public ? t('public_wish') : t('private_wish')) : null) : null,
@@ -265,7 +265,8 @@
     $$('[name="authors[]"]:checked', form).forEach(i => fd.append('authors[]', i.value));
     $$('[name="tags[]"]:checked', form).forEach(i => fd.append('tags[]', i.value));
     fd.append('title', form.title.value); fd.append('body', form.body.value);
-    if (!$('[data-year-unknown]').checked) fd.append('year', $('[data-year]').value);
+    // bez časové osy rok neposíláme (krok „Kdy“ je skrytý)
+    if (S.me.config.timeline !== false && !$('[data-year-unknown]').checked) fd.append('year', $('[data-year]').value);
     if ($('[data-wish]')?.checked) fd.append('wish_public', '1');
     const wishText = S.wishMode === 'text' && form.wish_text ? form.wish_text.value.trim() : '';
     fd.append('wish_text', wishText);

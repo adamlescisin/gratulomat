@@ -6,6 +6,7 @@ return [
         // bez skloňování jmen: název události se jen cituje
         'default' => "Ahoj {jmena}!\nK události „:title“ ({datum}) připravujeme malé překvapení – společný film ze vzpomínek, fotek a přání.\nMáte nějakou historku, fotku ze šuplíku nebo vzkaz? Nahrajte to prosím tady (odkaz je jen pro vás):\n{odkaz}\nDěkujeme!",
         'narozeniny' => "Ahoj {jmena}! 🎉\nK události „:title“ ({datum}) připravujeme malé překvapení – společný film ze vzpomínek, fotek a přání.\nMáte nějakou historku, fotku ze šuplíku nebo vzkaz? Nahrajte to prosím tady (odkaz je jen pro vás):\n{odkaz}\nDěkujeme a těšíme se!",
+        'podekovani' => "Ahoj {jmena}!\nK události „:title“ ({datum}) chystáme společné poděkování – film ze vzpomínek, fotek a vzkazů.\nMáte nějakou historku, fotku nebo pár slov díků? Nahrajte to prosím tady (odkaz je jen pro vás):\n{odkaz}\nDěkujeme!",
         'smutecni' => "Dobrý den, {jmena},\nk rozloučení „:title“ sbíráme vzpomínky, fotografie a vzkazy pro rodinu a blízké. Pokud se chcete připojit, můžete tak učinit zde (odkaz je jen pro vás):\n{odkaz}\nDěkujeme.",
     ],
     // dřívější výchozí texty (se skloňováním) – uložené beze změny se nahradí novými

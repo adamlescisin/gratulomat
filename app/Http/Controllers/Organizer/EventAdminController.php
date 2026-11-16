@@ -56,6 +56,7 @@ class EventAdminController extends Controller
                 'public_from' => $event->show?->public_from?->toIso8601String(),
                 'is_public' => $event->showPublic(),
                 'auto_share' => (bool) $event->setting('auto_share'),
+                'timeline' => $event->timeline(),
                 'wall_open_at' => $event->setting('wall_open_at'),
                 'wall_opens_at' => $event->wallOpensAt()->toIso8601String(),
                 'auto_share_at' => ($event->collect_until ?? $event->event_date)?->toIso8601String(),
@@ -241,6 +242,7 @@ class EventAdminController extends Controller
             'auto_share' => 'sometimes|boolean',
             'finale_title' => 'sometimes|nullable|string|max:120',
             'reminders' => 'sometimes|boolean',
+            'timeline' => 'sometimes|boolean',
             'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
@@ -272,6 +274,9 @@ class EventAdminController extends Controller
         if (array_key_exists('finale_title', $v)) {
             $t = trim((string) $v['finale_title']);
             $settings['finale_title'] = $t === '' || $t === $event->defaultFinaleTitle() ? null : $t;
+        }
+        if (array_key_exists('timeline', $v)) {
+            $settings['timeline'] = (bool) $v['timeline'];
         }
         if (array_key_exists('auto_share', $v)) {
             $settings['auto_share'] = (bool) $v['auto_share'];

@@ -11,6 +11,9 @@
     $many = count($household->names ?? []) > 1;
     $v['go'] = __($many ? 'guest.go_many' : 'guest.go_one');
     $v['create'] = __($many ? 'guest.create_many' : 'guest.create_one');
+    $timeline = $event->timeline();
+    // bez časové osy se krok „Kdy“ skrývá a další kroky se přečíslují
+    $sn = fn (int $n) => $timeline ? $n : $n - 1;
 @endphp
 <header class="topbar">
   <a class="brand" href="{{ route('event.show', $event) }}"><span class="brand__mark">{{ $event->age() ?: '✦' }}</span><span class="brand__name">{{ $event->title }}</span></a>
@@ -19,11 +22,11 @@
 
 <main class="guest">
   <section class="hero">
-    @if ($event->start_year)
+    @if ($event->start_year && $timeline)
       <div class="hero__years" aria-hidden="true"><span>{{ $event->start_year }}</span><i></i><span>{{ $event->event_date->year }}</span></div>
     @endif
     <h1 class="display hero__title"><span data-bind="greeting"></span><br>{!! __($heroKey, array_map('e', $v)) !!}</h1>
-    <p class="lead">{{ $funeral ? __('guest.lead_funeral') : __('guest.lead') }}</p>
+    <p class="lead">{{ $funeral ? __('guest.lead_funeral') : ($timeline ? __('guest.lead') : __('guest.lead_no_timeline')) }}</p>
     <div class="hero__meta">
       <div class="countdown" data-countdown aria-live="polite"></div>
       <div class="stats" data-stats></div>
@@ -45,19 +48,19 @@
         <div class="chips" data-authors></div>
       </fieldset>
 
-      <fieldset class="step">
+      <fieldset class="step" @if (! $timeline) hidden @endif>
         <legend><span class="step__n">2</span> {{ __('guest.step_when') }}</legend>
         <div class="year">
           <output class="year__out" data-year-out></output>
           <span class="year__era" data-year-era></span>
           <input type="range" name="year" min="{{ $minYear }}" max="{{ $nowYear }}" value="{{ (int) round(($minYear + $nowYear) / 2) }}" data-year aria-label="{{ __('guest.year_aria') }}">
           <div class="year__ticks" aria-hidden="true">@for ($y = (int) ceil($minYear / 10) * 10; $y <= $nowYear; $y += 10)<span style="--p:{{ round(($y - $minYear) / max(1, $nowYear - $minYear) * 100, 2) }}%">{{ $y }}</span>@endfor</div>
-          <label class="check"><input type="checkbox" data-year-unknown> {{ __('guest.year_unknown') }}</label>
+          <label class="check"><input type="checkbox" data-year-unknown @checked(! $timeline)> {{ __('guest.year_unknown') }}</label>
         </div>
       </fieldset>
 
       <fieldset class="step">
-        <legend><span class="step__n">3</span> {{ __('guest.step_story') }}</legend>
+        <legend><span class="step__n">{{ $sn(3) }}</span> {{ __('guest.step_story') }}</legend>
         <input class="input input--title" name="title" maxlength="140" placeholder="{{ __('guest.title_placeholder') }}">
         <div class="textarea-wrap">
           <textarea class="input" name="body" rows="6" maxlength="6000" placeholder="{{ __('guest.body_placeholder') }}"></textarea>
@@ -70,7 +73,7 @@
       </fieldset>
 
       <fieldset class="step">
-        <legend><span class="step__n">4</span> {{ $videoMb ? __('guest.step_media') : __('guest.step_media_photos') }}</legend>
+        <legend><span class="step__n">{{ $sn(4) }}</span> {{ $videoMb ? __('guest.step_media') : __('guest.step_media_photos') }}</legend>
         <label class="drop" data-drop>
           <input type="file" accept="{{ $videoMb ? 'image/*,video/*' : 'image/*' }}" multiple data-files hidden>
           <span class="drop__icon" aria-hidden="true">📷</span>
@@ -82,7 +85,7 @@
 
       @if ($wishes)
       <fieldset class="step">
-        <legend><span class="step__n">5</span> {{ $funeral ? __('guest.step_wish_funeral') : __('guest.step_wish', $v) }} <span class="optional">{{ __('guest.optional') }}</span></legend>
+        <legend><span class="step__n">{{ $sn(5) }}</span> {{ $funeral ? __('guest.step_wish_funeral') : __('guest.step_wish', $v) }} <span class="optional">{{ __('guest.optional') }}</span></legend>
         <div class="seg" role="tablist" aria-label="{{ __('guest.wish_form') }}">
           <button type="button" role="tab" class="seg__btn is-on" data-wish-mode="voice" aria-selected="true">{{ __('guest.wish_voice') }}</button>
           <button type="button" role="tab" class="seg__btn" data-wish-mode="text" aria-selected="false">{{ __('guest.wish_write') }}</button>
@@ -109,7 +112,7 @@
       @endif
 
       <fieldset class="step">
-        <legend><span class="step__n">{{ $wishes ? 6 : 5 }}</span> {{ __('guest.step_tags') }}</legend>
+        <legend><span class="step__n">{{ $sn($wishes ? 6 : 5) }}</span> {{ __('guest.step_tags') }}</legend>
         <div class="chips chips--tags" data-tags></div>
       </fieldset>
 

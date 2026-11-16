@@ -16,7 +16,7 @@ class WizardConfig
     public const OCCASIONS = [
         'birthday' => ['narozeniny', 'Narozeniny'], 'wedding' => ['svatba', 'Svatba'], 'anniversary' => ['vyroci-svatby', 'Výročí svatby'],
         'retire' => ['duchod', 'Odchod do důchodu'], 'company' => ['firemni-jubileum', 'Firemní jubileum'], 'farewell' => ['rozlucka', 'Rozlučka'],
-        'reunion' => ['sraz', 'Sraz spolužáků'], 'funeral' => ['smutecni', 'Smuteční rozloučení'],
+        'reunion' => ['sraz', 'Sraz spolužáků'], 'thanks' => ['podekovani', 'Poděkování'], 'funeral' => ['smutecni', 'Smuteční rozloučení'],
     ];
 
     public const RECIPIENTS = ['person' => 'osoba', 'couple' => 'par', 'team' => 'tym', 'company' => 'firma'];

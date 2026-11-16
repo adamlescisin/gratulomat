@@ -52,7 +52,7 @@ class MemoryPresenter
         return $event->memories()
             ->with(['media', 'household'])
             ->when(! $includeHidden, fn ($q) => $q->where('status', 'visible'))
-            ->orderByRaw('COALESCE(year, 9999)')->orderBy('created_at')
+            ->when($event->timeline(), fn ($q) => $q->orderByRaw('COALESCE(year, 9999)'))->orderBy('created_at')
             ->get()->map(fn ($m) => self::toArray($m))->all();
     }
 
@@ -79,6 +79,7 @@ class MemoryPresenter
             'celebrant_vocative' => $event->form('voc'),
             'birth_year' => $event->start_year ?? $event->event_date->year,
             'age' => $event->age() ?? 0,
+            'timeline' => $event->timeline(),
             'party_date' => $event->event_date->toIso8601String(),
             'finale_title' => $event->finaleTitle(),
             'watermark' => ! EventRules::has($event, 'no_watermark'),

@@ -13,8 +13,8 @@
     ['Doba a doplňky', 'Jak dlouho a co navíc?', 'Archiv běží od data události.'],
     ['Shrnutí', 'Shrnutí a platba', 'Zkontrolujte údaje. Tarif můžete později ještě navýšit.'],
   ];
-  const OCCASIONS = [['birthday', 'Narozeniny'], ['wedding', 'Svatba'], ['anniversary', 'Výročí svatby'], ['retire', 'Odchod do důchodu'], ['company', 'Firemní jubileum'], ['farewell', 'Rozlučka'], ['reunion', 'Sraz spolužáků'], ['funeral', 'Smuteční rozloučení']];
-  const RECIPIENTS = [['person', 'Jeden člověk', 'Narozeniny, důchod, rozlučka'], ['couple', 'Pár', 'Svatba, výročí, společná oslava'], ['team', 'Tým nebo parta', 'Spolužáci, oddíl, kapela'], ['company', 'Firma', 'Výročí firmy nebo pobočky']];
+  const OCCASIONS = [['birthday', 'Narozeniny'], ['wedding', 'Svatba'], ['anniversary', 'Výročí svatby'], ['retire', 'Odchod do důchodu'], ['company', 'Firemní jubileum'], ['farewell', 'Rozlučka'], ['reunion', 'Sraz spolužáků'], ['thanks', 'Poděkování'], ['funeral', 'Smuteční rozloučení']];
+  const RECIPIENTS = [['person', 'Jeden člověk', 'Narozeniny, důchod, rozlučka, poděkování'], ['couple', 'Pár', 'Svatba, výročí, společná oslava'], ['team', 'Tým nebo parta', 'Spolužáci, oddíl, kapela'], ['company', 'Firma', 'Výročí firmy nebo pobočky']];
   // [klíč, název, popis, světlá [pozadí, text, akcent], tmavá, úroveň] – stejné jako App\Domain\Guest\Themes
   const THEMES = (W.themes || []).map(t => [t.key, t.name, t.desc, t.light, t.dark, t.key === 'neutralni' ? 0 : 1]);
   const COLLECT = [[14, '14 dní', 0], [30, '30 dní', 1], [60, '60 dní', 1], [90, '90 dní', 1], [180, '180 dní', 2]];
@@ -94,7 +94,7 @@
     $('[data-date-label]').textContent = fu ? 'Datum rozloučení' : 'Datum události';
     $('[data-rec-label]').textContent = fu ? 'Jméno zesnulé / zesnulého' : { person: 'Jméno oslavence (1. pád)', couple: 'Jména páru', team: 'Název týmu nebo party', company: 'Název firmy' }[S.recipient];
     $('#w-rec').placeholder = { person: 'např. Jana', couple: 'např. Jana a Petr', team: 'např. Třída 4.B', company: 'např. Pekárna Novák' }[S.recipient];
-    $('[data-year-label]').textContent = fu ? 'Rok narození' : { person: 'Rok narození', couple: 'Rok svatby nebo seznámení', team: 'Rok, kdy jste začali', company: 'Rok založení' }[S.recipient];
+    $('[data-year-label]').textContent = fu ? 'Rok narození' : S.occasion === 'thanks' ? 'Rok, kdy jste se poznali' : { person: 'Rok narození', couple: 'Rok svatby nebo seznámení', team: 'Rok, kdy jste začali', company: 'Rok založení' }[S.recipient];
 
     opts('occasion', OCCASIONS.map(([v, l]) => [v, l]), 'opt');
     opts('recipient', (fu ? RECIPIENTS.slice(0, 1) : RECIPIENTS).map(([v, l, d]) => [v, `<strong>${l}</strong><small>${d}</small>`]), 'opt');
@@ -218,6 +218,7 @@
         if (['wedding', 'anniversary'].includes(v)) p.recipient = 'couple';
         if (v === 'company') p.recipient = 'company';
         if (v === 'reunion') p.recipient = 'team';
+        if (v === 'thanks') p.recipient = 'person';
       }
       set(p);
     }

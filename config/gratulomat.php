@@ -73,6 +73,7 @@ return [
         'default' => ['Rodina', 'Škola', 'Práce', 'Cesty', 'Sport', 'Mejdan', 'Trapas', 'Jen tak'],
         'svatba' => ['Seznámení', 'Rodina', 'Přátelé', 'Cesty', 'Mejdan', 'Trapas', 'Jen tak'],
         'firemni-jubileum' => ['Začátky', 'Projekty', 'Lidé', 'Akce', 'Úspěchy', 'Trapas'],
+        'podekovani' => ['Začátky', 'Společné chvíle', 'Rady a lekce', 'Akce', 'Úspěchy', 'Trapas', 'Jen tak'],
         'smutecni' => ['Rodina', 'Přátelé', 'Práce', 'Cesty', 'Koníčky', 'Poslední setkání'],
     ],
 
@@ -84,7 +85,7 @@ return [
     ],
 
     'event_types' => [
-        'narozeniny', 'svatba', 'vyroci-svatby', 'duchod', 'firemni-jubileum', 'rozlucka', 'sraz', 'smutecni',
+        'narozeniny', 'svatba', 'vyroci-svatby', 'duchod', 'firemni-jubileum', 'rozlucka', 'sraz', 'podekovani', 'smutecni',
     ],
 
     // Smuteční rozloučení: sběr do data rozloučení + N dní, bez hry.

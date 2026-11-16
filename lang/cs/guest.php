@@ -8,12 +8,14 @@ return [
     'hello' => 'Ahoj :names,',
     'hero' => [
         'default' => ':go s námi vytvořit příběh vzpomínek a přání pro událost <em>:title</em>.',
+        'podekovani' => ':go s námi poskládat poděkování pro <em>:acc</em>.',
         'smutecni' => 'zavzpomínejte s námi na <em>:acc</em>.',
     ],
     'finale' => [
         'narozeniny' => 'Všechno nejlepší, :voc!',
         'svatba' => 'Ať vám to spolu klape!',
         'vyroci-svatby' => 'Ať vám to spolu klape!',
+        'podekovani' => 'Děkujeme, :voc!',
         'smutecni' => 'Navždy v našich vzpomínkách',
         'default' => 'Děkujeme, že jste součástí příběhu',
     ],
@@ -27,6 +29,7 @@ return [
     'create_many' => '',
     'go_many' => 'pojďte',
     'lead' => 'Nasdílejte historku nebo vzpomínku, nahrajte fotky ze šuplíku nebo namluvte vzkaz. Výsledkem bude krásná audiovizuální prezentace s časovou osou a vy budete její spoluautoři. Pokud si to organizátor bude přát, nasdílí vám výsledek jako film.',
+    'lead_no_timeline' => 'Nasdílejte historku nebo vzpomínku, nahrajte fotky ze šuplíku nebo namluvte vzkaz. Výsledkem bude krásná audiovizuální prezentace a vy budete její spoluautoři. Pokud si to organizátor bude přát, nasdílí vám výsledek jako film.',
     'lead_funeral' => 'Napište vzpomínku, přidejte fotky nebo namluvte vzkaz. Společně z nich poskládáme tichou vzpomínku pro rodinu a blízké.',
     'add_memory' => 'Přidat vzpomínku',
     'kino_link' => '🎬 Videoprezentace je otevřená – pusťte si ji znovu',
@@ -157,6 +160,14 @@ return [
             'Firemní akce, o které se dodnes mluví.',
             'Kdo vám nejvíc pomohl a čím?',
             'Co by firma měla zažít v dalších letech?',
+        ],
+        'podekovani' => [
+            'Kdy a kde jste se s :ins poprvé potkali?',
+            'Co nejcennějšího vás :name naučil/a?',
+            'Chvíle, kdy vám :name opravdu pomohl/a.',
+            'Rada nebo věta od :gen, kterou si pamatujete dodnes.',
+            'Společný zážitek, na který rádi vzpomínáte.',
+            'Za co byste :dat chtěli poděkovat nejvíc?',
         ],
         'smutecni' => [
             'Kdy a kde jste se poprvé potkali?',

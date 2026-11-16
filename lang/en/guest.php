@@ -6,6 +6,7 @@ return [
     'hello' => 'Hi :names,',
     'hero' => [
         'default' => 'come and create a story of memories and wishes with us for <em>:title</em>.',
+        'podekovani' => 'come and put together a thank-you for <em>:name</em> with us.',
         'smutecni' => 'share your memories of <em>:name</em> with us.',
     ],
     'finale' => [
@@ -13,6 +14,7 @@ return [
         'svatba' => 'Here’s to you two!',
         'vyroci-svatby' => 'Here’s to you two!',
         'smutecni' => 'Forever in our memories',
+        'podekovani' => 'Thank you, :name!',
         'default' => 'Thank you for being part of the story',
     ],
     'archived' => 'This event has ended and its page is no longer available. If you need the archive extended, please contact the organiser.',
@@ -25,6 +27,7 @@ return [
     'create_many' => '',
     'go_many' => 'come',
     'lead' => 'Share a story or a memory, upload photos from the drawer or record a message. The result will be a beautiful audiovisual presentation with a timeline, and you will be its co-authors. If the organiser wishes, they will share the result with you as a film.',
+    'lead_no_timeline' => 'Share a story or a memory, upload photos from the drawer or record a message. The result will be a beautiful audiovisual presentation, and you will be its co-authors. If the organiser wishes, they will share the result with you as a film.',
     'lead_funeral' => 'Write a memory, add photos or record a message. Together we will create a quiet remembrance for the family and friends.',
     'add_memory' => 'Add a memory',
     'kino_link' => '🎬 The video presentation is open – watch it again',
@@ -153,6 +156,14 @@ return [
             'A company event people still talk about.',
             'Who helped you the most, and how?',
             'What should the company experience in the years to come?',
+        ],
+        'podekovani' => [
+            'When and where did you first meet :name?',
+            'What is the most valuable thing :name taught you?',
+            'A moment when :name really helped you.',
+            'Advice or a phrase from :name you still remember.',
+            'A shared experience you love to look back on.',
+            'What would you most like to thank :name for?',
         ],
         'smutecni' => [
             'When and where did you first meet?',
