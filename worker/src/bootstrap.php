@@ -2,7 +2,7 @@
 
 /* Společné pro worker.php a check.php. */
 
-const WORKER_VERSION = '1.1';
+const WORKER_VERSION = '1.2';
 
 spl_autoload_register(function (string $class) {
     if (str_starts_with($class, 'Worker\\')) {
@@ -41,7 +41,6 @@ function worker_api(array $config): Closure
         $body = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
         $err = curl_error($ch);
-        curl_close($ch);
         if ($body === false || $status >= 400) {
             throw new RuntimeException("Gratulomat {$method} {$path} → HTTP {$status}".($err ? " ({$err})" : ''));
         }

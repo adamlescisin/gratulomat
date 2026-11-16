@@ -45,6 +45,7 @@ try {
     $line(false, 'MyÚčto: '.$msg, match (true) {
         str_contains($msg, '401'), str_contains($msg, '403') => 'Token je neplatný, vypršel nebo nemá rozsah read_write.',
         str_contains($msg, 'connect') => 'MyÚčto neběží nebo je jiná adresa/port v myucto_url.',
+        str_contains($msg, 'Sazba DPH') => 'Spojení i token fungují, jen neznám tvar číselníku sazeb. Pošlete mi tento řádek (tokeny v něm nejsou).',
         default => 'Zkontrolujte myucto_url a token.',
     });
 }

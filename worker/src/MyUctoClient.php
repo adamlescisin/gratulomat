@@ -57,12 +57,38 @@ class MyUctoClient
     public function vatRateId(float $percent): int
     {
         $this->vatRates ??= $this->request('GET', '/api/v1/codebooks/vat-rates');
-        foreach ($this->vatRates['data'] ?? $this->vatRates as $rate) {
-            if (abs((float) ($rate['rate'] ?? $rate['value'] ?? -1) - $percent) < 0.001) {
-                return (int) $rate['id'];
+        // Číselník může mít různý tvar (data / items, rate / value / percent, 21 nebo 0.21, "21 %") – hledáme rekurzivně.
+        $found = null;
+        $walk = function ($node) use (&$walk, &$found, $percent) {
+            if (! is_array($node) || $found !== null) {
+                return;
             }
+            if (isset($node['id'])) {
+                foreach (['rate', 'value', 'percent', 'percentage', 'vat_rate', 'vat', 'name', 'label', 'code'] as $k) {
+                    if (! isset($node[$k]) || is_array($node[$k])) {
+                        continue;
+                    }
+                    $v = (float) str_replace(',', '.', preg_replace('/[^0-9.,]/', '', (string) $node[$k]));
+                    if ($v > 0 && $v <= 1) {
+                        $v *= 100;
+                    }
+                    if (abs($v - $percent) < 0.001) {
+                        $found = (int) $node['id'];
+
+                        return;
+                    }
+                }
+            }
+            foreach ($node as $child) {
+                $walk($child);
+            }
+        };
+        $walk($this->vatRates);
+        if ($found !== null) {
+            return $found;
         }
-        throw new RuntimeException("Sazba DPH {$percent} % v MyÚčtu nenalezena.");
+        throw new RuntimeException("Sazba DPH {$percent} % v MyÚčtu nenalezena. Číselník vrátil: "
+            .mb_substr(json_encode($this->vatRates, JSON_UNESCAPED_UNICODE), 0, 600));
     }
 
     /** Hledání dokladu podle textu (číslo objednávky v poznámce) kvůli idempotenci. */
@@ -161,7 +187,6 @@ class MyUctoClient
             throw new RuntimeException('MyÚčto nedostupné: '.curl_error($ch));
         }
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        curl_close($ch);
 
         return [$status, $content];
     }
