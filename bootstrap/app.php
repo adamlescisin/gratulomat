@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\ViewErrorBag;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -33,7 +34,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->view('site.maintenance', status: 503)->header('Retry-After', '600');
             }
             if ($mode === 'coming_soon') {
-                return response()->view('site.coming-soon');
+                // U adres mimo routy neběží webový middleware – chybové hlášky formuláře doplníme prázdné.
+                return response()->view('site.coming-soon', ['errors' => new ViewErrorBag]);
             }
 
             return null;
