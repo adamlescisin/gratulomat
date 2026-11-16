@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Domain\Orders\CzechNames;
+use App\Domain\Orders\WizardConfig;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -71,6 +73,26 @@ class Event extends Model
         }
 
         return $vars;
+    }
+
+    /** Hlavní organizátor (vlastník) podle e-mailu; předchozí vlastník přestane mít přístup. */
+    public function setOwner(string $email): User
+    {
+        $user = User::firstOrCreate(['email' => mb_strtolower(trim($email))], ['name' => strstr($email, '@', true)]);
+        $old = $this->organizers()->wherePivot('role', 'owner')->pluck('users.id')->reject(fn ($id) => $id === $user->id);
+        if ($old->isNotEmpty()) {
+            $this->organizers()->detach($old->all());
+        }
+        $this->organizers()->syncWithoutDetaching([$user->id => ['role' => 'owner']]);
+
+        return $user;
+    }
+
+    /** Tvary jména pro texty (1. pád → 3., 4., 5. pád…), přepočet po změně jména. */
+    public function refreshRecipientForms(): void
+    {
+        $type = array_search($this->recipient_type, WizardConfig::RECIPIENTS, true) ?: 'person';
+        $this->recipient_forms = CzechNames::forms($this->recipient_name, $type) ?: null;
     }
 
     public function setting(string $key, mixed $default = null): mixed

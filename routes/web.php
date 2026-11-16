@@ -59,6 +59,8 @@ Route::get('/moje', [AuthController::class, 'events'])->middleware('auth')->name
 Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(BackofficeController::class)->group(function () {
     Route::get('/', 'dashboard')->name('backoffice');
     Route::get('/udalosti', 'events')->name('backoffice.events');
+    Route::get('/udalosti/{event}', 'event')->name('backoffice.event');
+    Route::post('/udalosti/{event}', 'eventSave')->name('backoffice.event.save');
     Route::get('/cekaci-listina', 'waitlist')->name('backoffice.waitlist');
     Route::get('/cekaci-listina.csv', 'waitlistCsv')->name('backoffice.waitlist.csv');
     Route::delete('/cekaci-listina/{entry}', 'waitlistDelete')->name('backoffice.waitlist.delete');
@@ -72,6 +74,7 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/objednavky/{order}/vip-rucne', [OrdersController::class, 'vipManual'])->name('backoffice.order.vipManual');
     Route::post('/objednavky/{order}/uloha/{job}', [OrdersController::class, 'retryJob'])->name('backoffice.order.retry');
     Route::get('/objednavky/{order}/doklad/{invoice}', [OrdersController::class, 'invoicePdf'])->name('backoffice.order.pdf');
+    Route::post('/objednavky/{order}/email', [OrdersController::class, 'email'])->name('backoffice.order.email');
     Route::post('/objednavky/{order}/poznamka', [OrdersController::class, 'note'])->name('backoffice.order.note');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
     Route::post('/slevy', 'discountStore')->name('backoffice.discounts.store');

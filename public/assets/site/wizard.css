@@ -92,3 +92,4 @@ input[type=range] { width: 100%; accent-color: var(--coral); }
 .wz .scale[data-guests-scale] span:first-child { transform: none; } .wz .scale[data-guests-scale] span:first-child::before { left: 0; }
 .wz .scale[data-guests-scale] span:last-child { transform: translateX(-100%); } .wz .scale[data-guests-scale] span:last-child::before { left: auto; right: 0; }
 @media (max-width: 560px) { .wz .scale[data-guests-scale] span { font-size: 11px; } }
+.wz .tg-soon { opacity: .6; cursor: default; } .wz .tag-soon { background: #E6E1F5; color: #1C1633; }

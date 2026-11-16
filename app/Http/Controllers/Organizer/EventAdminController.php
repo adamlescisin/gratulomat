@@ -161,7 +161,7 @@ class EventAdminController extends Controller
             $data['public_from'] = match (true) {
                 $v === 'now' => now(),
                 $v === null || $v === '' => null,
-                default => Carbon::parse($v, 'Europe/Prague'),
+                default => Carbon::parse($v, 'Europe/Prague')->utc(),
             };
         }
         if ($request->has('game_enabled')) {
@@ -177,14 +177,23 @@ class EventAdminController extends Controller
         $v = $request->validate([
             'invite_text' => 'nullable|string|max:2000',
             'collect_until' => 'nullable|date',
-        ]);
+            'title' => 'sometimes|required|string|max:140',
+            'recipient_name' => 'sometimes|required|string|max:120',
+        ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
+        if (isset($v['title'])) {
+            $event->title = trim($v['title']);
+        }
+        if (isset($v['recipient_name']) && trim($v['recipient_name']) !== $event->recipient_name) {
+            $event->recipient_name = trim($v['recipient_name']);
+            $event->refreshRecipientForms();
+        }
         $settings = $event->settings ?? [];
         if (array_key_exists('invite_text', $v)) {
             $settings['invite_text'] = $v['invite_text'];
         }
         $event->settings = $settings;
         if (! empty($v['collect_until'])) {
-            $until = Carbon::parse($v['collect_until'], 'Europe/Prague');
+            $until = Carbon::parse($v['collect_until'], 'Europe/Prague')->utc();
             $maxDays = $event->limit('collect_days');
             $max = $event->isFuneral() ? null : ($maxDays ? $event->created_at->copy()->addDays($maxDays)->max($event->event_date) : null);
             abort_if($max && $until->gt($max), response()->json(['error' => 'Delší sběr tarif neumožňuje.'], 422));

@@ -33,7 +33,7 @@ class WizardConfig
     /** přepínač v průvodci => funkce v ceníku */
     public const FEATURE_MAP = [
         'voice' => 'wishes', 'nowm' => 'no_watermark', 'offline' => 'offline', 'video' => 'videos', 'game' => 'game',
-        'mp4' => 'mp4', 'reminders' => 'reminders', 'importList' => 'import', 'anonLink' => 'anonymous_link', 'langs' => 'translations',
+        'reminders' => 'reminders', 'importList' => 'import', 'anonLink' => 'anonymous_link', 'langs' => 'translations',
         'vipSetup' => 'vip_services', 'vipEdit' => 'vip_services',
     ];
 
@@ -169,8 +169,9 @@ class WizardConfig
             'recipient_name' => $d['recName'],
             'recipient_forms' => CzechNames::forms($d['recName'], $d['recipient']) ?: null,
             'start_year' => $d['startYear'],
-            'event_date' => $date,
-            'collect_until' => $collect,
+            // aplikace ukládá v UTC (APP_TIMEZONE), místní čas převedeme
+            'event_date' => $date->copy()->utc(),
+            'collect_until' => $collect->copy()->utc(),
             'archive_until' => $archiveUntil->toDateString(),
             'status' => 'collecting',
             'plan' => $plan,

@@ -7,6 +7,9 @@
 <section class="panel" style="flex:2 1 460px">
   <h2 style="margin:0">{{ $order->config['name'] ?? $order->number }} @if ($order->is_test)<span class="tag">TEST</span>@endif</h2>
   <p class="muted" style="margin:0">{{ $order->number }} · {{ $order->statusLabel() }} · vytvořeno {{ $order->created_at->timezone('Europe/Prague')->format('j. n. Y H:i') }}@if ($order->paid_at) · zaplaceno {{ $order->paid_at->timezone('Europe/Prague')->format('j. n. Y H:i') }}@endif</p>
+  @if ($order->kind === 'manual')
+    <p style="margin:0;padding:14px 16px;border-radius:14px;background:#F4EDE2">Založeno ručně provozovatelem <strong>bez platby</strong> · tarif {{ config("gratulomat.plans.{$order->plan}.name", $order->plan) }}. Nic se neúčtuje a doklad se nevystavuje.</p>
+  @else
   <div class="tbl-wrap"><table class="tbl">
     <thead><tr><th>Položka</th><th>Množství</th><th style="text-align:right">Celkem</th></tr></thead>
     <tbody>
@@ -22,6 +25,7 @@
       @if ($order->refunded_halere)<tr><td colspan="2">Vráceno</td><td style="text-align:right">−{{ $czk($order->refunded_halere) }}</td></tr>@endif
     </tfoot>
   </table></div>
+  @endif
 
   <h3 style="margin:8px 0 0">Doklady</h3>
   @forelse ($order->invoices as $inv)
@@ -30,7 +34,7 @@
       @if ($inv->pdf_path)<a class="b b--sm b--ghost" href="{{ route('backoffice.order.pdf', [$order, $inv]) }}">PDF</a>@endif
     </div>
   @empty
-    <p class="muted" style="margin:0">{{ $order->is_test ? 'Testovací objednávka – doklad se nevystavuje.' : ($order->kind === 'manual' ? 'Ruční založení bez platby – bez dokladu.' : 'Zatím žádný doklad.') }}</p>
+    <p class="muted" style="margin:0">{{ $order->kind === 'manual' ? 'Ruční založení bez platby – bez dokladu.' : ($order->is_test ? 'Testovací objednávka – doklad se nevystavuje.' : 'Zatím žádný doklad.') }}</p>
   @endforelse
   @foreach ($jobs as $job)
     @if ($job->status !== 'done')
@@ -54,14 +58,18 @@
 <div style="flex:1 1 300px;display:flex;flex-direction:column;gap:22px;min-width:0">
 <section class="panel">
   <h3 style="margin:0">Zákazník</h3>
-  <p style="margin:0"><a href="mailto:{{ $order->email }}">{{ $order->email }}</a></p>
+  <form method="post" action="{{ route('backoffice.order.email', $order) }}" style="display:flex;flex-direction:column;gap:8px">@csrf
+    <input class="inp" type="email" name="email" value="{{ old('email', $order->email) }}" required>
+    @if ($order->event)<label class="muted"><input type="checkbox" name="move_owner" value="1" checked> převést i organizátora události na tento e-mail</label>@endif
+    <button class="b b--sm b--ghost" style="align-self:flex-start">Změnit e-mail</button>
+  </form>
   @if ($order->company)
     <p class="muted" style="margin:0">{{ $order->company['name'] }}<br>IČO {{ $order->company['ico'] }}@if ($order->company['dic'] ?? null) · DIČ {{ $order->company['dic'] }}@endif<br>{{ $order->company['street'] }}, {{ $order->company['zip'] }} {{ $order->company['city'] }}</p>
   @endif
   @if ($order->discount_code)<p class="muted" style="margin:0">Slevový kód {{ $order->discount_code }} ({{ $order->discount_percent }} %, −{{ $czk($order->discount_halere) }})</p>@endif
   @if ($order->stripeUrl())<p style="margin:0"><a href="{{ $order->stripeUrl() }}" target="_blank" rel="noopener">Platba ve Stripe ↗</a></p>@endif
   @if ($order->event)
-    <div class="row"><a class="b b--sm" href="{{ route('organizer.admin', $order->event) }}">Administrace události</a><a class="b b--sm b--ghost" href="{{ route('event.show', $order->event) }}" target="_blank">Stránka ↗</a></div>
+    <div class="row"><a class="b b--sm" href="{{ route('backoffice.event', $order->event) }}">Upravit událost</a><a class="b b--sm b--ghost" href="{{ route('organizer.admin', $order->event) }}">Administrace</a><a class="b b--sm b--ghost" href="{{ route('event.show', $order->event) }}" target="_blank">Stránka ↗</a></div>
     <form method="post" action="{{ route('backoffice.order.resend', $order) }}">@csrf<button class="b b--sm b--ghost">Znovu poslat odkaz do administrace</button></form>
   @endif
 </section>

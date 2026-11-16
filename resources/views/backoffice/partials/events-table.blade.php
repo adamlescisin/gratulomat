@@ -9,7 +9,7 @@
       <td>{{ $e->status }}</td>
       <td>{{ $e->households_count }}</td>
       <td>{{ $e->memories_count }}</td>
-      <td style="white-space:nowrap"><a class="b b--sm" href="{{ route('organizer.admin', $e) }}">Administrace</a> <a class="b b--sm b--ghost" href="{{ route('event.show', $e) }}" target="_blank">Stránka ↗</a></td>
+      <td style="white-space:nowrap"><a class="b b--sm" href="{{ route('backoffice.event', $e) }}">Upravit</a> <a class="b b--sm b--ghost" href="{{ route('organizer.admin', $e) }}">Administrace</a> <a class="b b--sm b--ghost" href="{{ route('event.show', $e) }}" target="_blank">Stránka ↗</a></td>
     </tr>
   @empty
     <tr><td colspan="7" class="muted">Zatím žádné události. Založte ji příkazem <code>gratulomat:event</code>.</td></tr>

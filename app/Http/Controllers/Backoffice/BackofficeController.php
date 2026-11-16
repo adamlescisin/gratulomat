@@ -9,11 +9,13 @@ use App\Models\Event;
 use App\Models\Household;
 use App\Models\Media;
 use App\Models\Memory;
+use App\Models\Order;
 use App\Models\Setting;
 use App\Models\TesterCode;
 use App\Models\WaitlistEntry;
 use App\Support\MailBrand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -142,6 +144,54 @@ class BackofficeController extends Controller
         Mail::to($request->user())->send(new LoginLink($request->user(), route('login')));
 
         return back()->with('ok', 'Zkušební e-mail odešel na '.$request->user()->email.'.');
+    }
+
+    public function event(Event $event)
+    {
+        return view('backoffice.event', [
+            'event' => $event->load('organizers'), 'mode' => Setting::siteMode(),
+            'orders' => Order::where('event_id', $event->id)->latest()->get(),
+        ]);
+    }
+
+    public function eventSave(Request $request, Event $event)
+    {
+        $v = $request->validate([
+            'title' => 'required|string|max:140',
+            'recipient_name' => 'required|string|max:120',
+            'event_date' => 'required|date',
+            'collect_until' => 'nullable|date',
+            'archive_until' => 'nullable|date',
+            'guest_limit' => 'nullable|integer|min:1|max:5000',
+            'owner_email' => 'required|email:rfc|max:191',
+        ], ['owner_email.*' => 'Zkontrolujte e-mail organizátora.', 'title.required' => 'Název nesmí být prázdný.']);
+
+        $tz = 'Europe/Prague';
+        $nameChanged = $event->recipient_name !== $v['recipient_name'];
+        $event->fill([
+            'title' => $v['title'], 'recipient_name' => $v['recipient_name'],
+            'event_date' => Carbon::parse($v['event_date'], $tz)->utc(),
+            'collect_until' => $v['collect_until'] ? Carbon::parse($v['collect_until'], $tz)->utc() : null,
+            'archive_until' => $v['archive_until'] ? Carbon::parse($v['archive_until'], $tz)->toDateString() : null,
+        ]);
+        if ($nameChanged) {
+            $event->refreshRecipientForms();
+        }
+        if (! empty($v['guest_limit'])) {
+            $event->limits = [...($event->limits ?? []), 'guests' => (int) $v['guest_limit']];
+        }
+        $changes = array_keys($event->getDirty());
+        $event->save();
+
+        $owner = $event->organizers()->wherePivot('role', 'owner')->first();
+        if (mb_strtolower($v['owner_email']) !== $owner?->email) {
+            $event->setOwner($v['owner_email']);
+            $changes[] = 'organizátor';
+            Order::where('event_id', $event->id)->update(['email' => mb_strtolower($v['owner_email'])]);
+        }
+        Log::info('Událost upravena provozovatelem', ['event' => $event->slug, 'changes' => $changes, 'by' => $request->user()->email]);
+
+        return redirect()->route('backoffice.event', $event)->with('ok', $changes ? 'Událost je uložená.' : 'Beze změn.');
     }
 
     public function waitlist()

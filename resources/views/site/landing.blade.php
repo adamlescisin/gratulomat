@@ -132,7 +132,7 @@
           <span class="badge">Doporučujeme</span>
           <h3>{{ $plans['premiera']['name'] }}</h3>
           <div><div class="price">{{ $kc($plans['premiera']['price']) }}</div><div class="per">jednorázově za událost</div></div>
-          <ul class="ticks">@foreach (['Až '.$plans['premiera']['guests'].' gratulantů', 'Anonymní pozvánka', 'Import gratulantů ze seznamu nebo kontaktů', 'Videa od gratulantů', 'Film MP4 ke stažení', 'Hra „Hádej, kdo to napsal“', 'Připomínky gratulantům e-mailem', 'Archiv '.$plans['premiera']['archive_months'].' měsíců'] as $t)<li>{!! $tick('#FFC433') !!}<span>{{ $t }}</span></li>@endforeach</ul>
+          <ul class="ticks">@foreach (['Až '.$plans['premiera']['guests'].' gratulantů', 'Anonymní pozvánka', 'Import gratulantů ze seznamu nebo kontaktů', 'Videa od gratulantů', 'Film MP4 ke stažení (připravujeme)', 'Hra „Hádej, kdo to napsal“', 'Připomínky gratulantům e-mailem', 'Archiv '.$plans['premiera']['archive_months'].' měsíců'] as $t)<li>{!! $tick('#FFC433') !!}<span>{{ $t }}</span></li>@endforeach</ul>
           <a class="btn" href="{{ route('wizard', ['tarif' => 'premiera']) }}">Vybrat Premiéru</a>
         </div>
         <div class="plan">

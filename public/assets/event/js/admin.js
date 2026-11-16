@@ -88,8 +88,9 @@
     }).join('') || '<p class="empty">Zatím žádné vzpomínky.</p>';
 
     // nastavení
+    const bn = $('.brand__name'); if (bn) bn.textContent = `${E.title} · administrace`;
     const f = $('[data-settings]');
-    if (!f.dataset.loaded) { field(f, 'invite_text').value = E.invite_text; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); f.dataset.loaded = '1'; }
+    if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); f.dataset.loaded = '1'; }
   }
 
   const run = async (fn, okMsg) => { try { await fn(); if (okMsg) toast(okMsg); await load(); } catch (e) { toast(e.message); } };
@@ -116,7 +117,7 @@
     }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
-      run(() => post('settings', { invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
+      run(() => post('settings', { title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
     }
   });
 

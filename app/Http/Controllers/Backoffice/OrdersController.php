@@ -154,6 +154,20 @@ class OrdersController extends Controller
         return Storage::disk('local')->download($invoice->pdf_path, ($invoice->number ?: 'doklad').'.pdf');
     }
 
+    public function email(Request $request, Order $order)
+    {
+        $email = mb_strtolower($request->validate(['email' => 'required|email:rfc|max:191'], ['email.*' => 'Zkontrolujte e-mail.'])['email']);
+        $old = $order->email;
+        $order->update(['email' => $email]);
+        $order->log("E-mail zákazníka změněn: {$old} → {$email}", $request->user()->email);
+        if ($order->event && $request->boolean('move_owner')) {
+            $order->event->setOwner($email);
+            $order->log('Organizátor události převeden na '.$email, $request->user()->email);
+        }
+
+        return back()->with('ok', 'E-mail je změněný.'.($order->event && $request->boolean('move_owner') ? ' Odkaz do administrace pošlete tlačítkem „Znovu poslat odkaz“.' : ''));
+    }
+
     public function note(Request $request, Order $order)
     {
         $order->update(['note' => $request->validate(['note' => 'nullable|string|max:2000'])['note']]);

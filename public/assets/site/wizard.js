@@ -25,7 +25,7 @@
   let S = {
     step: 0, maxStep: 0, name: '', slug: '', slugTouched: false, occasion: 'birthday', date: today.toISOString().slice(0, 10),
     recipient: 'person', recName: '', startYear: '', guests: 5, importList: false, anonLink: false, langs: false,
-    theme: 'zaklad', mode: 'light', voice: false, offline: false, nowm: false, video: false, game: false, mp4: false, reminders: false,
+    theme: 'zaklad', mode: 'light', voice: false, offline: false, nowm: false, video: false, game: false, reminders: false,
     collect: 14, archive: 1, discount: '', book: false, archExt: false, vipSetup: false, vipEdit: false,
   };
   try { const saved = JSON.parse(localStorage.getItem(STORE) || 'null'); if (saved) S = { ...S, ...saved }; } catch {}
@@ -119,7 +119,7 @@
       ['offline', 'Offline balíček', 'Videoprezentace poběží i bez internetu', 1],
       ['video', fu ? 'Videa od hostů' : 'Videa od gratulantů', 'Krátká videa až do 200 MB', 2],
       fu ? null : ['game', 'Hra „Hádej, kdo to napsal“', 'Autor se odhalí až po stisku tlačítka', 2],
-      ['mp4', 'Film MP4 ke stažení', 'Videoprezentace jako video na památku', 2],
+      ['mp4', 'Film MP4 ke stažení', 'Videoprezentace jako video na památku – připravujeme', 'soon'],
       ['reminders', fu ? 'Připomínky hostům e-mailem' : 'Připomínky gratulantům e-mailem', 'Automaticky upozorníme ty, kdo ještě nepřispěli', 2],
     ].filter(Boolean));
     toggles('addons', [
@@ -143,7 +143,9 @@
     box.innerHTML = list.map(([v, html]) => `<button type="button" class="${cls || ''}" data-opt="${key}" data-val="${v}" aria-pressed="${String(S[key]) === String(v)}">${html}</button>`).join('');
   }
   function toggles(key, list) {
-    $(`[data-toggles="${key}"]`).innerHTML = list.map(([k, l, d, lv]) => `<label class="tg"><input type="checkbox" ${k ? `data-tog="${k}"` : 'disabled'} ${!k || S[k] ? 'checked' : ''}><span class="t"><strong>${l}</strong><small>${d}</small></span><span class="tag tag-${lv}">${tag(lv)}</span></label>`).join('');
+    $(`[data-toggles="${key}"]`).innerHTML = list.map(([k, l, d, lv]) => lv === 'soon'
+      ? `<label class="tg tg-soon"><input type="checkbox" disabled><span class="t"><strong>${l}</strong><small>${d}</small></span><span class="tag tag-soon">Připravujeme</span></label>`
+      : `<label class="tg"><input type="checkbox" ${k ? `data-tog="${k}"` : 'disabled'} ${!k || S[k] ? 'checked' : ''}><span class="t"><strong>${l}</strong><small>${d}</small></span><span class="tag tag-${lv}">${tag(lv)}</span></label>`).join('');
   }
   function renderSlug() {
     const m = $('[data-slug-msg]'), box = $('[data-sugg]');
