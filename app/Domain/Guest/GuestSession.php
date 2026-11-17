@@ -33,6 +33,20 @@ class GuestSession
         session()->forget("guest.{$event->id}");
     }
 
+    /** Relace otevřená odkazem předání (oslavenec / rodina). Zneplatněný odkaz přístup okamžitě ruší. */
+    public static function isRecipient(Event $event): bool
+    {
+        $token = session("recipient.{$event->id}");
+
+        return is_string($token) && $event->handoverTokenValid($token);
+    }
+
+    public static function loginRecipient(Event $event, string $token): void
+    {
+        session()->regenerate();
+        session(["recipient.{$event->id}" => $token]);
+    }
+
     /** @return list<int> všechny domácnosti přihlášené v této relaci */
     public static function householdIds(): array
     {

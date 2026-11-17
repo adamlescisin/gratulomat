@@ -13,28 +13,34 @@ use ZipArchive;
  */
 class OfflinePackage
 {
-    public function build(Event $event, string $target): string
+    /** $forRecipient: kopie pro oslavence – soukromá přání se promítají, bez seznamu hostů a skrytých vzpomínek. */
+    public function build(Event $event, string $target, bool $forRecipient = false): string
     {
         $zip = new ZipArchive;
         if ($zip->open($target, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
             throw new RuntimeException('ZIP nelze vytvořit.');
         }
         $flags = JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
-        $show = MemoryPresenter::show($event, 'media');
+        $withPrivate = $forRecipient && $event->handoverIncludesPrivate();
+        $show = MemoryPresenter::show($event, 'media', $withPrivate) + ['recipient' => $forRecipient];
 
         $zip->addFromString('show.json', json_encode($show, $flags));
         $private = array_values(array_filter(MemoryPresenter::all($event, true),
             fn ($m) => ! $m['wish_public'] && ($m['wish_text'] || array_filter($m['media'], fn ($x) => $x['kind'] === 'audio'))));
-        $zip->addFromString('private-wishes.json', json_encode($private, $flags));
-        $zip->addFromString('guests.json', json_encode($event->households()->orderBy('label')
-            ->get(['label', 'names', 'relation', 'last_seen_at']), $flags));
+        if (! $forRecipient || $withPrivate) {
+            $zip->addFromString('private-wishes.json', json_encode($private, $flags));
+        }
+        if (! $forRecipient) {
+            $zip->addFromString('guests.json', json_encode($event->households()->orderBy('label')
+                ->get(['label', 'names', 'relation', 'last_seen_at']), $flags));
+        }
         app()->setLocale($event->locale);
         $zip->addFromString('index.html', view('event.kino', [
             'event' => $event, 'offline' => true, 'showUrl' => 'show.json', 'embeddedShow' => $show,
         ])->render());
         $zip->addFromString('JAK-PROMITAT.txt', "Rozbalte složku a otevřete index.html v Chrome nebo Safari.\n"
             ."Ovládání: mezerník pauza, šipky zpět/dál, F celá obrazovka, G přehled, M hudba.\n"
-            ."Soubor private-wishes.json obsahuje soukromá přání – nepromítají se.\n");
+            .($withPrivate ? "Soukromá přání jsou určená vám a ve videoprezentaci jsou také; najdete je i v private-wishes.json.\n" : "Soubor private-wishes.json obsahuje soukromá přání – nepromítají se.\n"));
 
         $assets = public_path('assets/event');
         $zip->addFile("$assets/css/app.css", 'assets/css/app.css');
@@ -48,7 +54,11 @@ class OfflinePackage
             $zip->addFile($track && $src === 'music/'.$track->file ? $track->path() : public_path($src), $src);
         }
         // všechna média včetně skrytých vzpomínek (ať se nic neztratí) + memory.json
+        $visible = array_column($show['memories'], 'id');
         foreach (glob($event->mediaDir().'/*', GLOB_ONLYDIR) as $dir) {
+            if ($forRecipient && ! in_array(basename($dir), $visible, true)) {
+                continue; // skryté (moderované) vzpomínky oslavenec nedostane
+            }
             foreach (glob("$dir/*") as $f) {
                 $zip->addFile($f, 'media/'.basename($dir).'/'.basename($f));
             }

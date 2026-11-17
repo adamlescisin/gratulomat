@@ -188,6 +188,9 @@ class GuestApiController extends Controller
             return response()->json(['error' => __('guest.kino_locked')], 403);
         }
 
-        return response()->json(MemoryPresenter::show($event, url($event->slug.'/m')));
+        // oslavenec (odkaz předání) dostane i soukromá přání – jsou určená jemu
+        $recipient = GuestSession::isRecipient($event) && ! EventPageController::isOrganizer($event);
+
+        return response()->json(MemoryPresenter::show($event, url($event->slug.'/m'), $recipient && $event->handoverIncludesPrivate()) + ['recipient' => $recipient]);
     }
 }

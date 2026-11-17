@@ -34,7 +34,7 @@
     const by = d.birth_year, mem = d.memories;
     // vzpomínka = příběh/fotky/video; přání (text nebo hlas, jen veřejné) má vlastní slajd ve finále
     const hasStory = m => !!(m.title || m.body || m.media.some(x => x.kind === 'photo' || x.kind === 'video'));
-    const hasWish = m => m.wish_public && !!(m.wish_text || m.media.some(x => x.kind === 'audio'));
+    const hasWish = m => (m.wish_public || d.recipient) && !!(m.wish_text || m.media.some(x => x.kind === 'audio'));
     const stories = mem.filter(hasStory);
     const dated = stories.filter(m => m.year).sort((a, b) => a.year - b.year || a.created_at.localeCompare(b.created_at));
     const undated = shuffle(stories.filter(m => !m.year));

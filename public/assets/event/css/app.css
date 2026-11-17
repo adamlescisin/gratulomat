@@ -445,6 +445,11 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
 .settings-grid .input { width: 100%; }
 
+/* Administrace: předání oslavenci */
+.handover-box { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
+.handover-box .h3 { font: 500 1.2rem var(--serif); margin: 0 0 .5rem; }
+.ho-form { display: grid; gap: .6rem; max-width: 640px; } .ho-state { margin-top: 1rem; }
+
 /* Administrace: hudební podkres */
 .music-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .6rem; }
 .music-tags .tag { border: 0; padding: .3rem .75rem; border-radius: 999px; font: inherit; font-size: .85rem; cursor: pointer;

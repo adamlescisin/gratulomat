@@ -141,6 +141,8 @@ Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])-
     Route::match(['get', 'post'], '/odhlasit-emaily/{household}', [EventPageController::class, 'unsubscribe'])->whereNumber('household')->middleware('signed')->name('event.unsubscribe')
         ->withoutMiddleware([ValidateCsrfToken::class]);
     Route::get('/kino', [EventPageController::class, 'kino'])->name('event.kino');
+    Route::get('/predani/{token}', [EventPageController::class, 'handover'])->where('token', '[A-Za-z0-9]{32}')->middleware('throttle:30,1')->name('event.handover');
+    Route::get('/predani/{token}/offline.zip', [EventPageController::class, 'handoverOffline'])->where('token', '[A-Za-z0-9]{32}')->middleware('throttle:5,1')->name('event.handover.offline');
     Route::get('/m/{memoryId}/{file}', [EventPageController::class, 'media'])->name('event.media');
 
     Route::get('/api/me', [GuestApiController::class, 'me']);
@@ -161,6 +163,8 @@ Route::prefix('{event}')->where(['event' => '[a-z0-9][a-z0-9-]{1,28}[a-z0-9]'])-
         Route::post('/api/memories/{memory}', [EventAdminController::class, 'updateMemory']);
         Route::post('/api/show', [EventAdminController::class, 'updateShow']);
         Route::post('/api/settings', [EventAdminController::class, 'updateSettings']);
+        Route::post('/api/handover', [EventAdminController::class, 'handover'])->middleware('throttle:10,1');
+        Route::delete('/api/handover', [EventAdminController::class, 'handoverRevoke']);
         Route::get('/offline.zip', [EventAdminController::class, 'offline'])->name('organizer.offline');
     });
 });

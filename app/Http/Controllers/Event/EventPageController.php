@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Event;
 
 use App\Domain\Guest\EventRules;
 use App\Domain\Guest\GuestSession;
+use App\Domain\Guest\MemoryPresenter;
+use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Household;
@@ -135,8 +137,10 @@ class EventPageController extends Controller
 
         $household = GuestSession::household($event);
         $organizer = self::isOrganizer($event);
-        $own = $organizer || ($household && $household->id === $memory->household_id);
-        $canView = $own || ($household && $memory->status === 'visible' && $event->wallOpen());
+        $recipient = GuestSession::isRecipient($event) && $memory->status === 'visible';
+        // oslavenec vidí i soukromá přání (u smutečního rozloučení ne)
+        $own = $organizer || ($household && $household->id === $memory->household_id) || ($recipient && $event->handoverIncludesPrivate());
+        $canView = $own || $recipient || ($household && $memory->status === 'visible' && $event->wallOpen());
         abort_unless($canView, 404);
 
         $media = Media::where('memory_id', $memoryId)->where(fn ($q) => $q->where('file', $file)->orWhere('thumb', $file))->first();
@@ -154,6 +158,45 @@ class EventPageController extends Controller
         ]);
     }
 
+    /** Odkaz předání: oslavenec (rodina) vidí prezentaci, všechny vzpomínky včetně soukromých přání a offline balíček. */
+    public function handover(Event $event, string $token)
+    {
+        if (! $event->handoverTokenValid($token)) {
+            return response()->view('event.landing', ['event' => $event, 'notice' => __('guest.handover.invalid')], 404);
+        }
+        if (! GuestSession::isRecipient($event)) {
+            GuestSession::loginRecipient($event, $token);
+            if (! $event->handover()['opened_at'] && ! self::isOrganizer($event)) {
+                $event->update(['settings' => array_replace_recursive($event->settings ?? [], ['handover' => ['opened_at' => now()->toIso8601String()]])]);
+            }
+        }
+        app()->setLocale($event->locale);
+        $memories = MemoryPresenter::all($event);
+        if (! $event->handoverIncludesPrivate()) {
+            $memories = array_map([MemoryPresenter::class, 'stripPrivateWish'], $memories);
+        }
+        $private = fn ($m) => ! $m['wish_public'] && ($m['wish_text'] || collect($m['media'])->contains('kind', 'audio'));
+
+        return view('event.handover', [
+            'event' => $event, 'h' => $event->handover(), 'token' => $token,
+            'memories' => $memories,
+            'privateCount' => count(array_filter($memories, $private)),
+            'people' => count(array_unique(array_merge(...array_map(fn ($m) => $m['authors'], $memories ?: [['authors' => []]])))),
+            'canDownload' => EventRules::has($event, 'offline'), // ne 'offline' – to je příznak layoutu pro offline balíček
+            'owner' => $event->organizers()->wherePivot('role', 'owner')->first(),
+        ]);
+    }
+
+    public function handoverOffline(Event $event, string $token, OfflinePackage $package)
+    {
+        abort_unless($event->handoverTokenValid($token), 404);
+        abort_unless(EventRules::has($event, 'offline'), 403);
+        @set_time_limit(600);
+        $file = $package->build($event, sys_get_temp_dir().'/gratulomat-'.$event->slug.'-'.date('Ymd-His').'.zip', forRecipient: true);
+
+        return response()->download($file, $event->slug.'.zip')->deleteFileAfterSend();
+    }
+
     public static function isOrganizer(Event $event): bool
     {
         return (bool) auth()->user()?->organizes($event);
@@ -162,6 +205,6 @@ class EventPageController extends Controller
     /** Videoprezentaci vidí organizátor vždy, hosté až po zpřístupnění. */
     public static function canWatch(Event $event): bool
     {
-        return self::isOrganizer($event) || ($event->showPublic() && GuestSession::household($event));
+        return self::isOrganizer($event) || GuestSession::isRecipient($event) || ($event->showPublic() && GuestSession::household($event));
     }
 }

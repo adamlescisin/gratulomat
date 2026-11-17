@@ -10,6 +10,7 @@ use App\Domain\Orders\StripeGateway;
 use App\Domain\Orders\UpgradeService;
 use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
+use App\Mail\RecipientHandover;
 use App\Models\Event;
 use App\Models\Household;
 use App\Models\MusicTrack;
@@ -18,6 +19,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 /** Administrace organizátora: /{slug}/admin (specifikace „Administrace organizátora“). */
 class EventAdminController extends Controller
@@ -57,6 +60,10 @@ class EventAdminController extends Controller
                 'public_from' => $event->show?->public_from?->toIso8601String(),
                 'is_public' => $event->showPublic(),
                 'auto_share' => (bool) $event->setting('auto_share'),
+                'handover' => ($h = $event->handover()) ? [
+                    'url' => $event->handoverUrl(), 'email' => $h['email'] ?? null, 'message' => $h['message'] ?? null,
+                    'created_at' => $h['created_at'] ?? null, 'sent_at' => $h['sent_at'] ?? null, 'opened_at' => $h['opened_at'] ?? null,
+                ] : null,
                 'timeline' => $event->timeline(),
                 'wall_open_at' => $event->setting('wall_open_at'),
                 'wall_opens_at' => $event->wallOpensAt()->toIso8601String(),
@@ -105,6 +112,48 @@ class EventAdminController extends Controller
         }
 
         return response()->json(['url' => $session['url']]);
+    }
+
+    /**
+     * Předání oslavenci: vytvoří (nebo s regenerate vymění) tajný odkaz, uloží e-mail a věnování,
+     * se send=true ho pošle e-mailem. Výměna odkazu okamžitě zneplatní ten starý.
+     */
+    public function handover(Request $request, Event $event): JsonResponse
+    {
+        $v = $request->validate([
+            'email' => 'nullable|email:rfc|max:191',
+            'message' => 'nullable|string|max:2000',
+            'send' => 'sometimes|boolean',
+            'regenerate' => 'sometimes|boolean',
+        ], ['email.email' => 'Zkontrolujte e-mail.']);
+        $h = $event->handover();
+        if (! $h || $request->boolean('regenerate')) {
+            $h = ['token' => Str::random(32), 'created_at' => now()->toIso8601String(), 'sent_at' => null, 'opened_at' => null];
+        }
+        $h['email'] = isset($v['email']) ? mb_strtolower($v['email']) : ($h['email'] ?? null);
+        $h['message'] = array_key_exists('message', $v) ? (trim((string) $v['message']) ?: null) : ($h['message'] ?? null);
+
+        if ($request->boolean('send')) {
+            if (! $h['email']) {
+                return response()->json(['error' => 'Vyplňte e-mail, kam odkaz poslat.'], 422);
+            }
+            $event->update(['settings' => array_merge($event->settings ?? [], ['handover' => $h])]);
+            Mail::to($h['email'])->send(new RecipientHandover($event->fresh(), $request->user()));
+            $h['sent_at'] = now()->toIso8601String();
+            Log::info('Předání odesláno', ['event' => $event->slug, 'by' => $request->user()->email]);
+        }
+        $event->update(['settings' => array_merge($event->settings ?? [], ['handover' => $h])]);
+
+        return $this->state($event->fresh());
+    }
+
+    public function handoverRevoke(Event $event): JsonResponse
+    {
+        $settings = $event->settings ?? [];
+        unset($settings['handover']);
+        $event->update(['settings' => $settings]);
+
+        return $this->state($event->fresh());
     }
 
     /** Pozvánky e-mailem: zařadí do fronty hosty s e-mailem (vybrané nebo všechny dosud nepozvané). */

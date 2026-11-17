@@ -36,7 +36,7 @@
     $('[data-timeline]').checked = sh.timeline; $('[data-auto-share]').checked = sh.auto_share; $('[data-auto-share-at]').textContent = fmt(sh.auto_share_at);
     $('[data-show-at]').value = localInput(sh.public_from || E.event_date);
     $('[data-game-wrap]').hidden = !E.game_available; $('[data-game]').checked = sh.game_enabled;
-    renderMusic();
+    renderMusic(); renderHandover();
 
     // hosté
     $('[data-hh-count]').textContent = `(${hh.length}${E.guest_limit ? ' z ' + E.guest_limit : ''})`;
@@ -251,6 +251,43 @@
     if (!a.paused && a.dataset.id === String(t.id)) { a.pause(); e.target.textContent = '▶ Ukázka'; return; }
     a.src = t.url; a.dataset.id = t.id; a.currentTime = 0; a.play(); e.target.textContent = '❚❚ Zastavit';
     a.onended = () => { e.target.textContent = '▶ Ukázka'; };
+  });
+
+  // předání oslavenci (u smutečního rozloučení rodině)
+  function renderHandover() {
+    const H = S.show.handover, fu = S.event.funeral;
+    $('[data-ho-title]').textContent = fu ? 'Předání rodině' : 'Předání oslavenci';
+    $('[data-ho-intro]').textContent = fu
+      ? 'Pošlete rodině tajný odkaz: uvidí vzpomínkovou prezentaci, všechny vzpomínky a veřejné vzkazy a může si stáhnout offline balíček. Soukromé vzkazy zůstávají jen u vás, jak bylo hostům slíbeno. Nic nemůže měnit. Funguje hned, i když prezentace pro hosty není zpřístupněná.'
+      : 'Pošlete oslavenci tajný odkaz: uvidí videoprezentaci, všechny vzpomínky včetně soukromých přání určených jemu a může si stáhnout offline balíček. Nic nemůže měnit. Funguje hned, i když prezentace pro hosty ještě není zpřístupněná – pošlete ho třeba den po oslavě.';
+    $('[data-ho-email]').placeholder = fu ? 'E-mail někoho z rodiny' : 'E-mail oslavence';
+    const em = $('[data-ho-email]'), msg = $('[data-ho-message]');
+    if (document.activeElement !== em) em.value = H?.email || '';
+    if (document.activeElement !== msg) msg.value = H?.message || '';
+    $('[data-ho-state]').hidden = !H;
+    $('[data-action=ho-send]').textContent = H?.sent_at ? 'Odeslat znovu' : 'Odeslat e-mailem';
+    $('[data-action=ho-link]').textContent = H ? 'Uložit věnování' : 'Jen vytvořit odkaz';
+    if (!H) return;
+    $('[data-ho-url]').value = H.url; $('[data-ho-open]').href = H.url;
+    $('[data-ho-status]').textContent = [`Odkaz vytvořen ${fmt(H.created_at)}`, H.sent_at ? `odeslán na ${H.email} ${fmt(H.sent_at)}` : 'zatím neodeslán',
+      H.opened_at ? `✓ otevřen ${fmt(H.opened_at)}` : 'zatím neotevřen'].join(' · ');
+  }
+  const hoBody = extra => ({ email: $('[data-ho-email]').value.trim() || null, message: $('[data-ho-message]').value, ...extra });
+  $('[data-action=ho-send]').addEventListener('click', () => {
+    if (!$('[data-ho-email]').value.trim()) return toast('Vyplňte e-mail');
+    run(() => post('handover', hoBody({ send: true })), 'Odkaz je odeslaný e-mailem');
+  });
+  $('[data-action=ho-link]').addEventListener('click', () => run(() => post('handover', hoBody({})), S.show.handover ? 'Uloženo' : 'Odkaz je připravený – zkopírujte ho a pošlete'));
+  $('[data-action=ho-copy]').addEventListener('click', async () => { await navigator.clipboard.writeText($('[data-ho-url]').value).catch(() => $('[data-ho-url]').select()); toast('Odkaz zkopírován'); });
+  $('[data-action=ho-regenerate]').addEventListener('click', () => {
+    if (confirm('Vyměnit odkaz? Starý okamžitě přestane fungovat a nový musíte poslat znovu.')) run(() => post('handover', hoBody({ regenerate: true })), 'Nový odkaz je připravený');
+  });
+  $('[data-action=ho-revoke]').addEventListener('click', () => {
+    if (!confirm('Zrušit předání? Odkaz okamžitě přestane fungovat.')) return;
+    run(async () => {
+      const r = await fetch(`${GM.base}/api/handover`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': GM.csrf, Accept: 'application/json' } });
+      if (!r.ok) throw new Error(`Chyba ${r.status}`);
+    }, 'Předání je zrušené');
   });
 
   $('[data-game]').addEventListener('change', e => run(() => post('show', { game_enabled: e.target.checked })));

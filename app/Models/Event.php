@@ -133,6 +133,43 @@ class Event extends Model
         return $mode === 'dark' ? 'dark' : 'light';
     }
 
+    /**
+     * Předání oslavenci (u smutečního rozloučení rodině): tajný odkaz jen ke čtení – videoprezentace,
+     * všechny vzpomínky včetně soukromých přání a offline balíček. Uloženo v settings.handover.
+     *
+     * @return array{token:string, email:?string, message:?string, created_at:string, sent_at:?string, opened_at:?string}|null
+     */
+    public function handover(): ?array
+    {
+        $h = $this->setting('handover');
+
+        return is_array($h) && ! empty($h['token']) ? $h : null;
+    }
+
+    public function handoverUrl(): ?string
+    {
+        $h = $this->handover();
+
+        return $h ? url($this->slug.'/predani/'.$h['token']) : null;
+    }
+
+    /**
+     * Smí příjemce předání vidět soukromá přání? Oslavenec ano (hosté psali „uvidí jen :name a organizátor“),
+     * u smutečního rozloučení ne – tam hosté psali „vzkaz uvidí jen organizátor“.
+     */
+    public function handoverIncludesPrivate(): bool
+    {
+        return ! $this->isFuneral();
+    }
+
+    /** Odpovídá token aktuálnímu odkazu předání? (porovnání v konstantním čase) */
+    public function handoverTokenValid(string $token): bool
+    {
+        $h = $this->handover();
+
+        return $h && hash_equals($h['token'], $token);
+    }
+
     /** Časová osa: vzpomínky podle let a dekád (výchozí). Vypnuto = jen vzpomínky a přání, hosté rok nezadávají. */
     public function timeline(): bool
     {

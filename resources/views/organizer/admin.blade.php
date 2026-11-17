@@ -121,6 +121,24 @@
       <audio data-music-audio preload="none"></audio>
     </div>
     <label class="check" data-game-wrap hidden><input type="checkbox" data-game> Hra „Hádej, kdo to napsal“ v Kině</label>
+
+    <div class="handover-box">
+      <h3 class="h3" data-ho-title>Předání oslavenci</h3>
+      <p class="muted" data-ho-intro style="margin-top:0">Pošlete oslavenci tajný odkaz: uvidí videoprezentaci, všechny vzpomínky včetně soukromých přání určených jemu a může si stáhnout offline balíček. Nic nemůže měnit. Funguje hned, i když prezentace pro hosty ještě není zpřístupněná – pošlete ho třeba den po oslavě.</p>
+      <div class="ho-form">
+        <input class="input" type="email" data-ho-email placeholder="E-mail oslavence" autocomplete="off">
+        <textarea class="input" rows="3" data-ho-message maxlength="2000" placeholder="Osobní věnování (nepovinné) – zobrazí se v e-mailu i na stránce"></textarea>
+        <div class="row">
+          <button class="btn btn--gold btn--sm" type="button" data-action="ho-send">Odeslat e-mailem</button>
+          <button class="btn btn--ghost btn--sm" type="button" data-action="ho-link">Jen vytvořit odkaz</button>
+        </div>
+      </div>
+      <div class="ho-state" data-ho-state hidden>
+        <div class="row"><input class="input" data-ho-url readonly style="flex:1;min-width:240px"><button class="btn btn--ghost btn--sm" type="button" data-action="ho-copy">Kopírovat</button><a class="btn btn--ghost btn--sm" data-ho-open target="_blank" rel="noopener">Otevřít</a></div>
+        <p class="muted" data-ho-status style="margin:.5rem 0"></p>
+        <div class="row"><button class="btn btn--ghost btn--sm" type="button" data-action="ho-regenerate">Vyměnit odkaz</button><button class="btn btn--ghost btn--sm btn--danger" type="button" data-action="ho-revoke">Zrušit předání</button></div>
+      </div>
+    </div>
   </section>
 </main>
 
