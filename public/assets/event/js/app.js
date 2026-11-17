@@ -118,7 +118,9 @@
   }
 
   function countdown() {
-    const el = $('[data-countdown]'), left = new Date(S.me.config.party_date) - Date.now();
+    const el = $('[data-countdown]');
+    if (!S.me.config.party_date) { el.hidden = true; return; } // událost bez data: bez odpočtu
+    const left = new Date(S.me.config.party_date) - Date.now();
     if (left <= 0) { el.replaceChildren(h('div', {}, h('b', {}, S.me.config.funeral ? '🕯️' : '🎉'), h('small', {}, S.me.config.funeral ? '' : t('celebrating')))); return; }
     const d = Math.floor(left / 864e5), hh = Math.floor(left / 36e5) % 24, m = Math.floor(left / 6e4) % 60, s = Math.floor(left / 1e3) % 60;
     el.replaceChildren(...[[d, 'd'], [hh, 'h'], [m, 'm'], [s, 's']].map(([v, u]) => h('div', {}, h('b', {}, String(v).padStart(2, '0')), h('small', {}, t('units.' + u)))));

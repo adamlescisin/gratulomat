@@ -55,7 +55,7 @@ class BackofficeController extends Controller
     public function events()
     {
         return view('backoffice.events', [
-            'events' => Event::withCount(['households', 'memories'])->with('organizers')->orderBy('event_date')->get(),
+            'events' => Event::withCount(['households', 'memories'])->with('organizers')->orderByRaw('COALESCE(event_date, collect_until)')->get(),
             'mode' => Setting::siteMode(),
         ]);
     }
@@ -206,19 +206,19 @@ class BackofficeController extends Controller
         $v = $request->validate([
             'title' => 'required|string|max:140',
             'recipient_name' => 'required|string|max:120',
-            'event_date' => 'required|date',
-            'collect_until' => 'nullable|date',
+            'event_date' => 'nullable|date',
+            'collect_until' => 'required|date',
             'archive_until' => 'nullable|date',
             'guest_limit' => 'nullable|integer|min:1|max:5000',
             'owner_email' => 'required|email:rfc|max:191',
-        ], ['owner_email.*' => 'Zkontrolujte e-mail organizátora.', 'title.required' => 'Název nesmí být prázdný.']);
+        ], ['owner_email.*' => 'Zkontrolujte e-mail organizátora.', 'title.required' => 'Název nesmí být prázdný.', 'collect_until.required' => 'Uzávěrka sběru příspěvků je povinná.']);
 
         $tz = 'Europe/Prague';
         $nameChanged = $event->recipient_name !== $v['recipient_name'];
         $event->fill([
             'title' => $v['title'], 'recipient_name' => $v['recipient_name'],
-            'event_date' => Carbon::parse($v['event_date'], $tz)->utc(),
-            'collect_until' => $v['collect_until'] ? Carbon::parse($v['collect_until'], $tz)->utc() : null,
+            'event_date' => $v['event_date'] ? Carbon::parse($v['event_date'], $tz)->utc() : null,
+            'collect_until' => Carbon::parse($v['collect_until'], $tz)->utc(),
             'archive_until' => $v['archive_until'] ? Carbon::parse($v['archive_until'], $tz)->toDateString() : null,
         ]);
         if ($nameChanged) {

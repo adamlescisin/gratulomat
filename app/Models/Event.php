@@ -188,7 +188,23 @@ class Event extends Model
 
     public function age(): ?int
     {
-        return $this->start_year ? $this->event_date->year - $this->start_year : null;
+        return $this->start_year ? $this->refDate()->year - $this->start_year : null;
+    }
+
+    /** Datum události je nepovinné – pro věk, roky na časové ose ap. se pak použije uzávěrka sběru. */
+    public function refDate(): Carbon
+    {
+        return $this->event_date ?? $this->collect_until ?? $this->created_at ?? now();
+    }
+
+    /** Doplní {datum} do textu pozvánky; bez data události zmizí i závorka kolem něj. */
+    public function fillDate(string $text): string
+    {
+        if (! $this->event_date) {
+            return str_replace([' ({datum})', '({datum})', '{datum} ', '{datum}'], '', $text);
+        }
+
+        return str_replace('{datum}', $this->event_date->timezone('Europe/Prague')->locale('cs')->isoFormat('D. MMMM'), $text);
     }
 
     public function isFuneral(): bool
@@ -219,7 +235,7 @@ class Event extends Model
 
     public function started(): bool
     {
-        return now()->gte($this->event_date);
+        return now()->gte($this->refDate());
     }
 
     /** Videoprezentaci hostům zpřístupňuje vždy organizátor (ručně nebo naplánovaným datem). */
@@ -252,6 +268,10 @@ class Event extends Model
         }
 
         // uzávěrka sběru; pokud by sběr běžel i po oslavě, odpečetí se nejpozději v den události
+        if (! $this->event_date) {
+            return $this->refDate();
+        }
+
         return $this->collect_until && $this->collect_until->lt($this->event_date) ? $this->collect_until : $this->event_date;
     }
 

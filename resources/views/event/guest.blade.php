@@ -23,7 +23,7 @@
 <main class="guest">
   <section class="hero">
     @if ($event->start_year && $timeline)
-      <div class="hero__years" aria-hidden="true"><span>{{ $event->start_year }}</span><i></i><span>{{ $event->event_date->year }}</span></div>
+      <div class="hero__years" aria-hidden="true"><span>{{ $event->start_year }}</span><i></i><span>{{ $event->refDate()->year }}</span></div>
     @endif
     <h1 class="display hero__title"><span data-bind="greeting"></span><br>{!! __($heroKey, array_map('e', $v)) !!}</h1>
     <p class="lead">{{ $funeral ? __('guest.lead_funeral') : ($timeline ? __('guest.lead') : __('guest.lead_no_timeline')) }}</p>

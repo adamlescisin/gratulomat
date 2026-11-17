@@ -5,7 +5,7 @@
     <tr>
       <td><strong>{{ $e->title }}</strong> @if ($e->is_test)<span class="tag">TEST</span>@endif<br><span class="muted">/{{ $e->slug }}@if ($e->relationLoaded('organizers') && $e->organizers->isNotEmpty()) · {{ $e->organizers->pluck('email')->join(', ') }}@endif</span></td>
       <td>{{ $e->type }}<br><span class="muted">{{ config("gratulomat.plans.{$e->plan}.name", $e->plan) }}</span></td>
-      <td>{{ $e->event_date->timezone('Europe/Prague')->format('j. n. Y') }}</td>
+      <td>{{ $e->event_date?->timezone('Europe/Prague')->format('j. n. Y') ?? '–' }}</td>
       <td>{{ $e->status }}</td>
       <td>{{ $e->households_count }}</td>
       <td>{{ $e->memories_count }}</td>

@@ -34,13 +34,12 @@ class GuestInvitation extends Mailable
     public function content(): Content
     {
         $e = $this->household->event;
-        $date = $e->event_date->timezone('Europe/Prague')->locale('cs')->isoFormat('D. MMMM');
-        $text = str_replace(['{jmena}', '{odkaz}', '{datum}'], [implode(' a ', $this->household->names), '', $date],
-            $e->setting('invite_text') ?: EventAdminController::defaultInviteFor($e));
+        $text = $e->fillDate(str_replace(['{jmena}', '{odkaz}'], [implode(' a ', $this->household->names), ''],
+            $e->setting('invite_text') ?: EventAdminController::defaultInviteFor($e)));
 
         return new Content(markdown: 'mail.guest-invitation', with: [
             'event' => $e, 'text' => trim(preg_replace("/\n{3,}/", "\n\n", $text)),
-            'deadline' => ($e->collect_until ?? $e->event_date)->timezone('Europe/Prague')->locale('cs')->isoFormat('D. MMMM'),
+            'deadline' => $e->refDate()->timezone('Europe/Prague')->locale('cs')->isoFormat('D. MMMM'),
             'url' => $this->household->inviteUrl(), 'unsubscribe' => $this->household->unsubscribeUrl(),
         ]);
     }

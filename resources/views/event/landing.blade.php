@@ -4,7 +4,7 @@
 @include('event.partials.locale')
 <main class="landing">
   @if ($event->age())<div class="landing__fifty" aria-hidden="true">{{ $event->age() }}</div>@endif
-  @if ($event->start_year)<p class="eyebrow">{{ $event->start_year }} → {{ $event->event_date->year }}</p>@endif
+  @if ($event->start_year)<p class="eyebrow">{{ $event->start_year }} → {{ $event->refDate()->year }}</p>@endif
   <h1 class="display">{{ $event->title }}</h1>
   @if (!empty($notice))
     <p class="lead">{{ $notice }}</p>

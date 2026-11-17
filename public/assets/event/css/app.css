@@ -445,6 +445,9 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
 .settings-grid .input { width: 100%; }
 
+/* Administrace: datum události a uzávěrka */
+.date-pair { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
+
 /* Administrace: předání oslavenci */
 .handover-box { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid var(--line); }
 .handover-box .h3 { font: 500 1.2rem var(--serif); margin: 0 0 .5rem; }

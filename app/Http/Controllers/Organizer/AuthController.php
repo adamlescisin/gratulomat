@@ -60,7 +60,7 @@ class AuthController extends Controller
 
     public function events()
     {
-        return view('organizer.events', ['events' => Auth::user()->events()->orderBy('event_date')->get()]);
+        return view('organizer.events', ['events' => Auth::user()->events()->orderByRaw('COALESCE(event_date, collect_until)')->get()]);
     }
 
     public function logout(Request $request)

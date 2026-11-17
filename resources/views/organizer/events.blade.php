@@ -5,7 +5,7 @@
   <a href="/" aria-label="Gratulomat" style="display:inline-block;margin-bottom:1.5rem">@include('partials.logo-ink', ['width' => 170])</a>
   <h1 class="display">Moje události</h1>
   @forelse ($events as $e)
-    <p class="lead"><a href="{{ route('organizer.admin', $e) }}">{{ $e->title }}</a> · {{ $e->event_date->format('j. n. Y') }}</p>
+    <p class="lead"><a href="{{ route('organizer.admin', $e) }}">{{ $e->title }}</a> · {{ $e->event_date?->timezone('Europe/Prague')->format('j. n. Y') ?? 'sběr do '.$e->collect_until?->timezone('Europe/Prague')->format('j. n. Y') }}</p>
   @empty
     <p class="lead">Zatím tu nic není.</p>
   @endforelse

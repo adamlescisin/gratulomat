@@ -14,8 +14,8 @@
     <label>E-mail organizátora (vlastníka)<input class="inp" type="email" name="owner_email" value="{{ old('owner_email', $owner?->email) }}" required>
       <span class="muted">Změna převede přístup do administrace na nový e-mail a upraví i e-mail v objednávce.</span></label>
     <div class="grid2">
-      <label>Datum a čas události<input class="inp" type="datetime-local" name="event_date" value="{{ old('event_date', $loc($event->event_date)) }}" required></label>
-      <label>Uzávěrka sběru vzkazů<input class="inp" type="datetime-local" name="collect_until" value="{{ old('collect_until', $loc($event->collect_until)) }}"></label>
+      <label>Datum a čas události<input class="inp" type="datetime-local" name="event_date" value="{{ old('event_date', $loc($event->event_date)) }}"> <small class="muted">nepovinné</small></label>
+      <label>Uzávěrka sběru vzkazů<input class="inp" type="datetime-local" name="collect_until" value="{{ old('collect_until', $loc($event->collect_until)) }}" required></label>
       <label>Viditelnost (archiv) do<input class="inp" type="date" name="archive_until" value="{{ old('archive_until', $event->archive_until?->toDateString()) }}">
         <span class="muted">Po tomto dni stránka a videoprezentace přestanou být dostupné.</span></label>
       <label>Limit hostů (domácností)<input class="inp" type="number" name="guest_limit" min="1" value="{{ old('guest_limit', $event->limit('guests')) }}"></label>

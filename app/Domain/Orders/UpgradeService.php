@@ -117,7 +117,7 @@ class UpgradeService
 
     private function newArchiveUntil(Event $event, string $plan, int $years): Carbon
     {
-        $base = ($event->isFuneral() && $event->collect_until ? $event->collect_until : $event->event_date)->copy()
+        $base = ($event->isFuneral() && $event->collect_until ? $event->collect_until : $event->refDate())->copy()
             ->timezone('Europe/Prague')->addMonths(config("gratulomat.plans.$plan.archive_months"))->startOfDay();
         $current = $event->archive_until?->copy() ?? $base;
         $until = $current->gt($base) ? $current : $base;

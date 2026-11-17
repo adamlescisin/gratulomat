@@ -31,10 +31,15 @@
         <div class="theme-grid" data-theme-pick></div>
         <p class="muted" style="font-size:.8rem;margin:.4rem 0 0">Stejný vzhled má i videoprezentace (Kino) a offline balíček.</p>
       </div>
-      <p class="muted" style="margin:.2rem 0 1rem;font-size:.85rem">Datum události nebo délku archivu vám změníme na <a href="mailto:{{ config('gratulomat.notify_email') }}">{{ config('gratulomat.notify_email') }}</a>.</p>
+
       <label class="muted">Závěrečný titulek videoprezentace<br><input class="input" name="finale_title" maxlength="120">
         <span style="display:block;font-size:.8rem">Prázdné = výchozí podle typu události.</span></label>
-      <label class="muted">Uzávěrka sběru<br><input class="input" type="datetime-local" name="collect_until" style="width:auto"></label>
+      <div class="date-pair">
+        <label class="muted"><span data-date-label>Datum a čas události</span> <span style="font-size:.8rem">(nepovinné)</span><br><input class="input" type="datetime-local" name="event_date" style="width:auto">
+          <span style="display:block;font-size:.8rem">Prázdné = bez data, odpočet na stránce hostů se nezobrazí.</span></label>
+        <label class="muted">Hosté mohou přispívat do <span style="font-size:.8rem">(povinné)</span><br><input class="input" type="datetime-local" name="collect_until" style="width:auto" required>
+          <span style="display:block;font-size:.8rem">Po tomto okamžiku už nikdo nic nepřidá ani neupraví.</span></label>
+      </div>
       <label class="muted">Odpečetit příspěvky hostům<br><input class="input" type="datetime-local" name="wall_open_at" style="width:auto">
         <span style="display:block;font-size:.8rem">Do té doby každý host vidí jen své příspěvky. Prázdné = při uzávěrce sběru.</span></label>
       <p class="muted" style="margin-top:1rem">Text pozvánky – <code>{jmena}</code>, <code>{odkaz}</code> a <code>{datum}</code> se doplní u každého hosta.</p>

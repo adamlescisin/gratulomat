@@ -109,7 +109,7 @@
     // vzhled: šablona + světlý / tmavý režim
     if (!f.dataset.loaded) { f.dataset.theme = E.theme; f.dataset.mode = E.mode; }
     renderThemes();
-    if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; field(f, 'finale_title').value = E.finale_title || ''; field(f, 'finale_title').placeholder = E.finale_default; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); if (S.show.wall_open_at) field(f, 'wall_open_at').value = localInput(S.show.wall_open_at); if (E.funeral) field(f, 'wall_open_at').closest('label').hidden = true; f.dataset.loaded = '1'; }
+    if (!f.dataset.loaded) { field(f, 'title').value = E.title; field(f, 'recipient_name').value = E.celebrant; if (E.funeral) $('[data-rec-label]').firstChild.textContent = 'Jméno zesnulé / zesnulého'; field(f, 'invite_text').value = E.invite_text; field(f, 'finale_title').value = E.finale_title || ''; field(f, 'finale_title').placeholder = E.finale_default; if (E.collect_until) field(f, 'collect_until').value = localInput(E.collect_until); if (E.event_date) field(f, 'event_date').value = localInput(E.event_date); if (E.funeral) $('[data-date-label]').textContent = 'Datum a čas rozloučení'; if (S.show.wall_open_at) field(f, 'wall_open_at').value = localInput(S.show.wall_open_at); if (E.funeral) field(f, 'wall_open_at').closest('label').hidden = true; f.dataset.loaded = '1'; }
   }
 
   function renderPlan() {
@@ -184,7 +184,7 @@
     }
     if (e.target.matches('[data-settings]')) {
       e.preventDefault();
-      run(() => post('settings', { finale_title: field(e.target, 'finale_title').value, wall_open_at: field(e.target, 'wall_open_at').value || null, theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null }), 'Uloženo ✓');
+      run(() => post('settings', { finale_title: field(e.target, 'finale_title').value, wall_open_at: field(e.target, 'wall_open_at').value || null, theme: e.target.dataset.theme, mode: e.target.dataset.mode, title: field(e.target, 'title').value, recipient_name: field(e.target, 'recipient_name').value, invite_text: field(e.target, 'invite_text').value, collect_until: field(e.target, 'collect_until').value || null, event_date: field(e.target, 'event_date').value || null }), 'Uloženo ✓');
     }
   });
 
@@ -296,9 +296,11 @@
     const qr = qrcode(0, 'M'); qr.addData(x.link); qr.make();
     $('[data-qr-title]').textContent = x.label;
     $('[data-qr-svg]').innerHTML = qr.createSvgTag({ cellSize: 6, margin: 2, scalable: true });
-    const date = new Date(S.event.event_date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long' });
-    $('[data-qr-msg]').value = (field($('[data-settings]'), 'invite_text').value || S.event.invite_text)
-      .replaceAll('{jmena}', x.names.join(' a ')).replaceAll('{odkaz}', x.link).replaceAll('{datum}', date);
+    const date = S.event.event_date ? new Date(S.event.event_date).toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long' }) : null;
+    let msg = (field($('[data-settings]'), 'invite_text').value || S.event.invite_text).replaceAll('{jmena}', x.names.join(' a ')).replaceAll('{odkaz}', x.link);
+    // bez data události zmizí {datum} i se závorkou (stejně jako v e-mailu)
+    msg = date ? msg.replaceAll('{datum}', date) : msg.replaceAll(' ({datum})', '').replaceAll('({datum})', '').replaceAll('{datum} ', '').replaceAll('{datum}', '');
+    $('[data-qr-msg]').value = msg;
     $('[data-qr]').showModal();
   }
 

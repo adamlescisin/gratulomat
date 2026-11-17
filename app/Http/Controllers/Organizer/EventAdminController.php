@@ -38,7 +38,7 @@ class EventAdminController extends Controller
             'event' => [
                 'slug' => $event->slug, 'title' => $event->title, 'type' => $event->type, 'plan' => $event->plan,
                 'celebrant' => $event->recipient_name, 'funeral' => $event->isFuneral(),
-                'event_date' => $event->event_date->toIso8601String(),
+                'event_date' => $event->event_date?->toIso8601String(),
                 'collect_until' => $event->collect_until?->toIso8601String(),
                 'archive_until' => $event->archive_until?->toDateString(),
                 'guest_limit' => $event->limit('guests'),
@@ -298,7 +298,8 @@ class EventAdminController extends Controller
     {
         $v = $request->validate([
             'invite_text' => 'nullable|string|max:2000',
-            'collect_until' => 'nullable|date',
+            'collect_until' => 'sometimes|required|date',
+            'event_date' => 'sometimes|nullable|date',
             'title' => 'sometimes|required|string|max:140',
             'theme' => 'sometimes|string|in:'.implode(',', array_keys(Themes::ALL)),
             'mode' => 'sometimes|in:light,dark',
@@ -308,7 +309,8 @@ class EventAdminController extends Controller
             'timeline' => 'sometimes|boolean',
             'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
-        ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.']);
+        ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.',
+            'collect_until.required' => 'Uzávěrka sběru příspěvků je povinná.', 'collect_until.date' => 'Neplatné datum uzávěrky.', 'event_date.date' => 'Neplatné datum události.']);
         if (isset($v['title'])) {
             $event->title = trim($v['title']);
         }
@@ -351,10 +353,23 @@ class EventAdminController extends Controller
             $settings['invite_text'] = $v['invite_text'];
         }
         $event->settings = $settings;
+        // obsah je vidět jen do konce archivu – událost ani sběr nesmí skončit až po něm
+        $archiveEnd = $event->archive_until?->copy()->timezone('Europe/Prague')->endOfDay();
+        $tooLate = 'Archiv události končí '.$archiveEnd?->format('j. n. Y').'. Pro pozdější datum si prodlužte archiv v sekci Tarif a doplňky.';
+        if (array_key_exists('event_date', $v)) {
+            $date = $v['event_date'] ? Carbon::parse($v['event_date'], 'Europe/Prague')->utc() : null;
+            if ($date && $archiveEnd && $date->gt($archiveEnd)) {
+                return response()->json(['error' => $tooLate], 422);
+            }
+            $event->event_date = $date;
+        }
         if (! empty($v['collect_until'])) {
             $until = Carbon::parse($v['collect_until'], 'Europe/Prague')->utc();
+            if ($archiveEnd && $until->gt($archiveEnd)) {
+                return response()->json(['error' => $tooLate], 422);
+            }
             $maxDays = $event->limit('collect_days');
-            $max = $event->isFuneral() ? null : ($maxDays ? $event->created_at->copy()->addDays($maxDays)->max($event->event_date) : null);
+            $max = $event->isFuneral() ? null : ($maxDays ? $event->created_at->copy()->addDays($maxDays)->max($event->refDate()) : null);
             abort_if($max && $until->gt($max), response()->json(['error' => 'Delší sběr tarif neumožňuje.'], 422));
             $event->collect_until = $until;
         }
