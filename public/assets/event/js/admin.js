@@ -42,7 +42,7 @@
     $('[data-hh-count]').textContent = `(${hh.length}${E.guest_limit ? ' z ' + E.guest_limit : ''})`;
     $('[data-households] tbody').innerHTML = hh.map(x => `
       <tr class="${x.memories ? '' : 'is-silent'}">
-        <td><strong>${esc(x.label)}</strong>${x.source === 'anonymous' ? ' <span class="badge" title="Přihlásil se sám přes anonymní pozvánku">sám</span>' : x.source === 'import' ? ' <span class="badge">import</span>' : ''}<br><span class="muted">${esc(x.names.join(' · '))}${x.email ? ' · ' + esc(x.email) : ''}${x.mail_status ? ` · <em>${esc(x.mail_status)}</em>` : ''}</span></td>
+        <td><strong>${esc(x.label)}</strong>${x.source === 'anonymous' ? ' <span class="badge" title="Přihlásil se sám přes anonymní pozvánku">sám</span>' : x.source === 'import' ? ' <span class="badge">import</span>' : ''}<br><span class="muted">${esc(x.names.join(' · '))}${x.email ? ' · ' + esc(x.email) : ''}${x.mail_status ? ` · <em${x.mail_error ? ` class="mail-err" title="${esc(x.mail_error)}"` : ''}>${esc(x.mail_status)}</em>` : ''}</span></td>
         <td>${esc(x.relation || '')}</td>
         <td>${x.memories}</td>
         <td class="muted">${x.last_seen ? fmt(x.last_seen) : '—'}</td>
@@ -56,7 +56,7 @@
       </tr>`).join('');
 
     // pozvánky e-mailem
-    const withMail = hh.filter(x => x.email && x.mail_status !== 'odhlásil'), notInvited = withMail.filter(x => !x.mail_status);
+    const withMail = hh.filter(x => x.email && x.mail_status !== 'odhlásil'), notInvited = withMail.filter(x => !x.mail_status || x.mail_status === 'nepodařilo se odeslat');
     $('[data-mail-info]').textContent = withMail.length
       ? `E-mail má ${withMail.length} z ${hh.length} hostů, zatím nepozváno: ${notInvited.length}. Použije se text pozvánky z Nastavení, odpovědi chodí na váš e-mail.`
       : 'Zatím žádný host nemá e-mail. Doplňte ho přes „Upravit“ nebo importem seznamu.';

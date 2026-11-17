@@ -445,6 +445,9 @@ textarea.input { resize: vertical; min-height: 9em; line-height: 1.65; }
 .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
 .settings-grid .input { width: 100%; }
 
+/* Administrace: chyba e-mailu hostovi */
+.mail-err { color: var(--danger); cursor: help; }
+
 /* Administrace: datum události a uzávěrka */
 .date-pair { display: flex; flex-wrap: wrap; gap: 1rem 2rem; }
 

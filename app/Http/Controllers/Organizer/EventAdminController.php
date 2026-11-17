@@ -81,7 +81,7 @@ class EventAdminController extends Controller
             ],
             'households' => $event->households()->orderBy('label')->get()->map(fn (Household $h) => [
                 'id' => $h->id, 'label' => $h->label, 'source' => $h->source, 'email' => $h->email,
-                'mail_status' => $h->email_opt_out ? 'odhlásil' : ($h->invited_at ? 'pozván '.$h->invited_at->timezone('Europe/Prague')->format('j. n.') : ($h->invite_queued_at ? 'odesílá se' : null)), 'names' => $h->names, 'relation' => $h->relation,
+                'mail_status' => self::mailStatus($h), 'mail_error' => $h->mail_error, 'names' => $h->names, 'relation' => $h->relation,
                 'last_seen' => $h->last_seen_at?->toIso8601String(), 'memories' => (int) ($counts[$h->id] ?? 0),
                 'link' => $h->link(),
             ]),
@@ -161,8 +161,9 @@ class EventAdminController extends Controller
     {
         $q = $event->households()->whereNotNull('email')->where('email_opt_out', false);
         $ids = array_filter((array) $request->input('ids', []), 'is_numeric');
-        $ids ? $q->whereKey($ids)->update(['invite_queued_at' => now(), 'invited_at' => null])
-            : $q->whereNull('invited_at')->whereNull('invite_queued_at')->update(['invite_queued_at' => now()]);
+        $reset = ['invite_queued_at' => now(), 'mail_error' => null, 'mail_attempts' => 0];
+        $ids ? $q->whereKey($ids)->update([...$reset, 'invited_at' => null])
+            : $q->whereNull('invited_at')->whereNull('invite_queued_at')->update($reset);
 
         return response()->json(['queued' => $event->households()->whereNotNull('invite_queued_at')->whereNull('invited_at')->count()]);
     }
@@ -292,6 +293,19 @@ class EventAdminController extends Controller
         }
 
         return response()->json(['ok' => true]);
+    }
+
+    /** Stav e-mailové pozvánky hosta pro přehled v administraci. */
+    public static function mailStatus(Household $h): ?string
+    {
+        return match (true) {
+            $h->email_opt_out => 'odhlásil',
+            (bool) $h->invited_at => 'pozván '.$h->invited_at->timezone('Europe/Prague')->format('j. n.'),
+            $h->invite_queued_at && $h->mail_attempts > 0 => 'odeslání selhává, zkoušíme znovu',
+            (bool) $h->invite_queued_at => $h->invite_queued_at->lt(now()->subMinutes(10)) ? 'čeká ve frontě (zdržení)' : 'odesílá se',
+            (bool) $h->mail_error => 'nepodařilo se odeslat',
+            default => null,
+        };
     }
 
     public function updateSettings(Request $request, Event $event): JsonResponse

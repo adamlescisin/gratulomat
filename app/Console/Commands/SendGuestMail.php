@@ -6,6 +6,7 @@ use App\Domain\Guest\EventRules;
 use App\Mail\GuestInvitation;
 use App\Models\Event;
 use App\Models\Household;
+use App\Models\Setting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -21,8 +22,12 @@ class SendGuestMail extends Command
 
     protected $description = 'Odeslání pozvánek a připomínek hostům e-mailem';
 
+    public const MAX_ATTEMPTS = 5;
+
     public function handle(): int
     {
+        // důkaz, že cron s plánovačem běží (back-office → Přehled)
+        Setting::put('scheduler_heartbeat', now()->toIso8601String());
         $this->queueReminders();
 
         $sent = 0;
@@ -38,11 +43,16 @@ class SendGuestMail extends Command
                 }
                 try {
                     Mail::to($h->email)->send(new GuestInvitation($h, $reminder));
-                    $h->update([$kind === 'invite' ? 'invited_at' : 'reminded_at' => now()]);
+                    $h->update([$kind === 'invite' ? 'invited_at' : 'reminded_at' => now(), 'mail_error' => null, 'mail_attempts' => 0]);
                     $sent++;
                     usleep(550_000);
                 } catch (Throwable $e) {
                     Log::warning('E-mail hostovi se nepodařilo odeslat: '.$e->getMessage(), ['household' => $h->id]);
+                    $attempts = $h->mail_attempts + 1;
+                    $error = mb_substr(trim(preg_replace('/\s+/', ' ', $e->getMessage())), 0, 480);
+                    // po MAX_ATTEMPTS pokusech (≈ 5 minut) to vzdáme – organizátor uvidí chybu a může odeslat znovu
+                    $h->update(['mail_error' => $error, 'mail_attempts' => $attempts] + ($attempts >= self::MAX_ATTEMPTS ? ["{$kind}_queued_at" => null] : []));
+                    Setting::put('guest_mail_last_error', ['at' => now()->toIso8601String(), 'message' => $error, 'household' => $h->id]);
                 }
             }
         }

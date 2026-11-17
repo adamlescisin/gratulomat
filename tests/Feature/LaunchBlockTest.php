@@ -141,4 +141,48 @@ class LaunchBlockTest extends TestCase
         $this->assertTrue($h->fresh()->email_opt_out);
         $this->get('/janinych-60/odhlasit-emaily/'.$h->id)->assertStatus(403);
     }
+
+    public function test_failing_invitation_is_reported_and_stops_after_attempts(): void
+    {
+        $e = $this->event(['plan' => 'premiera', 'limits' => ['guests' => 150, 'features' => ['reminders']]]);
+        $this->actingAs(User::first());
+        $this->postJson('/janinych-60/admin/api/send-invites')->assertJson(['queued' => 1]);
+        $this->assertSame('odesílá se', $this->getJson('/janinych-60/admin/api/state')->json('households.0.mail_status'));
+
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('Resend: API key is invalid'));
+        $this->artisan('gratulomat:guest-mail')->assertSuccessful();
+        $this->assertNotNull(Setting::get('scheduler_heartbeat'));
+        $h = Household::where('email', 'petra@example.cz')->first();
+        $this->assertSame(1, $h->mail_attempts);
+        $this->assertSame('odeslání selhává, zkoušíme znovu', $this->getJson('/janinych-60/admin/api/state')->json('households.0.mail_status'));
+
+        for ($i = 0; $i < 6; $i++) {
+            $this->artisan('gratulomat:guest-mail');
+        }
+        $h->refresh();
+        $this->assertSame(5, $h->mail_attempts);
+        $this->assertNull($h->invite_queued_at); // vzdali jsme to
+        $state = $this->getJson('/janinych-60/admin/api/state')->json('households.0');
+        $this->assertSame('nepodařilo se odeslat', $state['mail_status']);
+        $this->assertSame('Resend: API key is invalid', $state['mail_error']);
+
+        // back-office vidí plánovač i chybu
+        config(['gratulomat.operators' => ['op@gratulomat.cz']]);
+        $this->actingAs(User::create(['email' => 'op@gratulomat.cz', 'name' => 'op']));
+        $this->get('/backoffice')->assertOk()->assertSee('Plánovač a e-maily hostům')->assertSee('1 se nepodařilo odeslat')->assertSee('API key is invalid');
+
+        // organizátor odešle znovu → chyba se vynuluje
+        $this->actingAs(User::where('email', 'org@example.cz')->first());
+        $this->postJson('/janinych-60/admin/api/send-invites')->assertJson(['queued' => 1]);
+        $this->assertNull($h->fresh()->mail_error);
+    }
+
+    public function test_dashboard_warns_when_scheduler_never_ran(): void
+    {
+        config(['gratulomat.operators' => ['op@gratulomat.cz']]);
+        $this->actingAs(User::create(['email' => 'op@gratulomat.cz', 'name' => 'op']));
+        $this->get('/backoffice')->assertOk()->assertSee('Plánovač se ještě nespustil');
+        $this->artisan('gratulomat:guest-mail');
+        $this->get('/backoffice')->assertSee('V pořádku</strong> – naposledy', false);
+    }
 }
