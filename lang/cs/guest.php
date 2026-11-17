@@ -211,7 +211,7 @@ return [
     'loop' => [
         'made_by' => 'Vytvořeno v Gratulomatu',
         'thanks_title' => 'Díky, že jste se přidali! 💛',
-        'thanks_text' => 'Chystáte vlastní oslavu? Stejnou stránku si můžete vytvořit i vy – Ochutnávka je zdarma.',
+        'thanks_text' => 'Chystáte vlastní akci? Stejný Gratulomat si můžete lehce vytvořit i vy – tarif Ochutnávka je zcela zdarma.',
         'thanks_button' => 'Vytvořit vlastní',
         'kino' => 'Chcete vlastní? gratulomat.cz',
     ],

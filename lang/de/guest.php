@@ -207,7 +207,7 @@ return [
     'loop' => [
         'made_by' => 'Erstellt mit Gratulomat',
         'thanks_title' => 'Danke, dass du dabei bist! 💛',
-        'thanks_text' => 'Planst du selbst eine Feier? Dieselbe Seite kannst du auch erstellen – die Probierversion ist kostenlos.',
+        'thanks_text' => 'Planst du selbst einen Anlass? Einen solchen Gratulomat kannst du ganz leicht selbst erstellen – der Tarif Probierversion ist völlig kostenlos.',
         'thanks_button' => 'Eigene erstellen',
         'kino' => 'Auch eine eigene? gratulomat.cz',
     ],
