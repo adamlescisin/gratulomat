@@ -62,6 +62,12 @@ class EventDatesTest extends TestCase
         $this->assertStringContainsString('K události „Janiných 60“ připravujeme', $html);
         $this->assertStringNotContainsString('{datum}', $html);
         $this->assertStringNotContainsString('()', $html);
+
+        // předmět a patička pozvánky: sběr vzpomínek, ne pozvánka na akci
+        $mail = new GuestInvitation($hh);
+        $this->assertSame('Pojďte spolutvořit událost Janiných 60', $mail->envelope()->subject);
+        $this->assertStringContainsString('neposílejte jej prosím dále', $html);
+        $this->assertStringContainsString('Gratulomat je nová služba', $html);
     }
 
     public function test_dates_cannot_go_past_archive(): void

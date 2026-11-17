@@ -21,7 +21,7 @@ class GuestInvitation extends Mailable
         $owner = $e->organizers()->wherePivot('role', 'owner')->first();
 
         return new Envelope(
-            subject: $this->reminder ? 'Připomínka: '.$e->title.' – ještě můžete přispět' : 'Pozvánka: '.$e->title,
+            subject: $this->reminder ? 'Připomínka: '.$e->title.' – ještě můžete přispět' : ($e->isFuneral() ? 'Pojďte se podělit o vzpomínky: ' : 'Pojďte spolutvořit událost ').$e->title,
             replyTo: $owner ? [new Address($owner->email)] : [],
         );
     }
