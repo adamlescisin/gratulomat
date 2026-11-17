@@ -91,7 +91,7 @@
     <form data-upgrade class="upgrade">
       <label class="muted">Tarif<br><select class="input" name="plan" data-up-plan></select></label>
       <label class="muted">Balíčky +{{ config('gratulomat.addons.guest_pack.size') }} hostů ({{ config('gratulomat.addons.guest_pack.price') }} Kč)<br><input class="input" type="number" name="guest_packs" min="0" max="20" value="0"></label>
-      <label class="muted">Archiv o rok déle ({{ config('gratulomat.addons.archive_year.price') }} Kč / rok)<br><input class="input" type="number" name="archive_years" min="0" max="5" value="0"></label>
+      <label class="muted">Archiv +1 rok ({{ config('gratulomat.addons.archive_year.price') }} Kč/rok)<br><input class="input" type="number" name="archive_years" min="0" max="5" value="0"></label>
       <label class="check"><input type="checkbox" name="photobook" value="1"> Fotokniha ze vzpomínek (od {{ config('gratulomat.addons.photobook.price') }} Kč) – ozveme se s návrhem</label>
       <div class="upgrade__sum" data-up-sum></div>
       <button class="btn btn--gold" type="submit" data-up-pay disabled>Vyberte změnu</button>
@@ -107,9 +107,9 @@
   <section class="card">
     <h2 class="h2">Videoprezentace pro hosty</h2>
     <p class="muted" data-show-status></p>
-    <div class="row">
+    <div class="row row--center">
       <button class="btn btn--gold btn--sm" data-action="show-now">Zpřístupnit hned</button>
-      <label class="muted">nebo od <input class="input" type="datetime-local" data-show-at style="width:auto;display:inline-block"></label>
+      <label class="muted">nebo od <input class="input input--sm" type="datetime-local" data-show-at></label>
       <button class="btn btn--ghost btn--sm" data-action="show-at">Naplánovat</button>
       <button class="btn btn--ghost btn--sm btn--danger" data-action="show-close">Zavřít pro hosty</button>
     </div>
