@@ -80,7 +80,12 @@ class GuestImportAnonTest extends TestCase
         $this->assertSame(['Lucka', 'Tom'], $h->names);
         $this->assertSame('l@x.cz', $h->email);
         $this->get('/janinych-60')->assertOk()->assertSee(__('guest.logout'))->assertDontSee('name="kod"', false);
-        $this->get($path)->assertRedirect('/janinych-60'); // už přihlášený
+        // stejný odkaz znovu na stejném zařízení = nový host: předchozí se odhlásí a formulář je prázdný
+        $this->get($path)->assertOk()->assertSee('Jak se jmenujete?')->assertDontSee('Lucka')->assertHeader('Cache-Control', 'no-store, private');
+        $this->get('/janinych-60')->assertDontSee(__('guest.logout'));
+        $this->post($path, ['name' => 'Karel'])->assertRedirect('/janinych-60');
+        $this->assertSame(2, $e->households()->where('source', 'anonymous')->count());
+        $this->getJson('/janinych-60/api/me')->assertJsonPath('household.label', 'Karel');
 
         // nový odkaz zneplatní starý
         $this->actingAs(User::where('email', 'org@example.cz')->first());

@@ -51,11 +51,14 @@ class EventPageController extends Controller
         if (! self::anonValid($event, $token)) {
             return redirect()->to('/'.$event->slug.'?neplatny=1');
         }
+        // Hromadný odkaz = vždy nový host. Sdílený počítač či telefon nesmí převzít přihlášení předchozího hosta.
         if (GuestSession::household($event)) {
-            return redirect()->to('/'.$event->slug);
+            GuestSession::logout($event);
+            session()->regenerate();
         }
 
-        return view('event.anon', ['event' => $event, 'token' => $token, 'full' => self::anonFull($event)]);
+        return response()->view('event.anon', ['event' => $event, 'token' => $token, 'full' => self::anonFull($event)])
+            ->header('Cache-Control', 'no-store'); // ani tlačítko Zpět nesmí ukázat formulář předchozího hosta
     }
 
     public function anonJoin(Request $request, Event $event, string $token)
@@ -64,7 +67,7 @@ class EventPageController extends Controller
             return redirect()->to('/'.$event->slug.'?neplatny=1');
         }
         if (GuestSession::household($event)) {
-            return redirect()->to('/'.$event->slug);
+            GuestSession::logout($event); // odesláno z formuláře hromadného odkazu → nový host
         }
         if (self::anonFull($event)) {
             return back();

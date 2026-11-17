@@ -94,7 +94,7 @@
           <div class="mem__by">— ${esc(m.authors.join(' a '))} <span class="muted">(${esc(m.household.label)})</span></div>
         </div>
         <div class="mem__actions">
-          <button class="btn btn--ghost btn--sm" data-hide="${m.id}" data-status="${m.status}">${m.status === 'hidden' ? 'Zobrazit' : 'Skrýt z videoprezentace'}</button>
+          <button class="btn btn--ghost btn--sm" data-hide="${m.id}" data-status="${m.status}">${m.status === 'hidden' ? 'Zobrazit' : 'Nezobrazovat'}</button>
           <button class="btn btn--ghost btn--sm btn--danger" data-mdel="${m.id}">Smazat</button>
         </div>
       </article>`;
