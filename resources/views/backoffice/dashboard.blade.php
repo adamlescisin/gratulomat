@@ -31,9 +31,10 @@
 <section class="panel">
   <h2 style="margin:0">Plánovač a e-maily hostům</h2>
   <p style="margin:0">
-    @if (! $schAt) <strong style="color:#B3261E">Plánovač se ještě nespustil.</strong> Pozvánky a připomínky se neodesílají a archivace neběží. V hPanelu → Pokročilé → Cron Jobs přidejte úlohu <em>každou minutu</em>:
-      <code style="display:block;margin:.4rem 0;user-select:all">cd ~/domains/gratulomat.cz/current &amp;&amp; /opt/alt/php83/usr/bin/php artisan schedule:run &gt;&gt; /dev/null 2&gt;&amp;1</code>
-    @elseif ($schAt->lt(now()->subMinutes(5))) <strong style="color:#B3261E">Neběží od {{ $schAt->timezone('Europe/Prague')->format('j. n. Y H:i') }}</strong> – zkontrolujte cron v hPanelu (každou minutu, příkaz výše v docs/DEPLOY.md).
+    @if (! $schAt) <strong style="color:#B3261E">Plánovač se ještě nespustil.</strong> Pozvánky a připomínky se neodesílají a archivace neběží. V hPanelu → Pokročilé → Cron Jobs přidejte úlohu typu <em>Custom</em>, <em>každou minutu</em>, s příkazem (hPanel nepovoluje znaky jako <code>&gt;</code> nebo <code>&amp;&amp;</code>, proto skript):
+      <code style="display:block;margin:.4rem 0;user-select:all">/bin/sh {{ preg_replace('~/releases/[^/]+$~', '/current', base_path()) }}/bin/cron.sh</code>
+      Chyby najdete v <code>storage/logs/cron-error.log</code>.
+    @elseif ($schAt->lt(now()->subMinutes(5))) <strong style="color:#B3261E">Neběží od {{ $schAt->timezone('Europe/Prague')->format('j. n. Y H:i') }}</strong> – zkontrolujte cron v hPanelu: každou minutu, příkaz <code style="user-select:all">/bin/sh {{ preg_replace('~/releases/[^/]+$~', '/current', base_path()) }}/bin/cron.sh</code>; chyby v <code>storage/logs/cron-error.log</code>.
     @else <strong style="color:#11806A">V pořádku</strong> – naposledy {{ $schAt->timezone('Europe/Prague')->format('H:i') }}.
     @endif
     Ve frontě {{ $mailQueued }} e-mailů.
