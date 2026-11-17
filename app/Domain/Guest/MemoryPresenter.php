@@ -83,7 +83,7 @@ class MemoryPresenter
             'party_date' => $event->event_date->toIso8601String(),
             'finale_title' => $event->finaleTitle(),
             'watermark' => ! EventRules::has($event, 'no_watermark'),
-            'music' => $event->show?->music,
+            'music' => $event->show?->musicSrc() !== null,
             'game' => (bool) $event->show?->game_enabled && ! $event->isFuneral(),
             'media_base' => $mediaBase,
             'memories' => $includePrivate ? $memories : array_map([self::class, 'stripPrivateWish'], $memories),

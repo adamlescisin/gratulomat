@@ -43,10 +43,9 @@ class OfflinePackage
         foreach (glob("$assets/fonts/*.woff2") as $f) {
             $zip->addFile($f, 'assets/fonts/'.basename($f));
         }
-        if ($music = $event->show?->music) {
-            if (is_file(public_path($music))) {
-                $zip->addFile(public_path($music), $music);
-            }
+        if ($src = $event->show?->musicSrc(true)) {
+            $track = $event->show->track;
+            $zip->addFile($track && $src === 'music/'.$track->file ? $track->path() : public_path($src), $src);
         }
         // všechna média včetně skrytých vzpomínek (ať se nic neztratí) + memory.json
         foreach (glob($event->mediaDir().'/*', GLOB_ONLYDIR) as $dir) {

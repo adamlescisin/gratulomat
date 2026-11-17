@@ -2,6 +2,7 @@
 
 use App\Domain\Guest\GuestSession;
 use App\Http\Controllers\Backoffice\BackofficeController;
+use App\Http\Controllers\Backoffice\MusicController;
 use App\Http\Controllers\Backoffice\OrdersController;
 use App\Http\Controllers\Event\EventPageController;
 use App\Http\Controllers\Event\GuestApiController;
@@ -13,6 +14,7 @@ use App\Http\Middleware\EnsureOperator;
 use App\Http\Middleware\EnsureOrganizer;
 use App\Http\Middleware\EventNotArchived;
 use App\Models\Household;
+use App\Models\MusicTrack;
 use App\Models\TesterCode;
 use App\Support\MailBrand;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -80,6 +82,10 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/objednavky/{order}/vyrizeno/{code}', [OrdersController::class, 'todoDone'])->where('code', '[a-z_]+')->name('backoffice.order.todo');
     Route::post('/objednavky/{order}/email', [OrdersController::class, 'email'])->name('backoffice.order.email');
     Route::post('/objednavky/{order}/poznamka', [OrdersController::class, 'note'])->name('backoffice.order.note');
+    Route::get('/hudba', [MusicController::class, 'index'])->name('backoffice.music');
+    Route::post('/hudba', [MusicController::class, 'store'])->name('backoffice.music.store');
+    Route::post('/hudba/{track}', [MusicController::class, 'update'])->name('backoffice.music.update');
+    Route::delete('/hudba/{track}', [MusicController::class, 'destroy'])->name('backoffice.music.delete');
     Route::get('/cenik', 'prices')->name('backoffice.prices');
     Route::post('/cenik', 'pricesSave')->name('backoffice.prices.save');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
@@ -106,6 +112,14 @@ Route::get('/znacka/{file}', function (string $file) {
 
     return response()->file($path, ['Cache-Control' => 'public, max-age=31536000, immutable']);
 })->where('file', 'logo-[a-f0-9]{10}\.(png|jpg|jpeg|gif|webp)')->name('mail.logo');
+
+// Hudební podkresy z knihovny (veřejné – přehrává je Kino u hostů; soubor podporuje Range kvůli přetáčení)
+Route::get('/hudba/{file}', function (string $file) {
+    $track = MusicTrack::where('file', $file)->firstOrFail();
+    abort_unless(is_file($track->path()), 404);
+
+    return response()->file($track->path(), ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'public, max-age=31536000, immutable']);
+})->where('file', '[a-z0-9]{20,40}\.mp3')->name('music.file');
 
 // Průvodce založením události a platba.
 Route::get('/zalozit', [WizardController::class, 'page'])->name('wizard');

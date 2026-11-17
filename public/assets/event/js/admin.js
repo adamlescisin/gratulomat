@@ -36,6 +36,7 @@
     $('[data-timeline]').checked = sh.timeline; $('[data-auto-share]').checked = sh.auto_share; $('[data-auto-share-at]').textContent = fmt(sh.auto_share_at);
     $('[data-show-at]').value = localInput(sh.public_from || E.event_date);
     $('[data-game-wrap]').hidden = !E.game_available; $('[data-game]').checked = sh.game_enabled;
+    renderMusic();
 
     // hosté
     $('[data-hh-count]').textContent = `(${hh.length}${E.guest_limit ? ' z ' + E.guest_limit : ''})`;
@@ -225,6 +226,33 @@
   $('[data-reminders]').addEventListener('change', e => run(() => post('settings', { reminders: e.target.checked }), e.target.checked ? 'Připomínky zapnuty' : 'Připomínky vypnuty'));
   $('[data-auto-share]').addEventListener('change', e => run(() => post('settings', { auto_share: e.target.checked }), e.target.checked ? 'Po uzávěrce se prezentace hostům nasdílí sama' : 'Automatické nasdílení vypnuto'));
   $('[data-timeline]').addEventListener('change', e => run(() => post('settings', { timeline: e.target.checked }), e.target.checked ? 'Časová osa zapnuta – vzpomínky podle let' : 'Časová osa vypnuta – jen vzpomínky a přání'));
+  // hudební podkres: štítky filtrují nabídku, doporučené podle vzhledu a typu události jsou předvybrané
+  let musicTag = null;
+  function renderMusic() {
+    const M = S.music, cur = S.show.music_track_id;
+    $('[data-music-wrap]').hidden = !M.tracks.length;
+    if (!M.tracks.length) return;
+    const all = [...new Set(M.tracks.flatMap(t => t.tags))].sort((a, b) => (M.recommended.includes(b) - M.recommended.includes(a)) || a.localeCompare(b, 'cs'));
+    $('[data-music-tags]').innerHTML = [`<button type="button" class="tag ${musicTag ? '' : 'is-on'}" data-mtag="">vše</button>`]
+      .concat(all.map(t => `<button type="button" class="tag ${musicTag === t ? 'is-on' : ''}" data-mtag="${esc(t)}">${esc(t)}${M.recommended.includes(t) ? ' ★' : ''}</button>`)).join('');
+    const rec = t => t.tags.some(x => M.recommended.includes(x));
+    const list = M.tracks.filter(t => !musicTag || t.tags.includes(musicTag) || t.id === cur).sort((a, b) => rec(b) - rec(a) || a.title.localeCompare(b.title, 'cs'));
+    $('[data-music-select]').innerHTML = `<option value="">Bez hudby</option>` + list.map(t =>
+      `<option value="${t.id}" ${t.id === cur ? 'selected' : ''}>${rec(t) ? '★ ' : ''}${esc(t.title)}${t.artist ? ' – ' + esc(t.artist) : ''} (${t.duration}${t.tags.length ? ' · ' + esc(t.tags.join(', ')) : ''})</option>`).join('');
+  }
+  $('[data-music-tags]').addEventListener('click', e => { const b = e.target.closest('[data-mtag]'); if (!b) return; musicTag = b.dataset.mtag || null; renderMusic(); });
+  $('[data-music-select]').addEventListener('change', e => {
+    const a = $('[data-music-audio]'); a.pause(); $('[data-action=music-preview]').textContent = '▶ Ukázka';
+    run(() => post('show', { music_track_id: e.target.value || null }), e.target.value ? 'Podkres vybrán' : 'Videoprezentace bude bez hudby');
+  });
+  $('[data-action=music-preview]').addEventListener('click', e => {
+    const a = $('[data-music-audio]'), t = S.music.tracks.find(x => String(x.id) === $('[data-music-select]').value);
+    if (!t) return toast('Nejdřív vyberte skladbu');
+    if (!a.paused && a.dataset.id === String(t.id)) { a.pause(); e.target.textContent = '▶ Ukázka'; return; }
+    a.src = t.url; a.dataset.id = t.id; a.currentTime = 0; a.play(); e.target.textContent = '❚❚ Zastavit';
+    a.onended = () => { e.target.textContent = '▶ Ukázka'; };
+  });
+
   $('[data-game]').addEventListener('change', e => run(() => post('show', { game_enabled: e.target.checked })));
 
   function openQr(x) {

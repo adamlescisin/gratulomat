@@ -12,6 +12,7 @@ use App\Domain\Show\OfflinePackage;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Household;
+use App\Models\MusicTrack;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -61,6 +62,15 @@ class EventAdminController extends Controller
                 'wall_opens_at' => $event->wallOpensAt()->toIso8601String(),
                 'auto_share_at' => ($event->collect_until ?? $event->event_date)?->toIso8601String(),
                 'game_enabled' => (bool) $event->show?->game_enabled,
+                'music_track_id' => $event->show?->music_track_id,
+            ],
+            // knihovna podkresů (jen skladby v nabídce); doporučené štítky podle vzhledu a typu události
+            'music' => [
+                'recommended' => MusicTrack::recommendedTags($event),
+                'tracks' => MusicTrack::where('active', true)->orderBy('title')->get()->map(fn (MusicTrack $t) => [
+                    'id' => $t->id, 'title' => $t->title, 'artist' => $t->artist, 'tags' => $t->tags ?? [],
+                    'duration' => $t->durationLabel(), 'url' => $t->url(),
+                ])->values(),
             ],
             'households' => $event->households()->orderBy('label')->get()->map(fn (Household $h) => [
                 'id' => $h->id, 'label' => $h->label, 'source' => $h->source, 'email' => $h->email,
@@ -217,6 +227,10 @@ class EventAdminController extends Controller
                 $v === null || $v === '' => null,
                 default => Carbon::parse($v, 'Europe/Prague')->utc(),
             };
+        }
+        if ($request->has('music_track_id')) {
+            $id = $request->input('music_track_id');
+            $data['music_track_id'] = $id ? MusicTrack::where('active', true)->findOrFail((int) $id)->id : null;
         }
         if ($request->has('game_enabled')) {
             $data['game_enabled'] = $request->boolean('game_enabled') && EventRules::has($event, 'game');

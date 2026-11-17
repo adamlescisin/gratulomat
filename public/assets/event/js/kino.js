@@ -81,7 +81,15 @@
     P.guess = $('[data-guess]').checked;
     $('[data-start]').classList.add('is-gone');
     try { P.ac = new (window.AudioContext || window.webkitAudioContext)(); } catch {}
-    if (music) { music.volume = 0; music.play().catch(() => {}); fadeMusic(.55, 2500); }
+    if (music) {
+      // Hlasitost přes Web Audio (GainNode): iOS ignoruje audio.volume, takže by se podkres neztišoval.
+      // Offline balíček (file://) zůstává u audio.volume – Web Audio by tam ze souboru hrál ticho.
+      if (P.ac && location.protocol.startsWith('http')) {
+        try { P.gain = P.ac.createGain(); P.gain.gain.value = 0; P.ac.createMediaElementSource(music).connect(P.gain); P.gain.connect(P.ac.destination); } catch { P.gain = null; }
+      }
+      if (!P.gain) music.volume = 0;
+      music.play().catch(() => {}); fadeMusic(.55, 2500);
+    }
     P.paused = false; go(0); kino.focus();
     requestAnimationFrame(loop);
   }
@@ -297,11 +305,17 @@
   function fadeMusic(to, ms) {
     if (!music) return;
     cancelAnimationFrame(fadeRaf);
-    const from = music.volume, t0 = performance.now(), target = P.musicOn ? to : 0;
+    const target = P.musicOn ? to : 0;
+    if (P.gain) { // plynulá křivka přímo v audio vlákně
+      const g = P.gain.gain, now = P.ac.currentTime;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(target, now + ms / 1000);
+      return;
+    }
+    const from = music.volume, t0 = performance.now();
     const step = now => { const p = Math.min(1, (now - t0) / ms); music.volume = from + (target - from) * p; if (p < 1) fadeRaf = requestAnimationFrame(step); };
     fadeRaf = requestAnimationFrame(step);
   }
-  const duck = on => fadeMusic(on ? .06 : .55, 900);
+  const duck = on => fadeMusic(on ? .07 : .55, on ? 600 : 1800);
 
   /* ---------------- ovládání ---------------- */
   function toggle(force) {

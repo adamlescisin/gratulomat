@@ -40,12 +40,13 @@
     <div class="kino__overview-grid" data-overview-grid></div>
   </div>
 </div>
-@if ($event->show?->music)<audio data-music src="{{ $offline ? $event->show->music : asset($event->show->music) }}" loop preload="auto"></audio>@endif
 @php
+    $musicSrc = $event->show?->musicSrc($offline ?? false);
     $gm = ['showUrl' => $showUrl];
     if ($loopUrl = $event->loopUrl('kino_finale')) { $gm['loop'] = ['url' => $loopUrl, 'label' => __('guest.loop.kino')]; }
     if (!empty($embeddedShow)) { $gm['demoShow'] = $embeddedShow; }
 @endphp
+@if ($musicSrc)<audio data-music src="{{ $musicSrc }}" loop preload="auto"></audio>@endif
 <script>window.GM = {!! json_encode($gm, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!};</script>
 <script src="{{ $offline ? 'assets/js/kino.js' : asset('assets/event/js/kino.js').'?v='.@filemtime(public_path('assets/event/js/kino.js')) }}" defer></script>
 @endsection
