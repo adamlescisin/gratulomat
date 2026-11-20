@@ -116,6 +116,8 @@
     <label class="check"><input type="checkbox" data-auto-share> Po uzávěrce sběru (<span data-auto-share-at></span>) prezentaci hostům automaticky nasdílet – na jejich stránce se dole objeví odkaz a QR kód</label>
     <label class="check" style="align-items:flex-start"><input type="checkbox" data-timeline style="margin-top:.2em"> <span>Časová osa – vzpomínky řadit podle let a desetiletí
       <span class="muted" style="display:block;font-size:.85rem">Vypnuto: ve videoprezentaci jen kapitoly Vzpomínky a Přání a hosté se na rok neptají. Už zadané roky zůstanou uložené pro případ, že časovou osu zase zapnete.</span></span></label>
+    <label class="check" style="align-items:flex-start;margin-left:1.6rem" data-decades-wrap><input type="checkbox" data-decades style="margin-top:.2em"> <span>Kapitoly po desetiletích – od dětství až po dnešek
+      <span class="muted" style="display:block;font-size:.85rem">Vypnuto: vzpomínky poběží v jedné kapitole chronologicky s uvedeným rokem, vzpomínky bez roku na konci.</span></span></label>
     <div class="music-pick" data-music-wrap hidden>
       <p class="muted" style="margin:.8rem 0 .4rem">Hudební podkres <span style="font-size:.85rem">– hraje ve smyčce, při videu nebo hlasovém vzkazu se sám ztiší</span></p>
       <div class="music-tags" data-music-tags></div>

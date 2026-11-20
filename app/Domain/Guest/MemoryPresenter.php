@@ -80,6 +80,7 @@ class MemoryPresenter
             'birth_year' => $event->start_year ?? $event->refDate()->year,
             'age' => $event->age() ?? 0,
             'timeline' => $event->timeline(),
+            'decades' => $event->decades(),
             'party_date' => $event->event_date?->toIso8601String(),
             'finale_title' => $event->finaleTitle(),
             'watermark' => ! EventRules::has($event, 'no_watermark'),

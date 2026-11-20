@@ -51,6 +51,27 @@ class TimelineAndThanksTest extends TestCase
         $this->getJson('/dekujeme-trenere/api/me')->assertJsonPath('config.timeline', true);
     }
 
+    public function test_organizer_turns_decade_chapters_off(): void
+    {
+        $e = $this->event();
+        $this->assertTrue($e->decades());
+        $this->assertTrue(MemoryPresenter::show($e, '/')['decades']);
+
+        $this->actingAs(User::first());
+        $this->postJson('/dekujeme-trenere/admin/api/settings', ['decades' => false])->assertOk();
+        $this->getJson('/dekujeme-trenere/admin/api/state')->assertJsonPath('show.decades', false)->assertJsonPath('show.timeline', true);
+        $e = $e->fresh();
+        $this->assertFalse($e->decades());
+        $this->assertTrue($e->timeline()); // roky zůstávají, jen bez kapitol po desetiletích
+        $show = MemoryPresenter::show($e, '/');
+        $this->assertTrue($show['timeline']);
+        $this->assertFalse($show['decades']);
+
+        // bez časové osy nejsou ani desetiletí
+        $this->postJson('/dekujeme-trenere/admin/api/settings', ['decades' => true, 'timeline' => false])->assertOk();
+        $this->assertFalse($e->fresh()->decades());
+    }
+
     public function test_organizer_turns_timeline_off(): void
     {
         $e = $this->event();

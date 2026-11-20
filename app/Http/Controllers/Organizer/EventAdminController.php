@@ -65,6 +65,7 @@ class EventAdminController extends Controller
                     'created_at' => $h['created_at'] ?? null, 'sent_at' => $h['sent_at'] ?? null, 'opened_at' => $h['opened_at'] ?? null,
                 ] : null,
                 'timeline' => $event->timeline(),
+                'decades' => (bool) $event->setting('decades', true),
                 'wall_open_at' => $event->setting('wall_open_at'),
                 'wall_opens_at' => $event->wallOpensAt()->toIso8601String(),
                 'auto_share_at' => ($event->collect_until ?? $event->event_date)?->toIso8601String(),
@@ -321,6 +322,7 @@ class EventAdminController extends Controller
             'finale_title' => 'sometimes|nullable|string|max:120',
             'reminders' => 'sometimes|boolean',
             'timeline' => 'sometimes|boolean',
+            'decades' => 'sometimes|boolean',
             'wall_open_at' => 'sometimes|nullable|date',
             'recipient_name' => 'sometimes|required|string|max:120',
         ], ['title.required' => 'Název události nesmí být prázdný.', 'recipient_name.required' => 'Jméno nesmí být prázdné.',
@@ -356,6 +358,9 @@ class EventAdminController extends Controller
         }
         if (array_key_exists('timeline', $v)) {
             $settings['timeline'] = (bool) $v['timeline'];
+        }
+        if (array_key_exists('decades', $v)) {
+            $settings['decades'] = (bool) $v['decades'];
         }
         if (array_key_exists('auto_share', $v)) {
             $settings['auto_share'] = (bool) $v['auto_share'];

@@ -33,7 +33,7 @@
     $('[data-show-status]').textContent = sh.is_public ? (sh.public_from ? `Hosté videoprezentaci vidí (od ${fmt(sh.public_from)}).` : `Hosté videoprezentaci vidí – automaticky po uzávěrce ${fmt(sh.auto_share_at)}.`)
       : sh.public_from ? `Naplánováno: hosté ji uvidí od ${fmt(sh.public_from)}.`
       : sh.auto_share ? `Hosté ji uvidí automaticky po uzávěrce sběru (${fmt(sh.auto_share_at)}).` : 'Hosté videoprezentaci zatím nevidí. Vy ji máte v náhledu kdykoli.';
-    $('[data-timeline]').checked = sh.timeline; $('[data-auto-share]').checked = sh.auto_share; $('[data-auto-share-at]').textContent = fmt(sh.auto_share_at);
+    $('[data-timeline]').checked = sh.timeline; $('[data-decades]').checked = sh.decades; $('[data-decades]').disabled = !sh.timeline; $('[data-decades-wrap]').style.opacity = sh.timeline ? '' : '.5'; $('[data-auto-share]').checked = sh.auto_share; $('[data-auto-share-at]').textContent = fmt(sh.auto_share_at);
     $('[data-show-at]').value = localInput(sh.public_from || E.event_date);
     $('[data-game-wrap]').hidden = !E.game_available; $('[data-game]').checked = sh.game_enabled;
     renderMusic(); renderHandover();
@@ -225,6 +225,7 @@
   }
   $('[data-reminders]').addEventListener('change', e => run(() => post('settings', { reminders: e.target.checked }), e.target.checked ? 'Připomínky zapnuty' : 'Připomínky vypnuty'));
   $('[data-auto-share]').addEventListener('change', e => run(() => post('settings', { auto_share: e.target.checked }), e.target.checked ? 'Po uzávěrce se prezentace hostům nasdílí sama' : 'Automatické nasdílení vypnuto'));
+  $('[data-decades]').addEventListener('change', e => run(() => post('settings', { decades: e.target.checked }), e.target.checked ? 'Kapitoly po desetiletích zapnuty' : 'Vzpomínky chronologicky v jedné kapitole'));
   $('[data-timeline]').addEventListener('change', e => run(() => post('settings', { timeline: e.target.checked }), e.target.checked ? 'Časová osa zapnuta – vzpomínky podle let' : 'Časová osa vypnuta – jen vzpomínky a přání'));
   // hudební podkres: štítky filtrují nabídku, doporučené podle vzhledu a typu události jsou předvybrané
   let musicTag = null;

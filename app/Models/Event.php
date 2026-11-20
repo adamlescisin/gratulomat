@@ -176,6 +176,12 @@ class Event extends Model
         return (bool) $this->setting('timeline', true);
     }
 
+    /** Kapitoly po desetiletích (jen se zapnutou časovou osou); vypnuto = jedna kapitola chronologicky s rokem. */
+    public function decades(): bool
+    {
+        return $this->timeline() && (bool) $this->setting('decades', true);
+    }
+
     public function setting(string $key, mixed $default = null): mixed
     {
         return data_get($this->settings, $key, $default);

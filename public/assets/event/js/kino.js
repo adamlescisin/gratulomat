@@ -48,14 +48,22 @@
         ms.forEach(m => S.push({ type: 'memory', m, chapter: 'Vzpomínky' }));
       }
     }
+    const decades = tl && d.decades !== false;
+    if (tl && !decades) { // časová osa bez desetiletí: jedna kapitola chronologicky, bez roku na konci
+      const ms = [...dated, ...stories.filter(m => !m.year).sort((a, b) => a.created_at.localeCompare(b.created_at))];
+      if (ms.length) {
+        S.push({ type: 'chapter', big: String(ms.length), label: 'Vzpomínky', meta: `${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
+        ms.forEach(m => S.push({ type: 'memory', m, chapter: 'Vzpomínky' }));
+      }
+    }
     const groups = new Map();
-    if (tl) dated.forEach(m => { const dec = Math.floor(m.year / 10) * 10; groups.has(dec) || groups.set(dec, []); groups.get(dec).push(m); });
+    if (decades) dated.forEach(m => { const dec = Math.floor(m.year / 10) * 10; groups.has(dec) || groups.set(dec, []); groups.get(dec).push(m); });
     for (const [dec, ms] of groups) {
       const from = Math.max(dec, by), to = Math.min(dec + 9, new Date().getFullYear());
       S.push({ type: 'chapter', big: String(dec), label: DECADES[dec] || `${dec}s`, meta: `${d.celebrant_dative} ${from - by}–${to - by} · ${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
       ms.forEach(m => S.push({ type: 'memory', m, chapter: DECADES[dec] }));
     }
-    if (tl && undated.length) {
+    if (decades && undated.length) {
       S.push({ type: 'chapter', big: '∞', label: 'Kdykoliv a pořád', meta: `${undated.length} ${plural(undated.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')} bez letopočtu` });
       undated.forEach(m => S.push({ type: 'memory', m, chapter: 'Kdykoliv a pořád' }));
     }
