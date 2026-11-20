@@ -85,10 +85,20 @@
       // Hlasitost přes Web Audio (GainNode): iOS ignoruje audio.volume, takže by se podkres neztišoval.
       // Offline balíček (file://) zůstává u audio.volume – Web Audio by tam ze souboru hrál ticho.
       if (P.ac && location.protocol.startsWith('http')) {
-        try { P.gain = P.ac.createGain(); P.gain.gain.value = 0; P.ac.createMediaElementSource(music).connect(P.gain); P.gain.connect(P.ac.destination); } catch { P.gain = null; }
+        try {
+          P.gain = P.ac.createGain(); P.gain.gain.value = 0; P.gain.connect(P.ac.destination);
+          // dvě kopie stopy pro plynulé prolnutí konce smyčky do jejího začátku
+          const twin = music.cloneNode(); twin.removeAttribute('data-music'); music.after(twin);
+          M.els = [music, twin].map(el => {
+            el.loop = false; const g = P.ac.createGain(); P.ac.createMediaElementSource(el).connect(g); g.connect(P.gain);
+            el.addEventListener('ended', () => { if (M.els[M.cur]?.el === el && !P.paused) { el.currentTime = 0; el.play().catch(() => {}); } }); // pojistka (uspaná karta)
+            return { el, g };
+          });
+          M.els[1].g.gain.value = 0;
+        } catch { P.gain = null; M.els = []; }
       }
-      if (!P.gain) music.volume = 0;
-      music.play().catch(() => {}); fadeMusic(.55, 2500);
+      if (!P.gain) music.volume = 0; // offline: klasický loop přes atribut, bez prolnutí
+      musicPlay(); fadeMusic(.55, 2500);
     }
     P.paused = false; go(0); kino.focus();
     requestAnimationFrame(loop);
@@ -99,12 +109,15 @@
     if (!P.paused && P.cur) {
       P.t += dt;
       P.cur.tick?.(P.t);
+      // konec prezentace: podkres během posledních sekund plynule dozní
+      if (P.idx === P.slides.length - 1 && !P.musicEnding && P.dur - P.t <= MUSIC_OUT) { P.musicEnding = true; fadeMusic(0, (P.dur - P.t) * 1000); }
       if (P.t >= P.dur) {
         if (P.cur.waitGuess && !P.cur.revealed) { /* čeká se na Enter */ }
         else if (P.idx < P.slides.length - 1) go(P.idx + 1);
-        else P.paused = true;
+        else { P.paused = true; P.ended = true; setTimeout(musicPause, 300); }
       }
     }
+    musicTick();
     const total = P.slides.length, frac = P.dur ? Math.min(1, P.t / P.dur) : 0;
     $('[data-progress] i').style.width = `${((Math.max(0, P.idx) + frac) / total) * 100}%`;
     requestAnimationFrame(loop);
@@ -116,6 +129,11 @@
     const old = stage.querySelector('.slide.is-on');
     if (old) { old.classList.remove('is-on'); setTimeout(() => old.remove(), 1200); }
     P.idx = i; P.t = 0;
+    if (P.musicEnding || P.ended) { // návrat z konce – hudba zase naběhne
+      const wasEnded = P.ended; P.musicEnding = P.ended = false;
+      if (wasEnded) { P.paused = false; kino.classList.remove('is-paused'); }
+      if (P.musicOn) musicPlay(); fadeMusic(.55, 1500);
+    }
     const s = P.slides[i];
     const r = RENDER[s.type](s);
     P.cur = r; P.dur = r.dur;
@@ -317,11 +335,34 @@
   }
   const duck = on => fadeMusic(on ? .07 : .55, on ? 600 : 1800);
 
+  // Smyčka podkresu: kratší skladba se opakuje a její konec se prolne do začátku (equal-power crossfade),
+  // delší skladba na konci prezentace dozní (MUSIC_OUT). Bez Web Audio (offline) platí atribut loop.
+  const MUSIC_OUT = 6, M = { els: [], cur: 0, xf: false };
+  const musicEl = () => M.els.length ? M.els[M.cur].el : music;
+  function musicPlay() { if (music) musicEl().play().catch(() => {}); }
+  function musicPause() { if (!music) return; M.els.length ? M.els.forEach(x => x.el.pause()) : music.pause(); }
+  const XF_IN = Float32Array.from({ length: 32 }, (_, i) => Math.sin((i / 31) * Math.PI / 2));
+  const XF_OUT = Float32Array.from({ length: 32 }, (_, i) => Math.cos((i / 31) * Math.PI / 2));
+  function musicTick() {
+    if (M.els.length < 2 || M.xf || P.paused) return;
+    const a = M.els[M.cur], d = a.el.duration;
+    if (!isFinite(d) || a.el.paused) return;
+    if (d < 10) { a.el.loop = true; return; } // velmi krátká stopa (jingle) – klasická smyčka
+    const xf = Math.min(4, d / 4);
+    if (a.el.currentTime < d - xf) return;
+    M.xf = true;
+    const b = M.els[1 - M.cur], now = P.ac.currentTime;
+    b.el.currentTime = 0; b.el.play().catch(() => {});
+    [[b.g, XF_IN], [a.g, XF_OUT]].forEach(([g, curve]) => { g.gain.cancelScheduledValues(now); g.gain.setValueCurveAtTime(curve, now, xf); });
+    M.cur = 1 - M.cur;
+    setTimeout(() => { a.el.pause(); M.xf = false; }, xf * 1000 + 250);
+  }
+
   /* ---------------- ovládání ---------------- */
   function toggle(force) {
     P.paused = force ?? !P.paused;
     P.paused ? P.cur?.pause?.() : P.cur?.resume?.();
-    P.paused ? music?.pause() : (P.musicOn && music?.play().catch(() => {}));
+    P.paused ? musicPause() : (P.musicOn && !P.ended && musicPlay());
     kino.classList.toggle('is-paused', P.paused);
     showHud();
   }
@@ -376,7 +417,7 @@
     else if (k === 'g') overview();
     else if (k === 'escape') overview(false);
     else if (k === 'r') randomMemory();
-    else if (k === 'm') { P.musicOn = !P.musicOn; fadeMusic(P.musicOn ? .55 : 0, 500); if (P.musicOn) music?.play().catch(() => {}); }
+    else if (k === 'm') { P.musicOn = !P.musicOn; fadeMusic(P.musicOn ? .55 : 0, 500); if (P.musicOn && !P.paused) musicPlay(); }
     else if (k === 'home') go(0);
     else if (k === 'end') go(P.slides.length - 1);
     showHud();
