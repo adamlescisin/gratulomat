@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
 @include('site.partials.head')
+@include('site.partials.analytics')
 <title>Gratulomat – brzy spouštíme</title>
 <meta name="description" content="Gratulomat sesbírá historky, fotky a přání od vašich blízkých a složí z nich videoprezentaci, kterou pustíte všem najednou.">
 <meta property="og:title" content="Gratulomat – vzpomínky, které se promítají">

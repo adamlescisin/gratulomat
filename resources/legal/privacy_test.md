@@ -18,4 +18,4 @@ Máte právo na přístup k údajům, jejich opravu a výmaz a právo podat stí
 
 ## Cookies
 
-Používáme jen nezbytné cookies (relace a ochrana formulářů). Analytické ani reklamní cookies nepoužíváme.
+Nezbytné cookies (relace a ochrana formulářů) používáme vždy. Měření návštěvnosti přes Google Analytics (Google Ireland Limited) zapneme jen s vaším souhlasem, který udělíte nebo odmítnete v liště cookies a kdykoli změníte odkazem „Nastavení cookies“ v patičce. Sledujeme, které stránky se zobrazují a zda objednávka došla do konce (číslo objednávky a hodnota), ne jméno ani e-mail. Reklamní cookies nepoužíváme.

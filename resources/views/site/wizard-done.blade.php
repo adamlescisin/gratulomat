@@ -1,7 +1,24 @@
+@php
+    // Měřicí událost se posílá jen u ostré, dokončené objednávky; testovací (Připravujeme/testeři) data nezkreslují.
+    $ga = null;
+    if (! $order->is_test) {
+        $value = round($order->total_halere / 100, 2);
+        $base = ['transaction_id' => $order->number, 'currency' => 'CZK', 'value' => $value, 'plan' => $order->plan];
+        if ($order->status === 'fulfilled' && $order->total_halere > 0) {
+            $ga = ['purchase', $base + [
+                'tax' => round(($order->total_halere - $order->total_halere / 1.21) / 100, 2), // ceny jsou včetně DPH 21 %
+                'items' => array_map(fn ($l) => ['item_id' => $l['code'] ?? $l['name'], 'item_name' => $l['name'], 'price' => round($l['unit_price'] / 100, 2), 'quantity' => $l['qty']], $order->lines ?? []),
+            ]];
+        } elseif ($order->status === 'fulfilled' || $order->status === 'inquiry') {
+            $ga = ['generate_lead', $base]; // Ochutnávka zdarma / VIP poptávka
+        }
+    }
+@endphp
 <!doctype html>
 <html lang="cs">
 <head>
 @include('site.partials.head')
+@include('site.partials.analytics')
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="{{ asset('assets/site/wizard.css') }}?v={{ @filemtime(public_path('assets/site/wizard.css')) }}">
 <title>{{ $order->config['name'] }} · Gratulomat</title>
@@ -34,6 +51,16 @@
     @endif
   </div>
 </main>
+@if ($ga)
+<script>
+  // Jednou na objednávku (obnovení stránky událost neopakuje; GA navíc purchase deduplikuje podle transaction_id).
+  (() => {
+    const k = 'gm-ga-' + @json($order->number);
+    try { if (localStorage.getItem(k)) return; localStorage.setItem(k, '1'); } catch {}
+    gmTrack(@json($ga[0]), @json($ga[1]));
+  })();
+</script>
+@endif
 <script>
   // Úspěch: konfigurace v průvodci už není potřeba. Čekání na platbu: obnovovat stav.
   (() => {

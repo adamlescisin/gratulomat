@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
 @include('site.partials.head')
+@include('site.partials.analytics')
 <link rel="stylesheet" href="{{ asset('assets/site/landing.css') }}?v={{ @filemtime(public_path('assets/site/landing.css')) }}">
 <title>Gratulomat – vzpomínky, které se promítají</title>
 <meta name="description" content="Gratulanti pošlou historky, staré fotky a hlasová přání. Gratulomat z nich složí videoprezentaci, kterou na oslavě pustíte všichni spolu.">

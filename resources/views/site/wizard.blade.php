@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
 @include('site.partials.head')
+@include('site.partials.analytics')
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="{{ asset('assets/site/wizard.css') }}?v={{ @filemtime(public_path('assets/site/wizard.css')) }}">
 <title>Založit událost · Gratulomat</title>

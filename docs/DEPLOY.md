@@ -35,6 +35,13 @@ přepnutí symlinku `current`). Hostinger Git deploy se nepoužívá.
    Ruční kontrola: `php artisan gratulomat:archive --dry-run`.
 7. První nasazení: push do `main`. Po něm `php artisan key:generate` jen pokud `.env` nemá `APP_KEY`.
 
+## Google Analytics
+
+Do `shared/.env` produkce doplňte `GA_MEASUREMENT_ID=G-XXXXXXXXXX` (GA4 → Správce → Datové streamy). Prázdné = měření vypnuté.
+Měří se jen veřejný web (úvod, právní texty, průvodce, potvrzení objednávky) a až po souhlasu v liště cookies; stránky událostí a back-office ne.
+Události: `purchase` (zaplacená objednávka: `value` včetně DPH v CZK, `tax`, `items`, `transaction_id` = číslo objednávky)
+a `generate_lead` (Ochutnávka zdarma, VIP poptávka). Testovací objednávky a testeři se neměří.
+
 ## shared/.env (staging)
 
 ```

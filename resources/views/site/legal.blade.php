@@ -8,6 +8,7 @@
 <html lang="cs">
 <head>
 @include('site.partials.head')
+@include('site.partials.analytics')
 <title>{{ $title }} · Gratulomat</title>
 </head>
 <body>

@@ -125,6 +125,49 @@ class WizardOrderTest extends TestCase
         $this->assertSame(0, WorkerJob::count(), 'testovací objednávka nevystavuje doklad');
     }
 
+    public function test_done_page_sends_purchase_event_with_value_of_chosen_plan(): void
+    {
+        $this->submit($this->config(['voice' => true, 'guests' => 40]));
+        $order = Order::first();
+        $this->postJson('/api/stripe/webhook', FakeStripe::completed($order), ['Stripe-Signature' => 'ok'])->assertOk();
+        $url = route('wizard.done', ['objednavka' => $order->id]);
+
+        // testovací objednávka se neměří
+        $this->get($url)->assertDontSee('gmTrack(', false);
+
+        $order->refresh()->update(['is_test' => false]);
+        $html = $this->get($url)->assertOk()->getContent();
+        $this->assertStringContainsString('gmTrack("purchase"', $html);
+        $this->assertStringContainsString('"value":1280', $html);
+        $this->assertStringContainsString('"currency":"CZK"', $html);
+        $this->assertStringContainsString('"transaction_id":"'.$order->number.'"', $html);
+        $this->assertStringContainsString('"plan":"party"', $html);
+        $this->assertStringContainsString('"items":[', $html);
+    }
+
+    public function test_free_tasting_order_sends_lead_not_purchase(): void
+    {
+        $this->submit($this->config());
+        $order = Order::first();
+        $this->get(URL::signedRoute('wizard.confirm', $order))->assertRedirect();
+        $order->refresh()->update(['is_test' => false]);
+
+        $html = $this->get(route('wizard.done', ['objednavka' => $order->id]))->getContent();
+        $this->assertStringContainsString('gmTrack("generate_lead"', $html);
+        $this->assertStringNotContainsString('gmTrack("purchase"', $html);
+    }
+
+    public function test_analytics_loads_only_when_measurement_id_is_set_and_not_for_testers(): void
+    {
+        $this->get('/pristup')->assertDontSee('googletagmanager', false)->assertDontSee("gtag('consent'", false);
+
+        config(['gratulomat.ga_id' => 'G-TEST123456']);
+        $this->get('/pristup')->assertDontSee("gtag('consent'", false); // tester s cookie se neměří
+
+        $this->defaultCookies = []; // běžný návštěvník bez cookie testera
+        $this->get('/pristup')->assertSee("gtag('consent', 'default'", false)->assertSee('G-TEST123456', false);
+    }
+
     public function test_invalid_webhook_signature_is_rejected(): void
     {
         $this->postJson('/api/stripe/webhook', ['id' => 'evt_x'], ['Stripe-Signature' => 'bad'])->assertStatus(400);
