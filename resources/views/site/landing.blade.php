@@ -167,7 +167,7 @@
     <div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px">
       <p class="kicker">Jak Gratulomat vznikl?</p>
       <h2 class="h2">Narodil se na jedněch padesátinách.</h2>
-      <p>Gratulomat vznikl, když jsme pro jednu oslavu chtěli sesbírat vzpomínky od třiceti lidí po celé republice a promítnout je tak, aby se u toho všichni smáli i dojímali. Fungovalo to – tak jsme z toho udělali službu pro každého.</p>
+      <p>Pro jednu oslavu jsme chtěli sesbírat vzpomínky od více než třiceti lidí po celé republice. Nechtěli jsme trávit hodiny probíráním emailů, vybíráním, stříháním, kopírováním a formátováním a promítnout je lidem tak, aby se u toho všichni smáli i dojímali. Zafungovalo to skvěle – tak jsme z toho udělali službu pro každého.</p>
     </div>
   </section>
 
