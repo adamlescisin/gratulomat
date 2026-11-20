@@ -73,7 +73,7 @@
   <section id="jak" class="wrap sec">
     <div class="sec-head"><p class="kicker">Jak to funguje</p><h2 class="h2">Tři kroky. Žádné stříhání videa.</h2></div>
     <div class="cards3">
-      <div class="card"><span class="num">1</span><h3>Založte událost</h3><p>Jméno oslavence, datum a vzhled. Za dvě minuty máte vlastní stránku, třeba gratulomat.cz/eva-jde-do-duchodu.</p></div>
+      <div class="card"><span class="num">1</span><h3>Založte událost</h3><p>Jméno oslavence, datum a vzhled. Za minutu máte vlastní stránku, třeba gratulomat.cz/eva-jde-do-duchodu.</p></div>
       <div class="card"><span class="num">2</span><h3>Oslovte gratulanty</h3><p>Každý dostane osobní odkaz nebo QR kód. Bez aplikace a bez registrace – fotky, historky i hlasová přání nahrají z mobilu.</p></div>
       <div class="card"><span class="num">3</span><h3>Zmáčkněte tlačítko</h3><p>Na oslavě spustíte videoprezentaci: film ze všech vzpomínek seřazený podle let. Funguje i bez internetu.</p></div>
     </div>
