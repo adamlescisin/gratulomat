@@ -28,9 +28,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        // Neexistující stránka v režimu Připravujeme / Údržba = coming soon / údržba (i neznámé adresy událostí).
+        // Neexistující stránka v režimu Připravujeme / Údržba = coming soon / údržba (i neznámé adresy událostí);
+        // chybějící soubory (ukázkové video, hudba, logo) zůstávají skutečnou 404.
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if ($request->expectsJson() || $request->is('api/*', 'backoffice', 'backoffice/*', '*/admin', '*/admin/*', '*/api/*', '*/m/*')) {
+            if ($request->expectsJson() || $request->is('api/*', 'backoffice', 'backoffice/*', '*/admin', '*/admin/*', '*/api/*', '*/m/*', 'ukazka/*', 'hudba/*', 'znacka/*')) {
                 return null;
             }
             $mode = Setting::siteMode();
