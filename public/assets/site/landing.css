@@ -58,6 +58,7 @@
 .demo__close { position: absolute; top: -18px; right: -18px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #FFF6E9; color: #1C1633; font-size: 28px; line-height: 1; cursor: pointer; z-index: 2; }
 .demo__empty { margin: 0; padding: 48px 32px; background: #FFF6E9; color: #1C1633; border-radius: 20px; font-size: 18px; text-align: center; }
 .demo-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; }
+.bigbtn__note { max-width: 300px; margin-top: -10px; font-size: 14px; line-height: 1.45; color: rgba(255, 246, 233, .6); text-align: center; }
 .bigbtn span { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 26px; }
 .occ { display: flex; flex-wrap: wrap; gap: 12px; }
 .occ span { padding: 14px 22px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(28,22,51,.1); font-size: 18px; font-weight: 600; }

@@ -94,6 +94,7 @@
       <div class="bigbtn"><button type="button" data-demo aria-haspopup="dialog">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true" style="display:block;width:200px;height:auto"><circle cx="60" cy="61" r="50" fill="#FFF6E9"/><circle cx="60" cy="65" r="36" fill="#B93A22"/><circle cx="60" cy="58" r="36" fill="#FF5A3C"/><ellipse cx="47" cy="43" rx="12" ry="6" fill="#fff" opacity=".3" transform="rotate(-22 47 43)"/><path d="M60 73C41 60 43 43 53 43C56.5 43 59 45 60 47.5C61 45 63.5 43 67 43C77 43 79 60 60 73Z" fill="#FFF6E9"/></svg>
         <span>Ukázkový Gratulomat</span>
+        <small class="bigbtn__note">Po stisknutí tlačítka se zobrazí krátká ukázka YouTube videa, jak i váš Gratulomat může vypadat</small>
       </button></div>
     </div>
   </section>
