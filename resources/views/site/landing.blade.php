@@ -177,7 +177,7 @@
       @foreach ([
         ['Musí si organizátor nebo hosté/gratulanti něco instalovat?', 'Ne. Stačí otevřít osobní odkaz v mobilu nebo počítači. Žádná aplikace, žádné heslo.'],
         ['Co když na místě události není internet?', 'Den předem si stáhnete offline balíček a videoprezentaci pustíte z notebooku – bez připojení.'],
-        ['Kdo uvidí fotky a vzpomínky?', 'Jen pozvaní hosté a oslavenec. Soukromá přání vidí pouze oslavenec. O sdílení výsledné prezentace rozhoduje organizátor. Stránka se nezobrazuje ve vyhledávačích.'],
+        ['Kdo uvidí fotky a vzpomínky?', 'Pouze pozvaní hosté, organizátor a oslavenec. O zveřejnění sesbíraných přání/příspěvků a o sdílení výsledné prezentace rozhoduje organizátor události. Soukromá přání vidí vždy pouze organizátor/oslavenec. Stránka se nezobrazuje ve vyhledávačích.'],
         ['Co když někteří hosté nehovoří česky?', 'Vůbec nevadí – každý organizátor nebo host si může přepnout svůj Gratulomat do jazyka dle libosti. Zatím máme češtinu, angličtinu a němčinu, další jazyky budeme přidávat průběžně.'],
         ['Jak dlouho data uchováváte?', 'Podle tarifu 1 až 12 měsíců po oslavě. Pak je smažeme, pokud si archiv neprodloužíte.'],
         ['Můžu Gratulomat použít i pro firmu?', 'Ano – Gratulomat můžete využít i pro výročí či oslavu firmy, zaměstnanců, projektu nebo rozlučky. Nabízíme i zvýhodněné balíčky na míru – napište nám.'],
