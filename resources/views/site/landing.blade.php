@@ -86,7 +86,7 @@
         <h2 class="h2">Na oslavě to pustíte všichni spolu.</h2>
         <p>Žádné papírové přání s hracím strojkem nebo nahánění podpisů. Originální videoprezentace poběží na televizi nebo plátně přímo na oslavě a vy ji ovládáte jedním tlačítkem.</p>
         <ul class="ticks">
-          @foreach (['Kapitoly po desetiletích – od dětství až po dnešek', 'Fotky se pomalu přibližují, historky se rozsvěcují slovo po slově', 'Hlasová přání zazní nahlas, hudba se sama ztlumí', 'Hra „Hádej, kdo to napsal“ – autor se odhalí až po stisku tlačítka', 'Offline balíček pro místa bez internetu'] as $t)
+          @foreach (['Chronologické vzpomínky, případně po dekádách', 'Fotky se pomalu přibližují, historky se rozsvěcují slovo po slově', 'Hlasová přání zazní nahlas, hudba se sama ztlumí', 'Hra „Hádej, kdo to napsal“ – autor se odhalí až po stisku tlačítka', 'Offline balíček pro místa bez internetu'] as $t)
             <li>{!! $tick('#FFC433') !!}<span>{{ $t }}</span></li>
           @endforeach
         </ul>
