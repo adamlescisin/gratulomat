@@ -77,6 +77,17 @@ class GrowthLoopAndRobotsTest extends TestCase
         }
     }
 
+    public function test_sitemap_lists_public_pages_in_every_mode(): void
+    {
+        foreach (['live', 'coming_soon'] as $mode) {
+            config(['gratulomat.site_mode' => $mode]);
+            $res = $this->get('/sitemap.xml')->assertOk()->assertHeaderMissing('X-Robots-Tag');
+            $this->assertStringContainsString('application/xml', $res->headers->get('Content-Type'));
+            $res->assertSee('<loc>https://gratulomat.test/</loc>', false)->assertSee('/obchodni-podminky', false)->assertSee('/ochrana-soukromi', false);
+            $this->assertStringNotContainsString('/pristup', $res->getContent());
+        }
+    }
+
     public function test_coming_soon_soft_404_is_noindex(): void
     {
         config(['gratulomat.site_mode' => 'coming_soon']);

@@ -38,6 +38,16 @@ Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
 // Přístup testerů v režimu Připravujeme.
 Route::get('/pristup', fn () => view('site.coming-soon', ['openCode' => true]))->name('access');
 Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware('throttle:6,1')->name('waitlist');
+// Sitemap pro vyhledávače: jen veřejný marketing (stejný seznam jako RobotsHeaders::INDEXABLE).
+Route::get('/sitemap.xml', function () {
+    $base = rtrim((string) config('gratulomat.marketing_url'), '/');
+    $urls = collect(['/' => ['weekly', '1.0'], '/obchodni-podminky' => ['yearly', '0.3'], '/ochrana-soukromi' => ['yearly', '0.3']])
+        ->map(fn ($m, $path) => "  <url>\n    <loc>{$base}{$path}</loc>\n    <changefreq>{$m[0]}</changefreq>\n    <priority>{$m[1]}</priority>\n  </url>")
+        ->implode("\n");
+
+    return response("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n{$urls}\n</urlset>\n")
+        ->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('sitemap');
 Route::get('/ochrana-soukromi', fn () => view('site.legal', ['doc' => 'privacy']))->name('privacy');
 Route::get('/obchodni-podminky', fn () => view('site.legal', ['doc' => 'terms']))->name('terms');
 Route::get('/pravidla-pro-hosty', fn () => view('site.legal', ['doc' => 'guest_rules']))->name('guest-rules');

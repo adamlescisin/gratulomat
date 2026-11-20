@@ -6,3 +6,5 @@ Disallow: /moje
 Disallow: /prihlaseni
 Disallow: /pristup
 Disallow: /jazyk/
+
+Sitemap: https://gratulomat.cz/sitemap.xml

@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 class RobotsHeaders
 {
     /** Názvy rout, které se smějí indexovat. Cokoli jiného je noindex. */
-    public const INDEXABLE = ['home', 'privacy', 'terms'];
+    public const INDEXABLE = ['home', 'privacy', 'terms', 'sitemap'];
 
     public const NOINDEX = 'noindex, nofollow, noarchive, noimageindex';
 
