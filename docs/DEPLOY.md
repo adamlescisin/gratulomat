@@ -37,7 +37,7 @@ přepnutí symlinku `current`). Hostinger Git deploy se nepoužívá.
 
 ## Google Analytics
 
-Do `shared/.env` produkce doplňte `GA_MEASUREMENT_ID=G-XXXXXXXXXX` (GA4 → Správce → Datové streamy). Prázdné = měření vypnuté.
+Do `shared/.env` produkce doplňte `GA_MEASUREMENT_ID=G-XXXXXXXXXX` (GA4 → Správce → Datové streamy). Na produkci (`APP_ENV=production`) je výchozí `G-9FDM6YD6RB`, jinde je měření vypnuté, dokud ID není v `.env`.
 Měří se jen veřejný web (úvod, právní texty, průvodce, potvrzení objednávky) a až po souhlasu v liště cookies; stránky událostí a back-office ne.
 Události: `purchase` (zaplacená objednávka: `value` včetně DPH v CZK, `tax`, `items`, `transaction_id` = číslo objednávky)
 a `generate_lead` (Ochutnávka zdarma, VIP poptávka). Funnel v průvodci: `view_item` (dojití na Shrnutí) a `begin_checkout` (odeslání). Testovací objednávky a testeři se neměří.

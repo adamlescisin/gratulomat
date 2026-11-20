@@ -13,7 +13,8 @@ return [
     // Kam míří odkazy „Vytvořeno v Gratulomatu“ ze stránek událostí (growth loop).
     'marketing_url' => env('MARKETING_URL', 'https://gratulomat.cz'),
     // Google Analytics 4 (G-XXXXXXXXXX). Prázdné = měření vypnuté, nenačte se nic.
-    'ga_id' => env('GA_MEASUREMENT_ID'),
+    // Na produkci výchozí gratulomat.cz (ID není tajné); jinde prázdné, pokud není v .env.
+    'ga_id' => env('GA_MEASUREMENT_ID', env('APP_ENV') === 'production' ? 'G-9FDM6YD6RB' : null),
 
     'site_mode' => env('SITE_MODE', 'coming_soon'), // coming_soon | maintenance | live
 
