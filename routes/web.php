@@ -2,6 +2,7 @@
 
 use App\Domain\Guest\GuestSession;
 use App\Http\Controllers\Backoffice\BackofficeController;
+use App\Http\Controllers\Backoffice\DemoVideoController;
 use App\Http\Controllers\Backoffice\MailTemplateController;
 use App\Http\Controllers\Backoffice\MusicController;
 use App\Http\Controllers\Backoffice\OrdersController;
@@ -17,6 +18,7 @@ use App\Http\Middleware\EventNotArchived;
 use App\Models\Household;
 use App\Models\MusicTrack;
 use App\Models\TesterCode;
+use App\Support\DemoVideo;
 use App\Support\MailBrand;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Http\Request;
@@ -97,6 +99,9 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/hudba', [MusicController::class, 'store'])->name('backoffice.music.store');
     Route::post('/hudba/{track}', [MusicController::class, 'update'])->name('backoffice.music.update');
     Route::delete('/hudba/{track}', [MusicController::class, 'destroy'])->name('backoffice.music.delete');
+    Route::get('/ukazka', [DemoVideoController::class, 'index'])->name('backoffice.demo');
+    Route::post('/ukazka', [DemoVideoController::class, 'save'])->name('backoffice.demo.save');
+    Route::delete('/ukazka', [DemoVideoController::class, 'destroy'])->name('backoffice.demo.delete');
     Route::get('/cenik', 'prices')->name('backoffice.prices');
     Route::post('/cenik', 'pricesSave')->name('backoffice.prices.save');
     Route::get('/slevy', 'discounts')->name('backoffice.discounts');
@@ -135,6 +140,15 @@ Route::get('/hudba/{file}', function (string $file) {
 
     return response()->file($track->path(), ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'public, max-age=31536000, immutable']);
 })->where('file', '[a-z0-9]{20,40}\.mp3')->name('music.file');
+
+// Ukázkový Gratulomat na landing page (Range kvůli přetáčení videa)
+Route::get('/ukazka/{file}', function (string $file) {
+    $path = DemoVideo::path($file);
+    abort_unless(is_file($path), 404);
+    $mime = ['mp4' => 'video/mp4', 'webm' => 'video/webm', 'jpg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp'][pathinfo($file, PATHINFO_EXTENSION)];
+
+    return response()->file($path, ['Content-Type' => $mime, 'Cache-Control' => 'public, max-age=31536000, immutable']);
+})->where('file', 'demo-[a-z0-9]{24}\.(mp4|webm|jpg|png|webp)')->name('demo.file');
 
 // Průvodce založením události a platba.
 Route::get('/zalozit', [WizardController::class, 'page'])->name('wizard');

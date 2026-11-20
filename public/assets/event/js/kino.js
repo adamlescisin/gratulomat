@@ -60,7 +60,7 @@
     if (decades) dated.forEach(m => { const dec = Math.floor(m.year / 10) * 10; groups.has(dec) || groups.set(dec, []); groups.get(dec).push(m); });
     for (const [dec, ms] of groups) {
       const from = Math.max(dec, by), to = Math.min(dec + 9, new Date().getFullYear());
-      S.push({ type: 'chapter', big: String(dec), label: DECADES[dec] || `${dec}s`, meta: `${d.celebrant_dative} ${from - by}–${to - by} · ${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
+      S.push({ type: 'chapter', big: String(dec), label: DECADES[dec] || `${dec}s`, meta: `${ageText(from - by, to - by, to < new Date().getFullYear())} · ${ms.length} ${plural(ms.length, 'vzpomínka', 'vzpomínky', 'vzpomínek')}` });
       ms.forEach(m => S.push({ type: 'memory', m, chapter: DECADES[dec] }));
     }
     if (decades && undated.length) {
@@ -81,6 +81,12 @@
       : 'Zatím tu nejsou žádné vzpomínky.';
     $('[data-action=start]').disabled = !mem.length;
     buildProgressMarks(); buildOverview();
+  }
+  // „Janě bylo 3–9 let“ / „Janě je 50 let“ – věk srozumitelně i u firem („Acme Ltd. bylo 3–9 let“)
+  function ageText(from, to, past) {
+    past = past || !!P.data?.funeral;
+    const n = to ?? from, unit = plural(n, 'rok', 'roky', 'let');
+    return `${P.data?.celebrant_dative || ''} ${n === 1 ? (past ? 'byl' : 'je') : n >= 2 && n <= 4 ? (past ? 'byly' : 'jsou') : (past ? 'bylo' : 'je')} ${to != null && to !== from ? `${from}–${to}` : from} ${unit}`.trim();
   }
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
@@ -194,7 +200,7 @@
       const readSec = Math.min(26, Math.max(6, 3 + words / 2.6)); // čte se nahlas a společně → pomaleji
       const by = m.authors.join(' a ');
       const captionParts = (excerpt) => [
-        m.year && d().timeline !== false ? h('div', { class: 'caption__year' }, `${m.year} · ${d().celebrant_dative} ${m.year - d().birth_year}`) : null,
+        m.year && d().timeline !== false ? h('div', { class: 'caption__year' }, m.year >= d().birth_year ? `${m.year} · ${ageText(m.year - d().birth_year, null, m.year < new Date().getFullYear())}` : String(m.year)) : null,
         m.title ? h('h2', { class: 'caption__title' }, m.title) : null,
         excerpt ? h('p', { class: 'caption__text' }, excerpt) : null,
         h('div', { class: 'caption__by' }, by),

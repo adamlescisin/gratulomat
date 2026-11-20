@@ -81,6 +81,7 @@ class MemoryPresenter
             'age' => $event->age() ?? 0,
             'timeline' => $event->timeline(),
             'decades' => $event->decades(),
+            'funeral' => $event->isFuneral(),
             'party_date' => $event->event_date?->toIso8601String(),
             'finale_title' => $event->finaleTitle(),
             'watermark' => ! EventRules::has($event, 'no_watermark'),

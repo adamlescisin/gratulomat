@@ -46,7 +46,7 @@
     <div class="hero-copy">
       <p class="kicker">Pro narozeniny, svatby, výročí a rozlučky</p>
       <h1 class="display">Ze vzpomínek vašich blízkých film na&nbsp;oslavu.</h1>
-      <p class="lead2">Gratulanti pošlou historky, staré fotky a hlasová přání. Gratulomat z nich složí příběh po desetiletích – a na oslavě ho pustíte všichni spolu.</p>
+      <p class="lead2">Gratulanti pošlou historky, staré fotky a hlasová přání. Gratulomat z nich složí chronologický audiovizuální příběh – a na oslavě ho pustíte všichni spolu.</p>
       <div class="row">
         <a class="btn" href="{{ route('wizard') }}">Založit událost zdarma</a>
         <a class="btn btn--line" href="#videoprezentace">Jak vypadá videoprezentace</a>
@@ -91,10 +91,10 @@
           @endforeach
         </ul>
       </div>
-      <div class="bigbtn"><div>
+      <div class="bigbtn"><button type="button" data-demo aria-haspopup="dialog">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true" style="display:block;width:200px;height:auto"><circle cx="60" cy="61" r="50" fill="#FFF6E9"/><circle cx="60" cy="65" r="36" fill="#B93A22"/><circle cx="60" cy="58" r="36" fill="#FF5A3C"/><ellipse cx="47" cy="43" rx="12" ry="6" fill="#fff" opacity=".3" transform="rotate(-22 47 43)"/><path d="M60 73C41 60 43 43 53 43C56.5 43 59 45 60 47.5C61 45 63.5 43 67 43C77 43 79 60 60 73Z" fill="#FFF6E9"/></svg>
-        <span>Spustit videoprezentaci</span>
-      </div></div>
+        <span>Ukázkový Gratulomat</span>
+      </button></div>
     </div>
   </section>
 
@@ -198,6 +198,51 @@
     </div>
   </section>
 </main>
+
+@php($demo = \App\Support\DemoVideo::get())
+<dialog class="demo" data-demo-dialog aria-label="Ukázkový Gratulomat">
+  <button type="button" class="demo__close" data-demo-close aria-label="Zavřít">×</button>
+  @if ($demo && $demo['type'] === 'embed')
+    <iframe data-demo-frame data-src="{{ $demo['src'] }}" title="Ukázkový Gratulomat" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+  @elseif ($demo)
+    <video data-demo-video src="{{ $demo['src'] }}" @if ($demo['poster']) poster="{{ $demo['poster'] }}" @endif controls playsinline preload="none"></video>
+  @else
+    <p class="demo__empty">Ukázku právě připravujeme. Zatím si můžete <a href="{{ route('wizard') }}">založit vlastní Gratulomat</a> – Ochutnávka je zdarma.</p>
+  @endif
+</dialog>
+<script>
+(() => {
+  const btn = document.querySelector('[data-demo]'), dlg = document.querySelector('[data-demo-dialog]');
+  if (!btn || !dlg) return;
+  const video = dlg.querySelector('[data-demo-video]'), frame = dlg.querySelector('[data-demo-frame]');
+  function confetti(n = 180) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const c = document.createElement('canvas'); c.className = 'demo-confetti'; document.body.append(c);
+    const ctx = c.getContext('2d'); c.width = innerWidth; c.height = innerHeight;
+    const colors = ['#FF5A3C', '#FFC433', '#FFF6E9', '#2EC4A0', '#8B7CF6'], r = (a, b) => a + Math.random() * (b - a);
+    const ps = Array.from({ length: n }, () => ({ x: innerWidth / 2 + r(-80, 80), y: innerHeight * .6, vx: r(-9, 9), vy: r(-17, -7), s: r(5, 10), c: colors[n++ % colors.length], a: r(0, 6), va: r(-.2, .2) }));
+    let f = 0;
+    (function tick() {
+      ctx.clearRect(0, 0, c.width, c.height);
+      ps.forEach(p => { p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.a += p.va;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.s, -p.s / 2, p.s * 2, p.s); ctx.restore(); });
+      if (++f < 150) requestAnimationFrame(tick); else c.remove();
+    })();
+  }
+  btn.addEventListener('click', () => {
+    confetti();
+    setTimeout(() => {
+      dlg.showModal();
+      if (frame && !frame.src) frame.src = frame.dataset.src;
+      video?.play().catch(() => {});
+    }, 650);
+  });
+  const close = () => { video?.pause(); if (frame) frame.removeAttribute('src'); dlg.close(); };
+  dlg.querySelector('[data-demo-close]').addEventListener('click', close);
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+  dlg.addEventListener('cancel', () => { video?.pause(); frame?.removeAttribute('src'); });
+})();
+</script>
 
 <footer class="lp-foot">
   <div class="wrap in">
