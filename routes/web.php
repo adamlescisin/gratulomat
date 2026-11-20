@@ -2,6 +2,7 @@
 
 use App\Domain\Guest\GuestSession;
 use App\Http\Controllers\Backoffice\BackofficeController;
+use App\Http\Controllers\Backoffice\MailTemplateController;
 use App\Http\Controllers\Backoffice\MusicController;
 use App\Http\Controllers\Backoffice\OrdersController;
 use App\Http\Controllers\Event\EventPageController;
@@ -108,6 +109,10 @@ Route::middleware(EnsureOperator::class)->prefix('backoffice')->controller(Backo
     Route::post('/emaily', 'mailBrandSave')->name('backoffice.mail.save');
     Route::get('/emaily/nahled', 'mailPreview')->name('backoffice.mail.preview');
     Route::post('/emaily/test', 'mailTest')->middleware('throttle:5,1')->name('backoffice.mail.test');
+    Route::get('/emaily/sablony/{key}', [MailTemplateController::class, 'edit'])->name('backoffice.mail.template');
+    Route::post('/emaily/sablony/{key}', [MailTemplateController::class, 'save'])->name('backoffice.mail.template.save');
+    Route::match(['get', 'post'], '/emaily/sablony/{key}/nahled', [MailTemplateController::class, 'preview'])->name('backoffice.mail.template.preview');
+    Route::post('/emaily/sablony/{key}/test', [MailTemplateController::class, 'test'])->middleware('throttle:5,1')->name('backoffice.mail.template.test');
     Route::get('/rezim', 'mode')->name('backoffice.mode');
     Route::post('/rezim', 'setMode');
     Route::post('/rezim/kontrola', 'setChecklist')->name('backoffice.checklist');

@@ -2,22 +2,24 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\UsesMailTemplate;
 use App\Models\Order;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 
+/** Potvrzení přijaté VIP poptávky. Text: back-office → E-maily → Šablony („vip_received“). */
 class VipInquiryReceived extends Mailable
 {
+    use UsesMailTemplate;
+
     public function __construct(public Order $order) {}
 
-    public function envelope(): Envelope
+    public function templateKey(): string
     {
-        return new Envelope(subject: 'Děkujeme za poptávku VIP – Gratulomat');
+        return 'vip_received';
     }
 
-    public function content(): Content
+    public function templateData(): array
     {
-        return new Content(markdown: 'mail.vip-received');
+        return ['vars' => ['nazev_udalosti' => $this->order->config['name'], 'adresa' => url($this->order->slug)]];
     }
 }

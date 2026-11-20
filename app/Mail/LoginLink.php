@@ -2,25 +2,25 @@
 
 namespace App\Mail;
 
+use App\Mail\Concerns\UsesMailTemplate;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 
+/** Jednorázový přihlašovací odkaz organizátorovi. Text: back-office → E-maily → Šablony („login_link“). */
 class LoginLink extends Mailable
 {
-    use Queueable;
+    use Queueable, UsesMailTemplate;
 
     public function __construct(public User $user, public string $link) {}
 
-    public function envelope(): Envelope
+    public function templateKey(): string
     {
-        return new Envelope(subject: 'Přihlášení do Gratulomatu');
+        return 'login_link';
     }
 
-    public function content(): Content
+    public function templateData(): array
     {
-        return new Content(markdown: 'mail.login-link');
+        return ['vars' => ['jmeno' => (string) $this->user->name], 'buttons' => ['prihlaseni' => $this->link]];
     }
 }

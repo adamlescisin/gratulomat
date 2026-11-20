@@ -27,4 +27,23 @@
   <iframe src="{{ route('backoffice.mail.preview') }}" title="Náhled e-mailu" style="width:100%;height:720px;border:0;display:block"></iframe>
 </section>
 </div>
+
+<section class="panel" style="margin-top:24px">
+  <h2 style="margin-top:0">Šablony e-mailů zákazníkům</h2>
+  <p class="muted">Texty e-mailů, které dostávají organizátoři. Upravit můžete předmět i text a použít zástupce pro údaje o události a tlačítka. Pozvánky hostům upravuje každý organizátor sám v administraci události.</p>
+  <div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th>E-mail</th><th>Kdy se posílá</th><th>Stav</th><th></th></tr></thead>
+    <tbody>
+    @foreach (\App\Support\MailTemplates::all() as $key => $def)
+      @php($saved = \App\Support\MailTemplates::saved($key))
+      <tr>
+        <td><a href="{{ route('backoffice.mail.template', $key) }}">{{ $def['label'] }}</a></td>
+        <td class="muted">{{ $def['when'] }}</td>
+        <td>{{ $saved ? 'upraveno' : 'výchozí' }}</td>
+        <td><a class="b b--ghost b--sm" href="{{ route('backoffice.mail.template', $key) }}">Upravit</a></td>
+      </tr>
+    @endforeach
+    </tbody>
+  </table></div>
+</section>
 @endsection
