@@ -48,6 +48,14 @@
   const slugify = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
   const set = (patch, opts = {}) => { S = { ...S, ...patch }; save(); render(); if (opts.slug) checkSlug(); if (opts.quote !== false) requestQuote(); };
 
+  // --- měření (GA4, jen se souhlasem; gmTrack je prázdná funkce, když je měření vypnuté) ---
+  const track = (name, extra = {}) => {
+    if (!window.gmTrack || !quote || quote.inquiry && !quote.total) return;
+    window.gmTrack(name, { currency: 'CZK', value: quote.total, plan: quote.plan, ...extra,
+      items: (quote.lines || []).map(l => ({ item_id: l.code || l.name, item_name: l.name, price: l.unit_price / 100, quantity: l.qty })) });
+  };
+  let viewedPlan = null;
+
   // --- server: adresa a cena ---
   let slugTimer, quoteTimer, slugReq = 0, quoteReq = 0;
   function checkSlug() {
@@ -228,8 +236,9 @@
     if (b.matches('[data-back]')) { S.step = Math.max(0, S.step - 1); save(); render(); }
     if (b.matches('[data-next]')) {
       if (!valid(S.step)) return;
-      if (S.step < 6) { S.step++; S.maxStep = Math.max(S.maxStep, S.step); save(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      if (S.step < 6) { S.step++; S.maxStep = Math.max(S.maxStep, S.step); save(); render(); window.scrollTo({ top: 0, behavior: 'smooth' }); if (S.step === 6 && quote && viewedPlan !== quote.plan) { viewedPlan = quote.plan; track('view_item'); } return; }
       $('[data-config]').value = JSON.stringify(S);
+      track('begin_checkout');
       b.disabled = true; b.textContent = 'Odesílám…';
       $('[data-wizard]').submit();
     }
