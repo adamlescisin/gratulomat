@@ -52,12 +52,6 @@
 .bigbtn > button:hover svg { transform: scale(1.04); }
 .bigbtn > button:active svg { transform: scale(.94) translateY(3px); }
 .bigbtn > button:focus-visible { outline: 3px solid var(--sun, #FFC433); outline-offset: 4px; }
-.demo { width: min(1100px, 94vw); max-height: 92vh; padding: 0; border: 0; border-radius: 20px; background: #000; overflow: visible; }
-.demo::backdrop { background: rgba(20, 16, 40, .82); }
-.demo video, .demo iframe { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 88vh; border: 0; border-radius: 20px; background: #000; }
-.demo__close { position: absolute; top: -18px; right: -18px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #FFF6E9; color: #1C1633; font-size: 28px; line-height: 1; cursor: pointer; z-index: 2; }
-.demo__empty { margin: 0; padding: 48px 32px; background: #FFF6E9; color: #1C1633; border-radius: 20px; font-size: 18px; text-align: center; }
-.demo-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; }
 .bigbtn__note { max-width: 300px; margin-top: -10px; font-size: 14px; line-height: 1.45; color: rgba(255, 246, 233, .6); text-align: center; }
 .bigbtn span { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 26px; }
 .occ { display: flex; flex-wrap: wrap; gap: 12px; }
