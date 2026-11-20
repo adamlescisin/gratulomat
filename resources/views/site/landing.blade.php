@@ -73,8 +73,8 @@
   <section id="jak" class="wrap sec">
     <div class="sec-head"><p class="kicker">Jak to funguje</p><h2 class="h2">Tři kroky. Žádné stříhání videa.</h2></div>
     <div class="cards3">
-      <div class="card"><span class="num">1</span><h3>Založte událost</h3><p>Jméno oslavence, datum a vzhled. Za dvě minuty máte vlastní stránku, třeba gratulomat.cz/jana60.</p></div>
-      <div class="card"><span class="num">2</span><h3>Pozvěte gratulanty</h3><p>Každý dostane osobní odkaz nebo QR kód. Bez aplikace a bez registrace – fotky, historky i hlasová přání nahrají z mobilu.</p></div>
+      <div class="card"><span class="num">1</span><h3>Založte událost</h3><p>Jméno oslavence, datum a vzhled. Za dvě minuty máte vlastní stránku, třeba gratulomat.cz/eva-jde-do-duchodu.</p></div>
+      <div class="card"><span class="num">2</span><h3>Oslovte gratulanty</h3><p>Každý dostane osobní odkaz nebo QR kód. Bez aplikace a bez registrace – fotky, historky i hlasová přání nahrají z mobilu.</p></div>
       <div class="card"><span class="num">3</span><h3>Zmáčkněte tlačítko</h3><p>Na oslavě spustíte videoprezentaci: film ze všech vzpomínek seřazený podle let. Funguje i bez internetu.</p></div>
     </div>
   </section>
@@ -165,9 +165,9 @@
   <section class="wrap story">
     <div style="flex:0 0 auto"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true" style="display:block;width:160px;height:auto"><rect width="120" height="120" rx="26" fill="#FF5A3C"/><circle cx="60" cy="61" r="40" fill="#1C1633"/><circle cx="60" cy="64.2" r="28.8" fill="#B93A22"/><circle cx="60" cy="58.6" r="28.8" fill="#FFC433"/><ellipse cx="49.6" cy="46.6" rx="9.6" ry="4.8" fill="#fff" opacity=".3" transform="rotate(-22 49.6 46.6)"/><path d="M60 70.6C44.8 60.2 46.4 46.6 54.4 46.6C57.2 46.6 59.2 48.2 60 50.2C60.8 48.2 62.8 46.6 65.6 46.6C73.6 46.6 75.2 60.2 60 70.6Z" fill="#1C1633"/></svg></div>
     <div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:14px">
-      <p class="kicker">Jak vznikl</p>
+      <p class="kicker">Jak Gratulomat vznikl?</p>
       <h2 class="h2">Narodil se na jedněch padesátinách.</h2>
-      <p>Gratulomat vznikl, když jsme pro jednu oslavu chtěli sesbírat vzpomínky od třiceti lidí a promítnout je tak, aby se u toho všichni smáli i dojímali. Fungovalo to – tak jsme z toho udělali službu pro každého.</p>
+      <p>Gratulomat vznikl, když jsme pro jednu oslavu chtěli sesbírat vzpomínky od třiceti lidí po celé republice a promítnout je tak, aby se u toho všichni smáli i dojímali. Fungovalo to – tak jsme z toho udělali službu pro každého.</p>
     </div>
   </section>
 
@@ -192,7 +192,7 @@
     <div class="cta">
       <div>
         <h2 class="h2">Zmáčkni a gratuluj.</h2>
-        <p>Založení trvá dvě minuty a Ochutnávka je zdarma. Tarif můžete kdykoli navýšit – nic se neztratí.</p>
+        <p>Založení trvá minutu a Ochutnávka je zdarma. Tarif můžete kdykoli navýšit – nic se neztratí.</p>
       </div>
       <div style="align-items:flex-start"><a class="btn btn--ink" href="{{ route('wizard') }}">Založit událost</a></div>
     </div>
