@@ -47,6 +47,7 @@ input[type=checkbox] { accent-color: var(--coral); }
 .cs-card { width: 100%; max-width: 420px; aspect-ratio: 1 / 1; border-radius: 40px; background: var(--ink-2); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
 .cs-card span { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 24px; }
 .press { border: 0; background: none; padding: 0; cursor: pointer; border-radius: 50%; transition: transform .12s ease; }
+.cs-note { max-width: 300px; margin-top: -6px; padding: 0 12px; font-size: 14px; line-height: 1.45; color: rgba(255, 246, 233, .6); text-align: center; }
 .press:active { transform: translateY(4px) scale(.97); }
 .code-box { padding-bottom: 48px; }
 .code-box form { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; padding: 24px; border-radius: 24px; background: var(--cream); color: var(--ink); max-width: 640px; }
@@ -62,6 +63,12 @@ input[type=checkbox] { accent-color: var(--coral); }
 .legal { max-width: 760px; margin: 0 auto; padding: 0 24px 72px; line-height: 1.6; color: var(--muted); }
 .legal h1 { color: var(--cream); font-size: clamp(36px, 5vw, 56px); line-height: 1; margin: 16px 0 24px; }
 .legal h2 { color: var(--cream); font-family: "Bricolage Grotesque", sans-serif; font-size: 22px; margin: 32px 0 8px; }
+.demo { width: min(1100px, 94vw); max-height: 92vh; padding: 0; border: 0; border-radius: 20px; background: #000; overflow: visible; }
+.demo::backdrop { background: rgba(20, 16, 40, .82); }
+.demo video, .demo iframe { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 88vh; border: 0; border-radius: 20px; background: #000; }
+.demo__close { position: absolute; top: -18px; right: -18px; width: 44px; height: 44px; border-radius: 50%; border: 0; background: #FFF6E9; color: #1C1633; font-size: 28px; line-height: 1; cursor: pointer; z-index: 2; }
+.demo__empty { margin: 0; padding: 48px 32px; background: #FFF6E9; color: #1C1633; border-radius: 20px; font-size: 18px; text-align: center; }
+.demo-confetti { position: fixed; inset: 0; pointer-events: none; z-index: 2147483647; }
 @media (prefers-reduced-motion: reduce) { .press { transition: none; } }
 
 .legal__body ul, .legal__body ol { padding-left: 1.3em; }

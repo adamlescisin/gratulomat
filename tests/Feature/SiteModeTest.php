@@ -22,6 +22,16 @@ class SiteModeTest extends TestCase
         config(['gratulomat.site_mode' => 'coming_soon', 'gratulomat.tester_codes' => ['BETA-1234']]);
     }
 
+    public function test_coming_soon_button_opens_demo_video_dialog(): void
+    {
+        $this->get('/')->assertOk()
+            ->assertSee('data-demo', false)
+            ->assertSee('data-demo-dialog', false)
+            ->assertSee('Ukázku právě připravujeme');
+        // soubor ukázky se nesmí v režimu Připravujeme nahradit stránkou coming soon
+        $this->get('/ukazka/demo-aaaaaaaaaaaaaaaaaaaaaaaa.mp4')->assertNotFound();
+    }
+
     public function test_public_sees_designed_coming_soon_page(): void
     {
         $this->get('/')->assertOk()

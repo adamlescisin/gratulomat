@@ -56,10 +56,11 @@
 
     <div class="cs-art">
       <div class="cs-card">
-        <button type="button" class="press" data-press aria-label="Zmáčkni a gratuluj">
+        <button type="button" class="press" data-demo aria-haspopup="dialog" aria-label="Zmáčkni a gratuluj – ukázkový Gratulomat">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true" style="display:block;width:220px;height:auto"><circle cx="60" cy="61" r="50" fill="#FFF6E9"/><circle cx="60" cy="65" r="36" fill="#B93A22"/><circle cx="60" cy="58" r="36" fill="#FF5A3C"/><ellipse cx="47" cy="43" rx="12" ry="6" fill="#fff" opacity=".3" transform="rotate(-22 47 43)"/><path d="M60 73C41 60 43 43 53 43C56.5 43 59 45 60 47.5C61 45 63.5 43 67 43C77 43 79 60 60 73Z" fill="#FFF6E9"/></svg>
         </button>
         <span>Zmáčkni a gratuluj.</span>
+        <small class="cs-note">Po stisknutí tlačítka se zobrazí krátká ukázka videa, jak i váš Gratulomat může vypadat</small>
       </div>
     </div>
   </main>
@@ -78,24 +79,14 @@
 
   @include('site.partials.footer')
 </div>
+@include('site.partials.demo')
 <script>
-  // Přístupový kód: rozbalit / sbalit. Tlačítko „gratuluj“: malá konfeta.
+  // Přístupový kód: rozbalit / sbalit. Tlačítko „gratuluj“ obsluhuje site.partials.demo.
   document.querySelector('[data-toggle-code]')?.addEventListener('click', e => {
     e.preventDefault();
     const box = document.getElementById('pristup'), open = box.hidden;
     box.hidden = !open; e.currentTarget.setAttribute('aria-expanded', open);
     if (open) document.getElementById('cs-code').focus();
-  });
-  document.querySelector('[data-press]').addEventListener('click', e => {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const r = e.currentTarget.getBoundingClientRect(), colors = ['#FF5A3C', '#FFC433', '#2EC4A0', '#FFF6E9'];
-    for (let i = 0; i < 28; i++) {
-      const p = document.createElement('i'), a = Math.random() * Math.PI * 2, d = 80 + Math.random() * 120;
-      p.style.cssText = `position:fixed;left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;width:8px;height:12px;border-radius:2px;background:${colors[i % 4]};pointer-events:none;transition:transform .9s cubic-bezier(.2,.7,.3,1),opacity .9s;z-index:9`;
-      document.body.append(p);
-      requestAnimationFrame(() => { p.style.transform = `translate(${Math.cos(a) * d}px,${Math.sin(a) * d - 60}px) rotate(${Math.random() * 540}deg)`; p.style.opacity = 0; });
-      setTimeout(() => p.remove(), 1000);
-    }
   });
 </script>
 </body>
