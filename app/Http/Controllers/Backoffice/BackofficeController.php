@@ -42,7 +42,7 @@ class BackofficeController extends Controller
             'kpis' => [
                 ['Události', Event::count()],
                 ['z toho TEST', Event::where('is_test', true)->count()],
-                ['Pozvánky (domácnosti)', Household::count()],
+                ['Pozvánky (hosté)', Household::count()],
                 ['Vzpomínky', Memory::count()],
                 ['Fotky', Media::where('kind', 'photo')->count()],
                 ['Čekací listina', WaitlistEntry::count()],

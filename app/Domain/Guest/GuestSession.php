@@ -47,7 +47,7 @@ class GuestSession
         session(["recipient.{$event->id}" => $token]);
     }
 
-    /** @return list<int> všechny domácnosti přihlášené v této relaci */
+    /** @return list<int> všichni hosté přihlášení v této relaci */
     public static function householdIds(): array
     {
         return array_values(array_map('intval', (array) session('guest', [])));

@@ -23,7 +23,7 @@
     const active = hh.filter(x => x.memories > 0).length, visited = hh.filter(x => x.last_seen).length;
     $('[data-kpis]').innerHTML = [
       [mem.length, 'vzpomínek'], [photos, 'fotek'], [mem.filter(m => has(m, 'audio') || has(m, 'video')).length, 's hlasem / videem'],
-      [`${active}/${hh.length}`, 'domácností přispělo'], [`${visited}/${hh.length}`, 'otevřelo odkaz'],
+      [`${active}/${hh.length}`, 'hostů přispělo'], [`${visited}/${hh.length}`, 'otevřelo odkaz'],
       [mem.filter(m => m.wish_public && (m.wish_text || has(m, 'audio'))).length, E.funeral ? 'veřejných vzkazů' : 'veřejných přání'],
       [mem.filter(m => !m.wish_public && (m.wish_text || has(m, 'audio'))).length, E.funeral ? 'soukromých vzkazů 🔒' : 'soukromých přání 🔒'],
     ].map(([v, l]) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`).join('');
@@ -208,7 +208,7 @@
     if (t.dataset.anon === 'regenerate' && confirm('Vytvořit nový odkaz? Ten starý přestane fungovat.')) run(() => post('anon-link', { action: 'regenerate' }), 'Nový odkaz vytvořen');
     if (t.dataset.anon === 'disable' && confirm('Vypnout anonymní pozvánku? Odkaz přestane fungovat, už přihlášení hosté zůstanou.')) run(() => post('anon-link', { action: 'disable' }), 'Anonymní pozvánka vypnutá');
     if (t.dataset.token && confirm('Vygenerovat nový odkaz? Ten starý přestane fungovat.')) run(() => post(`households/${t.dataset.token}`, { new_token: true }), 'Nový odkaz vytvořen');
-    if (t.dataset.del && confirm('Smazat domácnost i všechny její příspěvky?')) run(() => post(`households/${t.dataset.del}`, { delete: true }));
+    if (t.dataset.del && confirm('Smazat hosta i všechny jeho příspěvky?')) run(() => post(`households/${t.dataset.del}`, { delete: true }));
     if (t.dataset.hide) run(() => post(`memories/${t.dataset.hide}`, { status: t.dataset.status === 'hidden' ? 'visible' : 'hidden' }));
     if (t.dataset.mdel && confirm('Natrvalo smazat vzpomínku?')) run(() => post(`memories/${t.dataset.mdel}`, { delete: true }));
     if (a === 'show-now' && confirm('Zpřístupnit videoprezentaci všem hostům hned teď?')) run(() => post('show', { public_from: 'now' }), 'Videoprezentace je otevřená 🎬');

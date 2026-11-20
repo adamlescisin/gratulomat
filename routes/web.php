@@ -28,7 +28,7 @@ Route::get('/', fn () => request()->attributes->get('site_full_access') ? view('
 // Přepínač jazyka rozhraní (stránka hosta). Obsah události se nepřekládá.
 Route::post('/jazyk/{locale}', function (Request $request, string $locale) {
     abort_unless(in_array($locale, config('gratulomat.locales.guest'), true), 404);
-    // Volba se uloží i k domácnostem přihlášeným v této relaci (platí pak i na jiných zařízeních).
+    // Volba se uloží i k hostům přihlášeným v této relaci (platí pak i na jiných zařízeních).
     if ($ids = GuestSession::householdIds()) {
         Household::whereIn('id', $ids)->update(['preferred_locale' => $locale]);
     }

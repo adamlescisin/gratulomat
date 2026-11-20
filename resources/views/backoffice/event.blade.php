@@ -18,7 +18,7 @@
       <label>Uzávěrka sběru vzkazů<input class="inp" type="datetime-local" name="collect_until" value="{{ old('collect_until', $loc($event->collect_until)) }}" required></label>
       <label>Viditelnost (archiv) do<input class="inp" type="date" name="archive_until" value="{{ old('archive_until', $event->archive_until?->toDateString()) }}">
         <span class="muted">Po tomto dni stránka a videoprezentace přestanou být dostupné.</span></label>
-      <label>Limit hostů (domácností)<input class="inp" type="number" name="guest_limit" min="1" value="{{ old('guest_limit', $event->limit('guests')) }}"></label>
+      <label>Limit hostů<input class="inp" type="number" name="guest_limit" min="1" value="{{ old('guest_limit', $event->limit('guests')) }}"></label>
     </div>
     <div class="row"><button class="b">Uložit</button><a class="b b--ghost" href="{{ route('organizer.admin', $event) }}">Administrace události</a><a class="b b--ghost" href="{{ route('event.show', $event) }}" target="_blank">Stránka ↗</a></div>
   </form>

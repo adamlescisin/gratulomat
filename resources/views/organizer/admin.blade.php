@@ -50,7 +50,7 @@
 
   <section class="card">
     <h2 class="h2">Hosté <span class="muted" data-hh-count></span></h2>
-    <p class="muted">Jeden řádek = jedna domácnost (pár sdílí jeden odkaz). Volitelně za středník vztah k oslavenci.<br>
+    <p class="muted">Jeden řádek = jeden host nebo pár (sdílí jeden odkaz). Volitelně za středník vztah k oslavenci.<br>
       <code>Petra a Honza; spolužáci z gymplu</code> – jména pište jen křestní (použijí se k oslovení a podpisu).</p>
     <form data-import class="import">
       <textarea class="input" rows="4" name="lines" placeholder="Jana a Pavel&#10;Martin; kolega z práce"></textarea>
@@ -80,7 +80,7 @@
       </div>
     </div>
     <div class="table-wrap"><table class="table" data-households>
-      <thead><tr><th>Domácnost</th><th>Vztah</th><th>Příspěvky</th><th>Naposledy</th><th>Odkaz</th><th></th></tr></thead>
+      <thead><tr><th>Hosté</th><th>Vztah</th><th>Příspěvky</th><th>Naposledy</th><th>Odkaz</th><th></th></tr></thead>
       <tbody></tbody>
     </table></div>
   </section>

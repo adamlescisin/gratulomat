@@ -6,12 +6,12 @@ use App\Models\Event;
 use App\Models\Household;
 use Illuminate\Console\Command;
 
-/** Hromadné přidání pozvánek: jeden řádek = domácnost, volitelně „; vztah“. */
+/** Hromadné přidání pozvánek: jeden řádek = host nebo pár, volitelně „; vztah“. */
 class AddHouseholds extends Command
 {
     protected $signature = 'gratulomat:households {slug} {file? : textový soubor (jinak STDIN)} {--list : jen vypsat odkazy}';
 
-    protected $description = 'Přidá pozvánky (domácnosti) k události a vypíše osobní odkazy';
+    protected $description = 'Přidá pozvánky hostů k události a vypíše osobní odkazy';
 
     public function handle(): int
     {
@@ -42,7 +42,7 @@ class AddHouseholds extends Command
             $this->info("Přidáno: {$added}");
         }
 
-        $this->table(['Domácnost', 'Odkaz'], $event->households()->orderBy('label')->get()
+        $this->table(['Hosté', 'Odkaz'], $event->households()->orderBy('label')->get()
             ->map(fn ($h) => [$h->label, $h->link()])->all());
 
         return self::SUCCESS;
