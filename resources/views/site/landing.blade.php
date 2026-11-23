@@ -101,7 +101,7 @@
 
   <section class="wrap sec" style="padding-top:104px;gap:28px">
     <div class="sec-head"><p class="kicker">Pro jaké příležitosti</p><h2 class="h2">Pro každou životní událost.</h2></div>
-    <div class="occ">@foreach (['Narozeniny', 'Svatba', 'Výročí svatby', 'Odchod do důchodu', 'Firemní jubileum', 'Rozlučka s kolegou', 'Sraz spolužáků', 'Smuteční rozloučení'] as $o)<span>{{ $o }}</span>@endforeach</div>
+    <div class="occ">@foreach (['Narozeniny' => '/prani-k-narozeninam', 'Svatba' => '/prani-ke-svatbe', 'Výročí svatby' => null, 'Odchod do důchodu' => '/prani-k-odchodu-do-duchodu', 'Firemní jubileum' => null, 'Rozlučka s kolegou' => '/rozlouceni-s-kolegy', 'Sraz spolužáků' => null, 'Smuteční rozloučení' => null] as $o => $href)@if ($href)<a href="{{ $href }}">{{ $o }}</a>@else<span>{{ $o }}</span>@endif @endforeach</div>
   </section>
 
   <section class="wrap sec">

@@ -33,6 +33,9 @@ class Event extends Model
         'admin', 'api', 'backoffice', 'zalozit', 'cenik', 'moje', 'prihlaseni', 'pristup', 'kino', 'www',
         'gratulomat', 'test', 'jazyk', 'up', 'assets', 'build', 'storage', 'obchodni-podminky', 'ochrana-soukromi',
         'reklamacni-rad', 'pravidla-pro-hosty', 'jak-to-funguje', 'otazky',
+        // statické SEO stránky příležitostí (public/*.html)
+        'prani-k-narozeninam', 'prani-k-narozeninam-kamaradka', 'prani-k-18-narozeninam', 'prani-ke-svatbe',
+        'prani-k-odchodu-do-duchodu', 'rozlouceni-s-kolegy', 'gratulace-k-atestaci',
     ];
 
     public function getRouteKeyName(): string
