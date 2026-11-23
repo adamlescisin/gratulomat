@@ -44,7 +44,18 @@ Route::post('/cekaci-listina', [WaitlistController::class, 'store'])->middleware
 // Sitemap pro vyhledávače: jen veřejný marketing (stejný seznam jako RobotsHeaders::INDEXABLE).
 Route::get('/sitemap.xml', function () {
     $base = rtrim((string) config('gratulomat.marketing_url'), '/');
-    $urls = collect(['/' => ['weekly', '1.0'], '/obchodni-podminky' => ['yearly', '0.3'], '/ochrana-soukromi' => ['yearly', '0.3']])
+    $urls = collect([
+        '/' => ['weekly', '1.0'],
+        '/prani-k-narozeninam' => ['monthly', '0.7'],
+        '/prani-k-narozeninam-kamaradka' => ['monthly', '0.6'],
+        '/prani-k-18-narozeninam' => ['monthly', '0.6'],
+        '/prani-ke-svatbe' => ['monthly', '0.7'],
+        '/prani-k-odchodu-do-duchodu' => ['monthly', '0.7'],
+        '/rozlouceni-s-kolegy' => ['monthly', '0.6'],
+        '/gratulace-k-atestaci' => ['monthly', '0.6'],
+        '/obchodni-podminky' => ['yearly', '0.3'],
+        '/ochrana-soukromi' => ['yearly', '0.3'],
+    ])
         ->map(fn ($m, $path) => "  <url>\n    <loc>{$base}{$path}</loc>\n    <changefreq>{$m[0]}</changefreq>\n    <priority>{$m[1]}</priority>\n  </url>")
         ->implode("\n");
 

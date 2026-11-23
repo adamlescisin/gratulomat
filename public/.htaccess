@@ -18,6 +18,9 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
+    # Statické SEO stránky příležitostí (/slug -> /slug.html), před front controllerem
+    RewriteRule ^(prani-k-narozeninam|prani-k-narozeninam-kamaradka|prani-k-18-narozeninam|prani-ke-svatbe|prani-k-odchodu-do-duchodu|rozlouceni-s-kolegy|gratulace-k-atestaci)$ $1.html [L]
+
     # Send Requests To Front Controller...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
