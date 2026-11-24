@@ -10,6 +10,11 @@
 @include('site.partials.head')
 @include('site.partials.analytics')
 <title>{{ $title }} · Gratulomat</title>
+@include('site.partials.seo', ['title' => $title.' · Gratulomat', 'description' => [
+    'terms' => __('Obchodní podmínky služby Gratulomat – pravidla objednávky, platby a využívání služby.'),
+    'privacy' => __('Jak Gratulomat zpracovává osobní údaje: jaké údaje, proč, jak dlouho a jaká máte práva.'),
+    'guest_rules' => __('Pravidla pro hosty, kteří do Gratulomatu přidávají vzkazy, fotky a vzpomínky.'),
+][$doc]])
 </head>
 <body>
 <div class="cs">
