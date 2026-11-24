@@ -4,10 +4,7 @@
 @include('site.partials.head')
 @include('site.partials.analytics')
 <title>Gratulomat – brzy spouštíme</title>
-<meta name="description" content="Gratulomat sesbírá historky, fotky a přání od vašich blízkých a složí z nich videoprezentaci, kterou pustíte všem najednou.">
-<meta property="og:title" content="Gratulomat – vzpomínky, které se promítají">
-<meta property="og:description" content="Historky, fotky a přání od blízkých složené do jedné videoprezentace. Brzy spouštíme.">
-<meta property="og:image" content="{{ url('/icon-512.png') }}">
+@include('site.partials.seo', ['title' => __('Gratulomat – vzpomínky, které se promítají'), 'description' => __('Gratulomat sesbírá historky, fotky a přání od vašich blízkých a složí z nich videoprezentaci, kterou pustíte všem najednou.'), 'ogDescription' => __('Historky, fotky a přání od blízkých složené do jedné videoprezentace. Brzy spouštíme.')])
 </head>
 <body>
 <div class="cs">
